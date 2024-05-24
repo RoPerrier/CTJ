@@ -23,13 +23,9 @@
 
 ## Description
 
-The `CTJ` package implements the triple judgement comparative algorithm devised by Dr Kevin Kelly. The aim of this algorithm is to improve the accuracy of `ACJ` (adaptive comparative judgement). Instead of comparing elements two by two, they are compared three by three, and a notion of distance between elements is added to the algorithm. `CTJ` was devised by Dr Kevin Kelly.
+The `CTJ` package implements the triple judgement comparative algorithm devised by Dr. Kevin Kelly. The aim of this algorithm is to improve the accuracy of `ACJ` (adaptive comparative judgement). Instead of comparing elements two by two, they are compared three by three, and a notion of distance between elements is added to the algorithm. `CTJ` was devised by Dr. Kevin Kelly.
 
-This package therefore proposes an implementation of the `CTJ`, the `ACJ` and the `Rubric` judgment, to enable a more precise analysis of the `CTJ` and to compare its performance with other method. To do this, pairs and trios are selected with similar methods using Shannon entropy.
-
-Created on Wed May  1 16:05:18 2024
-
-@author: Romain Perrier
+This package therefore proposes an implementation of the `CTJ`, the `ACJ`, and the `Rubric` judgment, to enable a more precise analysis of the `CTJ` and to compare its performance with other methods. To do this, pairs and trios are selected with similar methods using Shannon entropy.
 
 ## Installation
 
@@ -37,7 +33,7 @@ Created on Wed May  1 16:05:18 2024
 pip install CTJ
 ```
 
-Then you need to restart the python kernel to finish the installation.
+Then you need to restart the Python kernel to finish the installation.
 
 ## Usage
 
@@ -50,25 +46,25 @@ from CTJ import Rubric, ACJ, CTJ
 ```
 
 You can use this package in three different ways.
-For each of the ways you will at least need to specify the list containing the names of your items, which are present in the CURRENT directory in .PNG format, the two elements delimiting your sample (they may not be present in the items list, this is not a problem).
+
+For each of the ways, you will at least need to specify the list containing the names of your items, which are present in the CURRENT directory in .PNG format, the two elements delimiting your sample (they may not be present in the items list, this is not a problem).
 
 ```py
-#Here an  exemple with shades of grey. All the items are present in the current directory for exemple 'g1' appear as 'g1.png' in the directory.
+# Here an example with shades of grey. All the items are present in the current directory, for example, 'g1' appears as 'g1.png' in the directory.
 shade = ['g1', 'g2', 'g3', 'g4', 'g5']
 
-#I use the grayscale from 0 to 255 so the highest score is 255 for white, it will be our best_element
+# I use the grayscale from 0 to 255, so the highest score is 255 for white; it will be our best_element.
 best_element = [255,'white']
 worst_element = [0,'black']
-
 ```
 
 * ### For predictive purposes
 
 You have a list of elements that you want to evaluate, but you don't know their real values. In this case, you need to specify which method to use. You can use the method provided in the package or use a method that you've coded yourself.
 
-I recommand to use a hight accuracy because here, it is calculated with the previous estimation, a high accuracy will evaluate  convergence of the estimated value in this case.
+I recommend using high accuracy because here, it is calculated with the previous estimation; a high accuracy will evaluate convergence of the estimated value in this case.
 
-By using the incorporated function :
+By using the incorporated function:
 
 ```py
 
@@ -84,9 +80,9 @@ CTJ(worst_element, best_element, shade, assessment_method = _ctj_assessment_meth
 
 * ### For testing purposes
 
-You have the real values and want to assess the value yourself. In this case, you need to specify which method to use. You can use the method provided in the package or use a method that you've coded yourself, also specify the real values in a list.
+You have the real values and want to assess the value yourself. In this case, you need to specify which method to use. You can use the method provided in the package or use a method that you've coded yourself; also specify the real values in a list.
 
-By using the incorporated function :
+By using the incorporated function:
 
 ```py
 
@@ -104,7 +100,7 @@ CTJ(worst_element, best_element, shade, true_values = real_values , assessment_m
 
 * ### For verifying purposes
 
-You have the real values and want to check if the efficencies of the algorithms.
+You have the real values and want to check the efficiencies of the algorithms.
 
 ```py
 
@@ -118,10 +114,10 @@ CTJ(worst_element, best_element, shade, true_values = real_values)
 
 ```
 
-Furthermore in this case you could use the sensibility parameter to introduce some bias.
+Furthermore, in this case, you could use the sensibility parameter to introduce some bias.
 
 The `Rubric`'s sensibility is a tuple containing two elements.
-The first value correspond to the mistake that the user could make by judging an item, the second value is the probability of making a mistake.
+The first value corresponds to the mistake that the user could make by judging an item, the second value is the probability of making a mistake.
 
 ```py
 
@@ -129,9 +125,9 @@ Rubric(worst_element, best_element, shade, true_values = real_values, sensibilit
 
 ```
 
-The `ACJ`'s sensibility is a list of tuple containing two elements.
-Each tuple correspond to the sensibility of a judge, the first tupple correspond to the sensibility of the first judge, and etc..
-The first value of each tupple correspond to the gap that could lead to a misjudgement, the second value is the probability of making a mistake.
+The `ACJ`'s sensibility is a list of tuples containing two elements.
+Each tuple corresponds to the sensibility of a judge, the first tuple corresponds to the sensibility of the first judge, and etc..
+The first value of each tuple corresponds to the gap that could lead to a misjudgement, the second value is the probability of making a mistake.
 
 ```py
 
@@ -140,7 +136,7 @@ ACJ(worst_element, best_element, shade, true_values = real_values, nb_judge = 2,
 ```
 
 The `CTJ`'s sensibility is a tuple containing three elements.
-The first value correspond to the distance between the nearest item  that the judge could misjudge, the second value is the mystake made on the scale, and the third value is the probability of making one of those mistake.
+The first value corresponds to the distance between the nearest item that the judge could misjudge, the second value is the mistake made on the scale, and the third value is the probability of making one of those mistakes.
 
 ```py
 
@@ -322,7 +318,6 @@ Generate a window to let the user make the `CTJ` assessment.
 
 ## License
 
-This project is licensed under the Apache 2.0 License. See the LICENSE file for more details.
+This project is licensed under the Apache 2.0 License. See the LICENSE and NOTICE.txt files for more details.
 
-## Usefull Links
 
