@@ -14,7 +14,7 @@ setup(
       name = 'CTJ',
       version = '0.9.5',
       packages = find_packages(),
-      #url = 
+      url = 'https://github.com/RoPerrier/CTJ',
       install_requires =[
           'choix>=0.3.5',
           'numpy>=1.26.4',
@@ -25,7 +25,7 @@ setup(
       license = 'Apache 2.0',
       author = 'Romain Perrier',
       author_email ='romain.perrier2@etu.isima.fr',
-      description = "Rubric Assesment, ACJ and CTJ Algorithms implementation",
+      description = "Rubric Assesment, ACJ and CTJ Algorithms implementation.",
       long_description = l_description,
       long_description_content_type = "text/markdown",
       )
