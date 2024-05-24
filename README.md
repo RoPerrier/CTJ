@@ -2,7 +2,7 @@
 
 ## Table of contents
 - [Description](#description)
-- [Installation](#installlation)
+- [Installation](#installation)
 - [Usage](#usage)
     - [For predictive purposes](#for-predictive-purposes)
     - [For testing purposes](#for-testing-purposes)
@@ -19,7 +19,6 @@
         - [ACJ Assessment Method](#acj-assessment-method)
         - [CTJ Assessment Method](#ctj-assessment-method)
 - [License](#license)
-- [Usefull Links](#usefull-links)
 
 ## Description
 
