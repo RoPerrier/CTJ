@@ -7,6 +7,7 @@
     - [For predictive purposes](#for-predictive-purposes)
     - [For testing purposes](#for-testing-purposes)
     - [For verifying purposes](#for-verifying-purposes)
+    - [Tutorial](#tutorial)
 - [Dependencies](#dependencies)
 - [Module Documentation](#module-documentation)
     - [Assessment Algorithms](#assessment-algorithms)
@@ -146,6 +147,14 @@ The first value correspond to the distance between the nearest item  that the ju
 CTJ(worst_element, best_element, shade, true_values = real_values, sensibility = (distance_error, scale_error, proba))
 
 ```
+
+### Tutorial
+
+You can look at these jupyter notebook Tutorial :
+
+- [Rubric Tutorial](https://github.com/RoPerrier/CTJ/blob/main/Notebook/Rubric-Tutorial.ipynb)
+- [ACJ Tutorial](https://github.com/RoPerrier/CTJ/blob/main/Notebook/ACJ-Tutorial.ipynb)
+- [CTJ Tutorial](https://github.com/RoPerrier/CTJ/blob/main/Notebook/CTJ-Tutorial.ipynb)
 
 ## Dependencies
 
