@@ -25,7 +25,7 @@ setup(
       license = 'Apache 2.0',
       author = 'Romain Perrier',
       author_email ='romain.perrier2@etu.isima.fr',
-      description = "Rubric Assesment, ACJ and CTJ Algorithms implementation",
+      description = "Rubric Assesment, ACJ and CTJ Algorithms implementation.",
       long_description = l_description,
       long_description_content_type = "text/markdown",
       )
