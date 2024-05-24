@@ -14,7 +14,7 @@ setup(
       name = 'CTJ',
       version = '0.9.5',
       packages = find_packages(),
-      #url = 
+      url = 'https://github.com/RoPerrier/CTJ',
       install_requires =[
           'choix>=0.3.5',
           'numpy>=1.26.4',
