@@ -10,6 +10,8 @@ import time
 
 from .util import SSR, Rescale, ready
 
+###############################         FUNCTIONS       ############################################
+
 def make_Rubric_assessment(items, item, sensibility, true_values, estimated_values, assessment_method, nb_assessment, width, height):
     """
     This function is used to do the assessment on an item and return the value of it
@@ -192,9 +194,3 @@ def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, a
         print("| Total duration : ", assessments_time)
     print("===============================================================")
     return estimated_values, len(items), acc, nb_bias, assessments_time
-########################################BASIC EXAMPLE##############################################
-
-# colors = [('black', 0), ('g1', 160), ('g2', 106), ('g3', 209),
-#            ('g4', 80), ('g5', 135), ('white', 255)]
-
-# _,s,j,_ = Rubric([0,'black'],[255,'white'],[color[0] for color in colors], true_values = [color[1] for color in colors], sensibility = (10,1))
