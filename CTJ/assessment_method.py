@@ -366,13 +366,4 @@ def resize_image(image_path, width, height):
     resized_image = original_image.subsample(int(original_width / new_width), int(original_height / new_height))
     
     return resized_image
-########################################BASIC EXAMPLE##############################################
-
-# pair = ["g1", "g2"]
-# resultat = _acj_assessment_method(0, pair, 500, 500)
-# print(resultat)
-
-# trio = ["g1", "g2", "g3"]
-# result = _ctj_assessment_method(10,trio, 300, 300)
-# print(result)
 

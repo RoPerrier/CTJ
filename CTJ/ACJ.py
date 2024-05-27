@@ -427,10 +427,3 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_va
         print("| Total duration : ", assessments_time)
     print("===============================================================")
     return estimated_values, len(assessments), cond, nb_bias, assessments_time
-
-########################################BASIC EXAMPLE##############################################
-
-colors = [('black', 0), ('g1', 160), ('g2', 106), ('g3', 209),
-           ('g4', 80), ('g5', 135), ('white', 255)]
-
-# _,s,j = ACJ([0,'black'],[255,'white'],[color[0] for color in colors], nb_judge = 1, true_values = [color[1] for color in colors], assessment_method = _acj_assessment_method)

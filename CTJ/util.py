@@ -146,6 +146,3 @@ def ready(info="", status=None):
     if Bad_Ending:
         raise Exception("You are not ready.. You must click on the 'Ready' button.")
     return skip
-
-# Example usage
-# ready("This is a test message", "tutorial")
