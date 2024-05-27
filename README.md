@@ -61,7 +61,7 @@ worst_element = [0,'black']
 
 You have a list of elements that you want to evaluate, but you don't know their real values. In this case, you need to specify which method to use. You can use the method provided in the package or use a method that you've coded yourself.
 
-Here the user needs to make assessments, so the items must be present in the directory where your script is located in PNG format. For example, if your script is named myscript.py and you use the shade and the bound defined before, your structure needs to be like this:
+Here the user needs to make assessments, so the items must be present in the directory where your script is located in PNG format. For example, if your script is named `myscript.py` and you use the shade and the bound defined before, your structure needs to be like this:
 
 ```
 Your/Project/Folder/
@@ -95,7 +95,7 @@ CTJ(worst_element, best_element, shade, assessment_method = _ctj_assessment_meth
 
 You have the real values and want to assess the value yourself. In this case, you need to specify which method to use. You can use the method provided in the package or use a method that you've coded yourself; also specify the real values in a list.
 
-Here the user needs to make assessments, so the items must be present in the directory where your script is located in PNG format. For example, if your script is named myscript.py and you use the shade and the bound defined before, your structure needs to be like this:
+Here the user needs to make assessments, so the items must be present in the directory where your script is located in PNG format. For example, if your script is named `myscript.py` and you use the shade and the bound defined before, your structure needs to be like this:
 
 ```
 Your/Project/Folder/
