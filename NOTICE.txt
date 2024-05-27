@@ -13,6 +13,11 @@ see LICENSE file for more information.
 The CTJ package import a number of libraries that
 are compatibly licensed. We list them here.
 
+Name: Choix
+Imported in: CTJ/[ACJ.py]
+License MIT
+  For details, see https://github.com/lucasmaystre/choix/blob/master/LICENSE
+
 Name: NumPy
 Imported in: CTJ/[Rubric.py,ACJ.py,CTJ.py,util.py,selection.py]
 License 3-Clause BSD
@@ -52,8 +57,3 @@ Name: Tkinter
 Imported in: CTJ/[util.py,assessment_method.py]
 License PSF (Python Software Foundation)
   For details, see https://github.com/python/cpython/blob/3.12/LICENSE
-
-Name: Choix
-Imported in: CTJ/[ACJ.py]
-License MIT
-  For details, see https://github.com/lucasmaystre/choix/blob/master/LICENSE
