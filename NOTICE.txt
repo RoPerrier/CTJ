@@ -5,7 +5,7 @@ Copyright 2024 Romain Perrier
 
 This product includes software developed at Trinity College Dublin (TCD) during an internship, 
 implementing three distinct algorithms for research purposes: 
-the Rubric assessment method,,the Adaptive Comparative Judgment (ACJ), and the Comparative Triple Judgments (CTJ).
+the Rubric assessment method, the Adaptive Comparative Judgment (ACJ), and the Comparative Triple Judgments (CTJ).
 
 The Comparative Triple Judgments Algorithm (CTJ) was devised by Dr. Kevin Kelly, a researcher at TCD.
 
