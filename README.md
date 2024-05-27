@@ -46,7 +46,7 @@ from CTJ import Rubric, ACJ, CTJ
 
 You can use this package in three different ways.
 
-For each of the ways, you will at least need to specify the list containing the names of your items, which are present in the CURRENT directory in .PNG format, the two elements delimiting your sample (they may not be present in the items list, this is not a problem).
+For each of the ways, you will at least need to specify the list containing the names of your items, the two elements delimiting your sample (they may not be present in the items list, this is not a problem).
 
 ```py
 # Here an example with shades of grey. All the items are present in the current directory, for example, 'g1' appears as 'g1.png' in the directory.
@@ -60,6 +60,20 @@ worst_element = [0,'black']
 * ### For predictive purposes
 
 You have a list of elements that you want to evaluate, but you don't know their real values. In this case, you need to specify which method to use. You can use the method provided in the package or use a method that you've coded yourself.
+
+Here the user needs to make assessments, so the items must be present in the directory where your script is located in PNG format. For example, if your script is named myscript.py and you use the shade and the bound defined before, your structure needs to be like this:
+
+```
+Your/Project/Folder/
+    ├── myscript.py
+    ├── black.png
+    ├── g1.png
+    ├── g2.png
+    ├── g3.png
+    ├── g4.png
+    ├── g5.png
+    └── white.png
+````
 
 I recommend using high accuracy because here, it is calculated with the previous estimation; a high accuracy will evaluate convergence of the estimated value in this case.
 
@@ -80,6 +94,20 @@ CTJ(worst_element, best_element, shade, assessment_method = _ctj_assessment_meth
 * ### For testing purposes
 
 You have the real values and want to assess the value yourself. In this case, you need to specify which method to use. You can use the method provided in the package or use a method that you've coded yourself; also specify the real values in a list.
+
+Here the user needs to make assessments, so the items must be present in the directory where your script is located in PNG format. For example, if your script is named myscript.py and you use the shade and the bound defined before, your structure needs to be like this:
+
+```
+Your/Project/Folder/
+    ├── myscript.py
+    ├── black.png
+    ├── g1.png
+    ├── g2.png
+    ├── g3.png
+    ├── g4.png
+    ├── g5.png
+    └── white.png
+````
 
 By using the incorporated function:
 
