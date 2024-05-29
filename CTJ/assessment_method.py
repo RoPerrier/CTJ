@@ -351,19 +351,29 @@ def resize_image(image_path, width, height):
     original_width = original_image.width()
     original_height = original_image.height()
     
-    # Calculate the scaling factor for width and height
-    width_ratio = width / original_width
-    height_ratio = height / original_height
+    # Calculate aspect ratio
+    aspect_ratio = original_width / original_height
     
-    # Use the smaller of the two ratios to ensure that the image fits within the specified dimensions
-    scale_factor = min(width_ratio, height_ratio)
+    # Calculate new dimensions while preserving aspect ratio
+    if aspect_ratio > 1:
+        new_width = width
+        new_height = int(width / aspect_ratio)
+    else:
+        new_height = height
+        new_width = int(height * aspect_ratio)
     
-    # Calculate the new dimensions
-    new_width = int(original_width * scale_factor)
-    new_height = int(original_height * scale_factor)
-    
-    # Resize the image while preserving aspect ratio
+    # Resize the image using Tkinter's `subsample` method
     resized_image = original_image.subsample(int(original_width / new_width), int(original_height / new_height))
     
     return resized_image
+
+
+
+
+
+
+
+
+
+
 
