@@ -28,42 +28,47 @@ The CTJ package imports a number of libraries that are compatibly licensed. We l
    - License: MIT
    - For details, see: https://github.com/lucasmaystre/choix/blob/master/LICENSE
 
-2. Name: NumPy
+2. Name: Pillow
+   - Imported in: CTJ/[assessment_method.py]
+   - License:  HPND
+   - For details, see: https://github.com/python-pillow/Pillow/blob/main/LICENSE
+
+3. Name: NumPy
    - Imported in: CTJ/[Rubric.py, ACJ.py, CTJ.py, util.py, selection.py]
    - License: 3-Clause BSD
    - For details, see: https://numpy.org/doc/stable/license.html
 
-3. Name: Scikit-Learn
+4. Name: Scikit-Learn
    - Imported in: CTJ/[selection.py]
    - License: 3-Clause BSD
    - For details, see: https://github.com/scikit-learn/scikit-learn/blob/main/COPYING
 
-4. Name: SciPy
+5. Name: SciPy
    - Imported in: CTJ/[ACJ.py]
    - License: 3-Clause BSD "New" or "Revised"
    - For details, see: https://github.com/scipy/scipy/blob/main/LICENSE.txt
 
-5. Name: Random
+6. Name: Random
    - Imported in: CTJ/[Rubric.py, ACJ.py, CTJ.py, selection.py]
    - License: PSF (Python Software Foundation)
    - For details, see: https://github.com/python/cpython/blob/3.12/LICENSE
 
-6. Name: Time
+7. Name: Time
    - Imported in: CTJ/[Rubric.py, ACJ.py, CTJ.py]
    - License: PSF (Python Software Foundation)
    - For details, see: https://github.com/python/cpython/blob/3.12/LICENSE
 
-7. Name: Itertools
+8. Name: Itertools
    - Imported in: CTJ/[ACJ.py, CTJ.py]
    - License: PSF (Python Software Foundation)
    - For details, see: https://github.com/python/cpython/blob/3.12/LICENSE
 
-8. Name: ImportLib
+9. Name: ImportLib
    - Imported in: CTJ/[assessment_method.py]
    - License: PSF (Python Software Foundation)
    - For details, see: https://github.com/python/cpython/blob/3.12/LICENSE
 
-9. Name: Tkinter
+10. Name: Tkinter
    - Imported in: CTJ/[util.py, assessment_method.py]
    - License: PSF (Python Software Foundation)
    - For details, see: https://github.com/python/cpython/blob/3.12/LICENSE

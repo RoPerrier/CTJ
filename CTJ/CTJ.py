@@ -15,7 +15,7 @@ from .selection import II, roulette
 
 ###############################         FUNCTIONS       ############################################
 
-def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessment_method, nb_assessment, width, height):
+def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessment_method, nb_assessment ):
     """
     This function is used to do the assessment on a Trio and return the tuple (Max,(dist,Average),Min)
 
@@ -35,10 +35,6 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
         The assessment method. If none, the assessment is automatically performed using the true value.
     nb_assessment : int
         The number of assessment done.
-    width : int
-        The maximum width of images displayed. Proportion are preserved.
-    height : int
-        The maximum height of images displayed. Proportion are preserved.
 
     Raises
     ------
@@ -68,7 +64,7 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
         a = time.time()
         
         #We let the judge make the assessment
-        trio, dist = assessment_method(scale, trio, width, height, nb_assessment)
+        trio, dist = assessment_method(scale, trio, nb_assessment)
         
         b = time.time()
         
@@ -263,7 +259,7 @@ def CTJ_new_trio (items, assessments, estimated_values):
 
     return trio
 
-def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values, scale, assessment_method, width, height):
+def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values, scale, assessment_method ):
     """
     This fonction initialize the CTJ algorithm. Set up the array of the model and the assessments list.
 
@@ -287,10 +283,6 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
         The value of the scale for the CTJ model.
     assessment_method : fun
         The assessment method. If none, the assessment is automatically performed using the true value.
-    width : int
-        The maximum width of images displayed. Proportion are preserved.
-    height : int
-        The maximum height of images displayed. Proportion are preserved.    
 
     Returns
     -------
@@ -339,12 +331,12 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
             items_copy.remove(item_2)
             item_3 = rd.choice(items_copy)
     
-            _ = assessment_method(scale,[item_1, item_2, item_3], width, height, -1) 
+            _ = assessment_method(scale,[item_1, item_2, item_3] , -1) 
 
     #Assess all items one times
     for i in range(0,nb_items-3,3):
         trio = [not_compared[i], not_compared[i+1], not_compared[i+2]]
-        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1, width, height)
+        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1 )
         assessments.append(assessment[0])
         assessments_time += assessment[1]
         nb_bias += assessment[2]
@@ -354,7 +346,7 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
 
     if nb_items%3 != 0:
         trio = [not_compared[nb_items-1], not_compared[nb_items-2], not_compared[nb_items-3]]
-        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1, width, height)
+        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1 )
         assessments.append(assessment[0])
         assessments_time += assessment[1]
         nb_bias += assessment[2]
@@ -363,7 +355,7 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
         
     return A, b, assessments, assessments_time, nb_bias
 
-def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, max_iteration = 30, max_accuracy = 0.9, scale = 10, assessment_method = None, width = 300, height = 300):
+def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, max_iteration = 30, max_accuracy = 0.9, scale = 10, assessment_method = None):
     """
     Comparative Triple judgement (CTJ) is an evaluation method based on the comparison of a trio of elements. Rather than scoring each item on a fixed scale, evaluators directly compare three items at once, ranking them from best to worst, and then position the central item on a scale by moving it closer to the end that best matches it.  CTJ was devised by Dr Kevin Kelly.
 
@@ -389,10 +381,7 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
         The value of the scale for the CTJ model. Default is 10.
     assessment_method : fun
         The assessment method. If none, the assessment is automatically performed using the true value. Default is None.
-    width : int
-        The maximum width of images displayed. Proportion are preserved. The default is 300.
-    height : int
-        The maximum height of images displayed. Proportion are preserved. The default is 300.
+        
     Returns
     -------
     estimated_values : list of int
@@ -419,7 +408,7 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
              true_values.append(max_item[0])
     
     #We initialize the A array, b array and assessments list
-    A, b, assessments, assessments_time, nb_bias = CTJ_init(items, items.index(max_item[1]), items.index(min_item[1]), max_item[0], min_item[0], sensibility, true_values, scale, assessment_method, width, height)
+    A, b, assessments, assessments_time, nb_bias = CTJ_init(items, items.index(max_item[1]), items.index(min_item[1]), max_item[0], min_item[0], sensibility, true_values, scale, assessment_method )
     
     iteration = 0
     
@@ -448,7 +437,7 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
         trio = CTJ_new_trio(items, assessments, estimated_values)
         
         #We add the new assessment
-        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1, width, height)
+        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1 )
         assessments.append(assessment[0])
         assessments_time += assessment[1]
         nb_bias += assessment[2]

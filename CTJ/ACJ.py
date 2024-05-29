@@ -17,7 +17,7 @@ from .selection import MI, roulette
 
 ###############################         FUNCTIONS       ############################################
 
-def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assessment_method, nb_assessment, width, height):
+def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assessment_method, nb_assessment):
     """
     This function is used to do the assessment on a Pair and return the tuple (Max, Min). In the format (int, int)
 
@@ -37,10 +37,6 @@ def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assess
         The assessment method. If none, the assessment is automatically performed using the true value.
     nb_assessment : int
         The number of assessment done.
-    width : int
-        The maximum width of images displayed. Proportion are preserved.
-    height : int
-        The maximum height of images displayed. Proportion are preserved.
 
     Raises
     ------
@@ -67,7 +63,7 @@ def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assess
         a = time.time()
         
         #We let the judges make the assessment
-        pair = assessment_method(id_judge, pair, width, height, nb_assessment)
+        pair = assessment_method(id_judge, pair, nb_assessment)
         
         b = time.time()
         
@@ -207,7 +203,7 @@ def ACJ_new_pair (items, max_item, assessments, estimated_values):
     
     return pair
 
-def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method, width, height):
+def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
     """
     This fonction initialize the ACJ algorithm. Set up the assessments list.
 
@@ -223,10 +219,6 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method, widt
          A list of tuple cointaining the sensibility treshold for each simulated judge, and the probability of making a mystake. In the format (int, double).
     assessment_method : fun
         The assessment method. If none, the assessment is automatically performed using the true value.
-    width : int
-        The maximum width of images displayed. Proportion are preserved.
-    height : int
-        The maximum height of images displayed. Proportion are preserved.
 
     Returns
     -------
@@ -262,12 +254,12 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method, widt
             items_copy.remove(item_1)
             item_2 = rd.choice(items_copy)
     
-            _ = assessment_method(-2,[item_1,item_2], width, height, -1)  
+            _ = assessment_method(-2,[item_1,item_2], -1)  
     
     #Assess all items one times
     for i in range(0,nb_items-2,2):
         pair = [not_compared[i], not_compared[i+1]]
-        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1, width, height) for id_judge in range(nb_judge)]
+        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1) for id_judge in range(nb_judge)]
         assessments_done = [assessment[0] for assessment in ACJ_assessment]
         assessments_time += np.array([assessment[1] for assessment in ACJ_assessment])
         nb_bias += np.array([assessment[2] for assessment in ACJ_assessment])
@@ -276,7 +268,7 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method, widt
 
     if nb_items%2 != 0:
         pair = [not_compared[nb_items-1], not_compared[nb_items-2]]
-        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1, width, height) for id_judge in range(nb_judge)]
+        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1) for id_judge in range(nb_judge)]
         assessments_done = [assessment[0] for assessment in ACJ_assessment]
         assessments_time += np.array([assessment[1] for assessment in ACJ_assessment])
         nb_bias += np.array([assessment[2] for assessment in ACJ_assessment])
@@ -285,7 +277,7 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method, widt
         
     return assessments, assessments_time, nb_bias
 
-def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_values = None, max_iteration = 30, max_accuracy = 0.9, assessment_method = None, width = 500, height = 500):
+def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_values = None, max_iteration = 30, max_accuracy = 0.9, assessment_method = None):
     """
     Adaptive Comparative Judgment (ACJ) is an evaluation method based on the comparison of pairs of items. Rather than scoring each item on a fixed scale, evaluators directly compare two items at a time and judge which is better according to certain criteria.
 
@@ -309,10 +301,6 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_va
         Accuracy of the model. The default is 0.9.
     assessment_method : fun
         The assessment method. If none, the assessment is automatically performed using the true value. The default is None.
-    width : int
-        The maximum width of images displayed. Proportion are preserved. The default is 500.
-    height : int
-        The maximum height of images displayed. Proportion are preserved. The default is 500.
     
     Raises
     ------
@@ -354,7 +342,7 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_va
         raise Exception("All the judge need a sensibility tuple ! The len of sensitbility is not equal to the number of judge.")
     
     #We initialize the assessments list
-    assessments, assessments_time, nb_bias = ACJ_init(items, true_values, nb_judge, sensibility, assessment_method, width, height)
+    assessments, assessments_time, nb_bias = ACJ_init(items, true_values, nb_judge, sensibility, assessment_method)
     
     iteration = 0
     
@@ -389,7 +377,7 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_va
         pair = ACJ_new_pair(items, max_item, assessments, estimated_values)
         
         #We add the new assessment
-        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1, width, height) for id_judge in range(nb_judge)]
+        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1) for id_judge in range(nb_judge)]
         assessments_done = [assessment[0] for assessment in ACJ_assessment]
         assessments_time += np.array([assessment[1] for assessment in ACJ_assessment])
         nb_bias += np.array([assessment[2] for assessment in ACJ_assessment])

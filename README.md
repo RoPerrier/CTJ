@@ -199,7 +199,7 @@ You can look at these jupyter notebook Tutorial :
 
 #### Rubric Algorithm
 
-#### `CTJ.Rubric(min_item, max_item, items, sensibility=(0,0), true_values=None, assessment_method=None, width=500, height=500)`
+#### `CTJ.Rubric(min_item, max_item, items, sensibility=(0,0), true_values=None, assessment_method=None)`
 
 `Rubric` Judgment is an evaluation method based on the direct notation of an item. An item is shown and we must evaluate it and give a value to it.
 
@@ -211,8 +211,6 @@ You can look at these jupyter notebook Tutorial :
 - `sensibility` (*tuple*) – A tuple containing the margin of error, and the probability of making a mistake. In the format (*int*, *double*).. The default is (0,0).
 - `true_values` (*list of int, optional*) – A list of int containing the true values corresponding to each item in the `items` list. The default is None.
 - `assessment_method` (*function, optional*) – The assessment method. If None, the assessment is automatically performed using the true value. The default is None.
-- `width` (*int*) – The maximum width of images displayed. Proportions are preserved. The default is 500.
-- `height` (*int*) – The maximum height of images displayed. Proportions are preserved. The default is 500.
 
 **Returns:**
 
@@ -224,7 +222,7 @@ You can look at these jupyter notebook Tutorial :
 
 #### ACJ Algorithm
 
-#### `CTJ.ACJ(min_item, max_item, items, nb_judge=1, sensibility=[(0,0)], true_values=None, max_iteration=30, max_accuracy=0.9, assessment_method=None, width=500, height=500)`
+#### `CTJ.ACJ(min_item, max_item, items, nb_judge=1, sensibility=[(0,0)], true_values=None, max_iteration=30, max_accuracy=0.9, assessment_method=None)`
 
 Adaptive Comparative Judgment (`ACJ`) is an evaluation method based on the comparison of pairs of items. Rather than scoring each item on a fixed scale, evaluators directly compare two items at a time and judge which is better according to certain criteria.
 
@@ -239,8 +237,6 @@ Adaptive Comparative Judgment (`ACJ`) is an evaluation method based on the compa
 - `max_iteration` (*int, optional*) – Number of maximum iterations of the algorithm. The default is 30.
 - `max_accuracy` (*float, optional*) – Accuracy of the model. The default is 0.9.
 - `assessment_method` (*function, optional*) – The assessment method. If None, the assessment is automatically performed using the true value. The default is None.
-- `width` (*int*) – The maximum width of images displayed. Proportions are preserved. The default is 500.
-- `height` (*int*) – The maximum height of images displayed. Proportions are preserved. The default is 500.
 
 **Raises:**
 
@@ -256,7 +252,7 @@ Adaptive Comparative Judgment (`ACJ`) is an evaluation method based on the compa
 
 #### CTJ Algorithm
 
-#### `CTJ.CTJ(min_item, max_item, items, sensibility = (0,0,0), true_values = None, max_iteration = 30, max_accuracy = 0.9, scale = 10, assessment_method = None, width = 300, height = 300)`
+#### `CTJ.CTJ(min_item, max_item, items, sensibility = (0,0,0), true_values = None, max_iteration = 30, max_accuracy = 0.9, scale = 10, assessment_method = None)`
 
 Comparative Triple judgement (`CTJ`) is an evaluation method based on the comparison of a trio of elements. Rather than scoring each item on a fixed scale, evaluators directly compare three items at once, ranking them from best to worst, and then position the central item on a scale by moving it closer to the end that best matches it.  `CTJ` was devised by Dr Kevin Kelly.
 
@@ -271,8 +267,6 @@ Comparative Triple judgement (`CTJ`) is an evaluation method based on the compar
 - `max_accuracy` (*float, optional*) – Accuracy of the model. The default is 0.9.
 - `scale` (*int, optional*) – The value of the scale for the CTJ model. The default is 10.
 - `assessment_method` (*function, optional*) – The assessment method. If None, the assessment is automatically performed using the true value. The default is None.
-- `width` (*int*) – The maximum width of images displayed. Proportions are preserved. The default is 300.
-- `height` (*int*) – The maximum height of images displayed. Proportions are preserved. The default is 300.
 
 **Returns:**
 
@@ -286,15 +280,13 @@ Comparative Triple judgement (`CTJ`) is an evaluation method based on the compar
 
 #### Rubric Assessment Method
 
-#### `CTJ._rubric_assessment_method(item, width, height, nb_assessment)`
+#### `CTJ._rubric_assessment_method(item, nb_assessment)`
 
 Generate a window to let the user make the `Rubric` assessment.
 
 **Parameters:**
 
 - `item` (*string*) – A string representing the item being assessed.
-- `width` (*int*) – The maximum width of images displayed.
-- `height` (*int*) – The maximum height of images displayed.
 - `nb_assessment` (*int*) – The number of assessments done.
 
 **Raises:**
@@ -307,7 +299,7 @@ Generate a window to let the user make the `Rubric` assessment.
 
 #### ACJ Assessment Method
 
-#### `CTJ._acj_assessment_method(id_judge, pair, width, height, nb_assessment)`
+#### `CTJ._acj_assessment_method(id_judge, pair, nb_assessment)`
 
 Generate a window to let the user make the `ACJ` assessment.
 
@@ -315,8 +307,6 @@ Generate a window to let the user make the `ACJ` assessment.
 
 - `id_judge` (*int*) – The id of the judge making the assessment.
 - `pair` (*list of string*) – A list of strings representing the pair of items being assessed.
-- `width` (*int*) – The maximum width of images displayed.
-- `height` (*int*) – The maximum height of images displayed.
 - `nb_assessment` (*int*) – The number of assessments done.
 
 **Raises:**
@@ -329,7 +319,7 @@ Generate a window to let the user make the `ACJ` assessment.
 
 #### CTJ Assessment Method
 
-#### `CTJ._ctj_assessment_method(slider_range, trio, width, height, nb_assessment)`
+#### `CTJ._ctj_assessment_method(slider_range, trio, nb_assessment)`
 
 Generate a window to let the user make the `CTJ` assessment.
 
@@ -337,8 +327,6 @@ Generate a window to let the user make the `CTJ` assessment.
 
 - `slider_range` (*int*) – The range of the slider.
 - `trio` (*list of string*) – A list of strings representing the trio of items being assessed.
-- `width` (*int*) – The maximum width of images displayed.
-- `height` (*int*) – The maximum height of images displayed.
 - `nb_assessment` (*int*) – The number of assessments done.
 
 **Returns:**

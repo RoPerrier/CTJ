@@ -12,7 +12,7 @@ from .util import SSR, Rescale, ready
 
 ###############################         FUNCTIONS       ############################################
 
-def make_Rubric_assessment(items, item, sensibility, true_values, estimated_values, assessment_method, nb_assessment, width, height):
+def make_Rubric_assessment(items, item, sensibility, true_values, estimated_values, assessment_method, nb_assessment ):
     """
     This function is used to do the assessment on an item and return the value of it
 
@@ -32,10 +32,6 @@ def make_Rubric_assessment(items, item, sensibility, true_values, estimated_valu
         The assessment method. If none, the assessment is automatically performed using the true value.
     nb_assessment: int
         The number of assessment done.
-    width : int
-        The maximum width of images displayed. Proportion are preserved.
-    height : int
-        The maximum height of images displayed. Proportion are preserved.
 
     Raises
     ------
@@ -62,7 +58,7 @@ def make_Rubric_assessment(items, item, sensibility, true_values, estimated_valu
         a = time.time()
         
         #We let the judges make the assessment
-        estimated_values[items.index(item)] = assessment_method(item, width, height, nb_assessment)
+        estimated_values[items.index(item)] = assessment_method(item, nb_assessment)
         
         b = time.time()
         
@@ -100,7 +96,7 @@ def make_Rubric_assessment(items, item, sensibility, true_values, estimated_valu
     
     return estimated_values , assessment_duration, one_more_bias
 
-def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, assessment_method = None, width = 500, height = 500):
+def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, assessment_method = None):
     """
     Rubric Judgment is an evaluation method based on the direct notation of an item. An item is shown and we must evaluate it and give a value to it.
 
@@ -117,12 +113,7 @@ def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, a
     true_values : list of int, optional
         A list of int containing the true values corresponding to each item in the `items` list. The default is None.
     assessment_method : fun
-        The assessment method. If none, the assessment is automatically performed using the true value. The default is None.
-    width : int
-        The maximum width of images displayed. Proportion are preserved. The default is 500.
-    height : int
-        The maximum height of images displayed. Proportion are preserved. The default is 500.
-    
+        The assessment method. If none, the assessment is automatically performed using the true value. The default is None.    
 
     Returns
     -------
@@ -165,12 +156,12 @@ def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, a
     
         if not skip_tutorial:
             item = rd.choice(items)
-            _ = assessment_method(item, width, height, -1)    
+            _ = assessment_method(item , -1)    
 
     while len(items_copy) != 0 :
         
         item = items_copy.pop()
-        estimated_values, time, one_more_bias = make_Rubric_assessment(items, item, sensibility, true_values, estimated_values, assessment_method, len(items)-len(items_copy), width, height)
+        estimated_values, time, one_more_bias = make_Rubric_assessment(items, item, sensibility, true_values, estimated_values, assessment_method, len(items)-len(items_copy) )
         assessments_time += time
         nb_bias += one_more_bias
     

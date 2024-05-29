@@ -16,7 +16,7 @@ bg_color = '#f0f0f0'
 ###############################         FUNCTIONS       ############################################
 
 
-def _rubric_assessment_method(item, width, height, nb_assessment):
+def _rubric_assessment_method(item, nb_assessment):
     """
     Generate a window to let the user make the Rubric assessment.
 
@@ -24,10 +24,6 @@ def _rubric_assessment_method(item, width, height, nb_assessment):
     ----------
     item : string
         A strings representing the item being assessed.
-    width : int
-        The maximum width of images displayed.
-    height : int
-        The maximum height of images displayed.
     nb_assessment : int
         The number of assessment done.
 
@@ -103,8 +99,8 @@ def _rubric_assessment_method(item, width, height, nb_assessment):
     if not os.path.exists(image_path):
         root.destroy()
         raise Exception(image_path + " not in directory.")
-            
-    image = resize_image(image_path, width, height)
+    
+    image = resize_image(image_path, (root.winfo_screenwidth() * 0.9)//3)
     
     label = tk.Label(frame, image=image, bg=bg_color)
     label.grid(row=0, column=0, padx=10, pady=10)
@@ -129,7 +125,7 @@ def _rubric_assessment_method(item, width, height, nb_assessment):
     
     return int(item_value)
 
-def _acj_assessment_method(id_judge, pair, width, height, nb_assessment):
+def _acj_assessment_method(id_judge, pair, nb_assessment):
     """
     Generate a window to let the user make the ACJ assessment.
 
@@ -139,10 +135,6 @@ def _acj_assessment_method(id_judge, pair, width, height, nb_assessment):
         The id of the judge making the assessment.
     pair : list of string
         A list of strings representing the pair of items being assessed.
-    width : int
-        The maximum width of images displayed.
-    height : int
-        The maximum height of images displayed.
     nb_assessment : int
         The number of assessment done.
 
@@ -215,8 +207,8 @@ def _acj_assessment_method(id_judge, pair, width, height, nb_assessment):
             root.destroy()
             raise Exception(image_path + " not in directory.")
     
-        images.append(resize_image(image_path, width, height))
-    
+        images.append(resize_image(image_path, (root.winfo_screenwidth() * 0.9)//3))
+                      
     label1 = tk.Label(frame, image=images[0], bg=bg_color)
     label1.grid(row=0, column=0, padx=10, pady=10)
     label1.bind("<Button-1>", lambda event: close(pair[0]))
@@ -236,7 +228,7 @@ def _acj_assessment_method(id_judge, pair, width, height, nb_assessment):
     
     return sort
 
-def _ctj_assessment_method(slider_range, trio, width, height, nb_assessment):
+def _ctj_assessment_method(slider_range, trio, nb_assessment):
     """
     Generate a window to let the user make the CTJ assessment.
 
@@ -246,10 +238,6 @@ def _ctj_assessment_method(slider_range, trio, width, height, nb_assessment):
         The range of the slider.
     trio : list of string
         A list of strings representing the trio of items being assessed.
-    width : int
-        The maximum width of images displayed.
-    height : int
-        The maximum height of images displayed.
     nb_assessment : int
         The number of assessment done.
         
@@ -337,8 +325,8 @@ def _ctj_assessment_method(slider_range, trio, width, height, nb_assessment):
         if not os.path.exists(image_path):
             root.destroy()
             raise Exception(image_path + " not in directory.")
-    
-        images.append(resize_image(image_path, width, height))
+
+        images.append(resize_image(image_path, (root.winfo_screenwidth() * 0.9)//3))
     
     image_labels = [tk.Label(frame, image=image) for image in images]
 
@@ -348,7 +336,6 @@ def _ctj_assessment_method(slider_range, trio, width, height, nb_assessment):
 
     selected_index = None
     
-    # Ajout du slider à gauche de la liste
     slider = tk.Scale(frame, from_=0, to=slider_range, orient=tk.HORIZONTAL, length=400)
     slider.grid(row=1, column=0, columnspan=len(trio), pady=10)
 
@@ -366,9 +353,11 @@ def _ctj_assessment_method(slider_range, trio, width, height, nb_assessment):
 
     return permutation,dist
 
-def resize_image(image_path, width, height):
+from PIL import Image, ImageTk
+
+def resize_image(image_path, width):
     """
-    Resize an image while preserving its aspect ratio using Tkinter's built-in methods.
+    Resize an image while preserving its aspect ratio using Pillow.
 
     Parameters
     ----------
@@ -376,8 +365,6 @@ def resize_image(image_path, width, height):
         Path to the image file.
     width : int
         The maximum width of images displayed.
-    height : int
-        The maximum height of images displayed.
 
     Returns
     -------
@@ -385,26 +372,23 @@ def resize_image(image_path, width, height):
         Resized image as a Tkinter PhotoImage object.
     """
         
-    original_image = tk.PhotoImage(file=image_path)
-    original_width = original_image.width()
-    original_height = original_image.height()
+    original_image = Image.open(image_path)
+    original_width, original_height = original_image.size
     
     # Calculate aspect ratio
     aspect_ratio = original_width / original_height
     
     # Calculate new dimensions while preserving aspect ratio
-    if aspect_ratio > 1:
-        new_width = width
-        new_height = int(width / aspect_ratio)
-    else:
-        new_height = height
-        new_width = int(height * aspect_ratio)
+    new_width = width
+    new_height = int(width / aspect_ratio)
     
-    # Resize the image using Tkinter's `subsample` method
-    resized_image = original_image.subsample(int(original_width / new_width), int(original_height / new_height))
+    # Resize the image using Pillow
+    resized_image = original_image.resize((int(new_width), int(new_height)))
     
-    return resized_image
-
+    # Convert the resized image to a Tkinter PhotoImage object
+    resized_photo = ImageTk.PhotoImage(resized_image)
+    
+    return resized_photo
 
 
 
