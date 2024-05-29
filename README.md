@@ -183,15 +183,16 @@ You can look at these jupyter notebook Tutorial :
 
 ## Dependencies
 
-- time >= 2.8.2
-- numpy >= 1.24.3
-- random >= 1.2.4
-- tkinter >= 8.6.12
-- importlib >= 6.0.0
 - choix >= 0.3.5
-- stats >= 1.11.1
-- itertools >= 8.12.0
+- pillow >= 10.2.0
+- numpy >= 1.24.3
 - scikit-learn >= 1.3.0
+- scipy >= 1.13.1
+- random >= 1.2.4
+- time >= 2.8.2
+- itertools >= 8.12.0
+- importlib >= 6.0.0
+- tkinter >= 8.6.12
 
 ## Module Documentation
 

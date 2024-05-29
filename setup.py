@@ -16,6 +16,7 @@ setup(
       packages = find_packages(),
       url = 'https://github.com/RoPerrier/CTJ',
       install_requires =[
+          'pillow>=10.2.0',
           'choix>=0.3.5',
           'numpy>=1.26.4',
           'scikit_learn>=1.2.2',

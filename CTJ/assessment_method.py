@@ -100,7 +100,7 @@ def _rubric_assessment_method(item, nb_assessment):
         root.destroy()
         raise Exception(image_path + " not in directory.")
     
-    image = resize_image(image_path, (root.winfo_screenwidth() * 0.9)//3)
+    image = resize_image(image_path, (root.winfo_screenwidth() * 0.9)//3,root.winfo_screenwidth() * 0.6)
     
     label = tk.Label(frame, image=image, bg=bg_color)
     label.grid(row=0, column=0, padx=10, pady=10)
@@ -207,7 +207,7 @@ def _acj_assessment_method(id_judge, pair, nb_assessment):
             root.destroy()
             raise Exception(image_path + " not in directory.")
     
-        images.append(resize_image(image_path, (root.winfo_screenwidth() * 0.9)//3))
+        images.append(resize_image(image_path, (root.winfo_screenwidth() * 0.9)//3,root.winfo_screenwidth() * 0.6))
                       
     label1 = tk.Label(frame, image=images[0], bg=bg_color)
     label1.grid(row=0, column=0, padx=10, pady=10)
@@ -326,7 +326,7 @@ def _ctj_assessment_method(slider_range, trio, nb_assessment):
             root.destroy()
             raise Exception(image_path + " not in directory.")
 
-        images.append(resize_image(image_path, (root.winfo_screenwidth() * 0.9)//3))
+        images.append(resize_image(image_path, (root.winfo_screenwidth() * 0.9)//3,root.winfo_screenwidth() * 0.6))
     
     image_labels = [tk.Label(frame, image=image) for image in images]
 
@@ -355,7 +355,7 @@ def _ctj_assessment_method(slider_range, trio, nb_assessment):
 
 from PIL import Image, ImageTk
 
-def resize_image(image_path, width):
+def resize_image(image_path, width, height):
     """
     Resize an image while preserving its aspect ratio using Pillow.
 
@@ -365,6 +365,8 @@ def resize_image(image_path, width):
         Path to the image file.
     width : int
         The maximum width of images displayed.
+    width : int
+        The height width of images displayed.
 
     Returns
     -------
@@ -373,22 +375,14 @@ def resize_image(image_path, width):
     """
         
     original_image = Image.open(image_path)
-    original_width, original_height = original_image.size
     
-    # Calculate aspect ratio
-    aspect_ratio = original_width / original_height
-    
-    # Calculate new dimensions while preserving aspect ratio
-    new_width = width
-    new_height = int(width / aspect_ratio)
-    
-    # Resize the image using Pillow
-    resized_image = original_image.resize((int(new_width), int(new_height)))
+    # Use the thumbnail method to resize the image in place
+    original_image.thumbnail((width, height), Image.Resampling.LANCZOS)
     
     # Convert the resized image to a Tkinter PhotoImage object
-    resized_photo = ImageTk.PhotoImage(resized_image)
+    resized_image = ImageTk.PhotoImage(original_image)
     
-    return resized_photo
+    return resized_image
 
 
 
