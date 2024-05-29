@@ -7,6 +7,7 @@ Created on Mon May 13 15:24:08 2024
 
 import tkinter as tk
 import importlib as il
+import os
 
 from tkinter import colorchooser
 
@@ -32,6 +33,8 @@ def _rubric_assessment_method(item, width, height, nb_assessment):
 
     Raises
     ------
+    Exception
+        No file in directory.
     Exception
         The assessment was not done.
 
@@ -94,7 +97,14 @@ def _rubric_assessment_method(item, width, height, nb_assessment):
     frame.pack(padx=10, pady=10)
     
     # Load images dynamically based on list elements
-    image = resize_image(item + ".png", width, height)
+    
+    image_path = item + ".png"
+    
+    if not os.path.exists(image_path):
+        root.destroy()
+        raise Exception(image_path + " not in directory.")
+            
+    image = resize_image(image_path, width, height)
     
     label = tk.Label(frame, image=image, bg=bg_color)
     label.grid(row=0, column=0, padx=10, pady=10)
@@ -138,6 +148,8 @@ def _acj_assessment_method(id_judge, pair, width, height, nb_assessment):
 
     Raises
     ------
+    Exception
+        No file in directory.
     Exception
         The assessment was not done.
 
@@ -194,14 +206,22 @@ def _acj_assessment_method(id_judge, pair, width, height, nb_assessment):
     frame.pack(padx=10, pady=10)
     
     # Load images dynamically based on list elements
-    image1 = resize_image(pair[0] + ".png", width, height)
-    image2 = resize_image(pair[1] + ".png", width, height)
+    images = []
     
-    label1 = tk.Label(frame, image=image1, bg=bg_color)
+    for image_name in pair:
+        image_path = image_name + ".png"
+        
+        if not os.path.exists(image_path):
+            root.destroy()
+            raise Exception(image_path + " not in directory.")
+    
+        images.append(resize_image(image_path, width, height))
+    
+    label1 = tk.Label(frame, image=images[0], bg=bg_color)
     label1.grid(row=0, column=0, padx=10, pady=10)
     label1.bind("<Button-1>", lambda event: close(pair[0]))
     
-    label2 = tk.Label(frame, image=image2, bg=bg_color)
+    label2 = tk.Label(frame, image=images[1], bg=bg_color)
     label2.grid(row=0, column=1, padx=10, pady=10)
     label2.bind("<Button-1>", lambda event: close(pair[1]))
     
@@ -232,6 +252,13 @@ def _ctj_assessment_method(slider_range, trio, width, height, nb_assessment):
         The maximum height of images displayed.
     nb_assessment : int
         The number of assessment done.
+        
+    Raises
+    ------
+    Exception
+        No file in directory.
+    Exception
+        The assessment was not done.
 
     Returns
     -------
@@ -302,7 +329,17 @@ def _ctj_assessment_method(slider_range, trio, width, height, nb_assessment):
     frame = tk.Frame(root, bg=bg_color)
     frame.pack(padx=10, pady=10)
 
-    images = [resize_image(image_name + ".png", width, height) for image_name in trio]
+    images = []
+    
+    for image_name in trio:
+        image_path = image_name + ".png"
+        
+        if not os.path.exists(image_path):
+            root.destroy()
+            raise Exception(image_path + " not in directory.")
+    
+        images.append(resize_image(image_path, width, height))
+    
     image_labels = [tk.Label(frame, image=image) for image in images]
 
     for i, label in enumerate(image_labels):
@@ -347,6 +384,7 @@ def resize_image(image_path, width, height):
     resized_image : tk.PhotoImage
         Resized image as a Tkinter PhotoImage object.
     """
+        
     original_image = tk.PhotoImage(file=image_path)
     original_width = original_image.width()
     original_height = original_image.height()
