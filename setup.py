@@ -12,7 +12,7 @@ with open("README.md", "r", encoding="utf-8") as f :
 
 setup(
       name = 'CTJ',
-      version = '0.9.8',
+      version = '0.9.5',
       packages = find_packages(),
       url = 'https://github.com/RoPerrier/CTJ',
       install_requires =[
