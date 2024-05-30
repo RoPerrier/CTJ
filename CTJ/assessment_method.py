@@ -196,6 +196,7 @@ def acj_assessment_method(id_judge, pair, nb_assessment, window):
         raise Exception("Assessment not done !")
     
     return sort
+    
 def ctj_assessment_method(slider_range, trio, nb_assessment, window):
     """
     Generate a window to let the user make the CTJ assessment.
