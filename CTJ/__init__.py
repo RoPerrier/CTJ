@@ -10,4 +10,4 @@ from .ACJ import ACJ
 
 from .CTJ import CTJ
 
-from .assessment_method import _rubric_assessment_method, _acj_assessment_method, _ctj_assessment_method
+from .assessment_method import rubric_assessment_method, acj_assessment_method, ctj_assessment_method
