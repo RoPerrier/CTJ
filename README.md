@@ -280,7 +280,7 @@ Comparative Triple judgement (`CTJ`) is an evaluation method based on the compar
 
 #### Rubric Assessment Method
 
-#### `CTJ._rubric_assessment_method(item, nb_assessment)`
+#### `CTJ.rubric_assessment_method(item, nb_assessment)`
 
 Generate a window to let the user make the `Rubric` assessment.
 
@@ -299,7 +299,7 @@ Generate a window to let the user make the `Rubric` assessment.
 
 #### ACJ Assessment Method
 
-#### `CTJ._acj_assessment_method(id_judge, pair, nb_assessment)`
+#### `CTJ.acj_assessment_method(id_judge, pair, nb_assessment)`
 
 Generate a window to let the user make the `ACJ` assessment.
 
@@ -319,7 +319,7 @@ Generate a window to let the user make the `ACJ` assessment.
 
 #### CTJ Assessment Method
 
-#### `CTJ._ctj_assessment_method(slider_range, trio, nb_assessment)`
+#### `CTJ.ctj_assessment_method(slider_range, trio, nb_assessment)`
 
 Generate a window to let the user make the `CTJ` assessment.
 

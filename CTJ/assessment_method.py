@@ -13,7 +13,7 @@ from PIL import Image, ImageTk
 ###############################         FUNCTIONS       ############################################
 
 
-def _rubric_assessment_method(item, nb_assessment, window):
+def rubric_assessment_method(item, nb_assessment, window):
     """
     Generate a window to let the user make the Rubric assessment.
 
@@ -109,7 +109,7 @@ def _rubric_assessment_method(item, nb_assessment, window):
         
     return int(item_value)
 
-def _acj_assessment_method(id_judge, pair, nb_assessment, window):
+def acj_assessment_method(id_judge, pair, nb_assessment, window):
     """
     Generate a window to let the user make the ACJ assessment.
 
@@ -196,7 +196,7 @@ def _acj_assessment_method(id_judge, pair, nb_assessment, window):
         raise Exception("Assessment not done !")
     
     return sort
-def _ctj_assessment_method(slider_range, trio, nb_assessment, window):
+def ctj_assessment_method(slider_range, trio, nb_assessment, window):
     """
     Generate a window to let the user make the CTJ assessment.
 
