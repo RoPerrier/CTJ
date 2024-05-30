@@ -22,7 +22,7 @@
 
 ## Description
 
-The `CTJ` package implements the triple judgement comparative algorithm devised by Dr. Kevin Kelly. The aim of this algorithm is to improve the accuracy of `ACJ` (adaptive comparative judgement). Instead of comparing elements two by two, they are compared three by three, and a notion of distance between elements is added to the algorithm. `CTJ` was devised by Dr. Kevin Kelly.
+The `CTJ` package implements the comparative triple judgement algorithm devised by Dr. Kevin Kelly. The aim of this algorithm is to improve the accuracy of `ACJ` (adaptive comparative judgement). Instead of comparing elements two by two, they are compared three by three, and a notion of distance between elements is added to the algorithm. `CTJ` was devised by Dr. Kevin Kelly.
 
 This package therefore proposes an implementation of the `CTJ`, the `ACJ`, and the `Rubric` judgment, to enable a more precise analysis of the `CTJ` and to compare its performance with other methods. To do this, pairs and trios are selected with similar methods using Shannon entropy.
 
