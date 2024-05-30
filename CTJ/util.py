@@ -7,6 +7,8 @@ Created on Wed May  1 15:56:51 2024
 
 import numpy as np
 import tkinter as tk
+
+from tkinter import colorchooser
 from sklearn.preprocessing import MinMaxScaler
 
 ###############################         FUNCTIONS       ############################################
@@ -174,7 +176,7 @@ class WindowManager():
         self._bgcolor = value
     
     def change_bg_color(self):
-        color = tk.colorchooser.askcolor()[1]
+        color = colorchooser.askcolor()[1]
         if color:
             self.bgcolor = color
             self.root.config(bg=self.bgcolor)
