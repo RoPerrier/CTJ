@@ -191,7 +191,6 @@ You can look at these jupyter notebook Tutorial :
 - random >= 1.2.4
 - time >= 2.8.2
 - itertools >= 8.12.0
-- importlib >= 6.0.0
 - tkinter >= 8.6.12
 
 ## Module Documentation

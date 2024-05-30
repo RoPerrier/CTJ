@@ -12,12 +12,12 @@ import choix
 
 from itertools import combinations, permutations
 
-from .util import Rescale, SSR, ready
+from .util import Rescale, SSR, ready, WindowManager
 from .selection import MI, roulette
 
 ###############################         FUNCTIONS       ############################################
 
-def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assessment_method, nb_assessment):
+def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assessment_method, nb_assessment, window):
     """
     This function is used to do the assessment on a Pair and return the tuple (Max, Min). In the format (int, int)
 
@@ -37,6 +37,8 @@ def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assess
         The assessment method. If none, the assessment is automatically performed using the true value.
     nb_assessment : int
         The number of assessment done.
+    window : WindowManager
+        an object to manage human assessments.
 
     Raises
     ------
@@ -58,12 +60,12 @@ def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assess
     
     if assessment_method is not None :
         
-        ready()
+        ready(window)
 
         a = time.time()
         
         #We let the judges make the assessment
-        pair = assessment_method(id_judge, pair, nb_assessment)
+        pair = assessment_method(id_judge, pair, nb_assessment, window)
         
         b = time.time()
         
@@ -228,6 +230,8 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
         The duration of the assessments.
     nb_bias : list of int
         A list containing the number of bias for each judges.
+    window : WindowManager
+        an object to manage human assessments.
 
     """
     
@@ -242,10 +246,14 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
     assessments_time = np.zeros(nb_judge)
     nb_bias = np.zeros(nb_judge)
     
+    window  = None
+    
     #if assessment method not None then Show a tutorial
     if assessment_method is not None :
         
-        skip_tutorial = ready(info = "The ACJ assessment involves comparisons between two items.\n\n On each iteration, you will be asked to click on the best items.\n\n By clicking on the 'Tutorial' button, you can access the tutorial.\n The tutorial consists of an evaluation of the algorithm. After completing the tutorial evaluation, the actual test will begin.\n\n Between each evaluation, a button will appear.\n Ensure you are ready before clicking on it, as once clicked, a countdown will start. At the end of the countdown, you can evaluate the item, so make sure you are prepared.", status =  "Tuto") 
+        window = WindowManager()
+        
+        skip_tutorial = ready(window, info = "The ACJ assessment involves comparisons between two items.\n\n On each iteration, you will be asked to click on the best items.\n\n By clicking on the 'Tutorial' button, you can access the tutorial.\n The tutorial consists of an evaluation of the algorithm. After completing the tutorial evaluation, the actual test will begin.\n\n Between each evaluation, a button will appear.\n Ensure you are ready before clicking on it, as once clicked, a countdown will start. At the end of the countdown, you can evaluate the item, so make sure you are prepared.", status =  "Tuto") 
         ###TUTO on pourrait le passer avec un bouton,  reflechir a un break ou un goto
         
         if not skip_tutorial:
@@ -254,12 +262,12 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
             items_copy.remove(item_1)
             item_2 = rd.choice(items_copy)
     
-            _ = assessment_method(-2,[item_1,item_2], -1)  
+            _ = assessment_method(-2,[item_1,item_2], -1, window)
     
     #Assess all items one times
     for i in range(0,nb_items-2,2):
         pair = [not_compared[i], not_compared[i+1]]
-        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1) for id_judge in range(nb_judge)]
+        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1, window) for id_judge in range(nb_judge)]
         assessments_done = [assessment[0] for assessment in ACJ_assessment]
         assessments_time += np.array([assessment[1] for assessment in ACJ_assessment])
         nb_bias += np.array([assessment[2] for assessment in ACJ_assessment])
@@ -268,14 +276,14 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
 
     if nb_items%2 != 0:
         pair = [not_compared[nb_items-1], not_compared[nb_items-2]]
-        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1) for id_judge in range(nb_judge)]
+        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1, window) for id_judge in range(nb_judge)]
         assessments_done = [assessment[0] for assessment in ACJ_assessment]
         assessments_time += np.array([assessment[1] for assessment in ACJ_assessment])
         nb_bias += np.array([assessment[2] for assessment in ACJ_assessment])
         
         assessments.append(max(set(assessments_done), key=assessments_done.count))
         
-    return assessments, assessments_time, nb_bias
+    return assessments, assessments_time, nb_bias, window
 
 def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_values = None, max_iteration = 30, max_accuracy = 0.9, assessment_method = None):
     """
@@ -342,7 +350,7 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_va
         raise Exception("All the judge need a sensibility tuple ! The len of sensitbility is not equal to the number of judge.")
     
     #We initialize the assessments list
-    assessments, assessments_time, nb_bias = ACJ_init(items, true_values, nb_judge, sensibility, assessment_method)
+    assessments, assessments_time, nb_bias, window = ACJ_init(items, true_values, nb_judge, sensibility, assessment_method)
     
     iteration = 0
     
@@ -377,7 +385,7 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_va
         pair = ACJ_new_pair(items, max_item, assessments, estimated_values)
         
         #We add the new assessment
-        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1) for id_judge in range(nb_judge)]
+        ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1, window) for id_judge in range(nb_judge)]
         assessments_done = [assessment[0] for assessment in ACJ_assessment]
         assessments_time += np.array([assessment[1] for assessment in ACJ_assessment])
         nb_bias += np.array([assessment[2] for assessment in ACJ_assessment])
@@ -399,6 +407,9 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_va
         cond = accuracy(true_values, estimated_values, all_estimated_values)
         
         iteration += 1
+    
+    if window is not None :
+        window.destroy()
         
     print("===============================================================")
     print("| Result of ACJ algorithm")

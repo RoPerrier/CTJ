@@ -10,12 +10,13 @@ import time
 
 from itertools import chain, combinations, permutations
 
-from .util import Rescale, SSR, ready
+from .util import Rescale, SSR, ready, WindowManager
 from .selection import II, roulette
+
 
 ###############################         FUNCTIONS       ############################################
 
-def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessment_method, nb_assessment ):
+def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessment_method, nb_assessment, window):
     """
     This function is used to do the assessment on a Trio and return the tuple (Max,(dist,Average),Min)
 
@@ -35,7 +36,9 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
         The assessment method. If none, the assessment is automatically performed using the true value.
     nb_assessment : int
         The number of assessment done.
-
+    window : WindowManager
+        an object to manage human assessments.
+        
     Raises
     ------
     Exception
@@ -59,12 +62,12 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
             
     if assessment_method is not None :
         
-        ready()
+        ready(window)
 
         a = time.time()
         
         #We let the judge make the assessment
-        trio, dist = assessment_method(scale, trio, nb_assessment)
+        trio, dist = assessment_method(scale, trio, nb_assessment, window)
         
         b = time.time()
         
@@ -294,10 +297,14 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
          A list containing all the assessments done in the format (int,(int,int),int).
     nb_bias : list of int
         A list containing the number of bias for each judges.
+    window : WindowManager
+        an object to manage human assessments.
 
     """
     
     nb_items = len(items)
+    
+    window = None
     
     #Create the matrices
     A = np.zeros((2, nb_items), dtype=np.double)
@@ -321,7 +328,9 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
     #if assessment method not None then Show a tutorial
     if assessment_method is not None :
         
-        skip_tutorial = ready(info = "The CTJ assessment involves comparisons between three items.\n\n On each iteration, you will be asked to sort the item, the best (at the left) to the worst (at the right).\n Then you must use the slider bellow to indicate the distance betwwen the extremums items and the average one.\n To swap item, you must click on both of them.\n\n By clicking on the 'Tutorial' button, you can access the tutorial.\n The tutorial consists of an evaluation of the algorithm. After completing the tutorial evaluation, the actual test will begin.\n\n Between each evaluation, a button will appear.\n Ensure you are ready before clicking on it, as once clicked, a countdown will start. At the end of the countdown, you can evaluate the item, so make sure you are prepared.", status =  "Tuto") 
+        window = WindowManager()
+        
+        skip_tutorial = ready(window, info = "The CTJ assessment involves comparisons between three items.\n\n On each iteration, you will be asked to sort the item, the best (at the left) to the worst (at the right).\n Then you must use the slider bellow to indicate the distance betwwen the extremums items and the average one.\n To swap item, you must click on both of them.\n\n By clicking on the 'Tutorial' button, you can access the tutorial.\n The tutorial consists of an evaluation of the algorithm. After completing the tutorial evaluation, the actual test will begin.\n\n Between each evaluation, a button will appear.\n Ensure you are ready before clicking on it, as once clicked, a countdown will start. At the end of the countdown, you can evaluate the item, so make sure you are prepared.", status =  "Tuto") 
         
         if not skip_tutorial:
             item_1 = rd.choice(items)
@@ -331,12 +340,12 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
             items_copy.remove(item_2)
             item_3 = rd.choice(items_copy)
     
-            _ = assessment_method(scale,[item_1, item_2, item_3] , -1) 
+            _ = assessment_method(scale,[item_1, item_2, item_3] , -1, window) 
 
     #Assess all items one times
     for i in range(0,nb_items-3,3):
         trio = [not_compared[i], not_compared[i+1], not_compared[i+2]]
-        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1 )
+        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1, window)
         assessments.append(assessment[0])
         assessments_time += assessment[1]
         nb_bias += assessment[2]
@@ -346,14 +355,14 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
 
     if nb_items%3 != 0:
         trio = [not_compared[nb_items-1], not_compared[nb_items-2], not_compared[nb_items-3]]
-        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1 )
+        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1, window)
         assessments.append(assessment[0])
         assessments_time += assessment[1]
         nb_bias += assessment[2]
         A = np.vstack([A, line])
         b = np.vstack([b, [0]])
         
-    return A, b, assessments, assessments_time, nb_bias
+    return A, b, assessments, assessments_time, nb_bias, window
 
 def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, max_iteration = 30, max_accuracy = 0.9, scale = 10, assessment_method = None):
     """
@@ -408,7 +417,7 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
              true_values.append(max_item[0])
     
     #We initialize the A array, b array and assessments list
-    A, b, assessments, assessments_time, nb_bias = CTJ_init(items, items.index(max_item[1]), items.index(min_item[1]), max_item[0], min_item[0], sensibility, true_values, scale, assessment_method )
+    A, b, assessments, assessments_time, nb_bias, window = CTJ_init(items, items.index(max_item[1]), items.index(min_item[1]), max_item[0], min_item[0], sensibility, true_values, scale, assessment_method )
     
     iteration = 0
     
@@ -437,7 +446,7 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
         trio = CTJ_new_trio(items, assessments, estimated_values)
         
         #We add the new assessment
-        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1 )
+        assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1, window)
         assessments.append(assessment[0])
         assessments_time += assessment[1]
         nb_bias += assessment[2]
@@ -460,6 +469,9 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
         cond = accuracy(true_values, estimated_values, all_estimated_values)
         
         iteration += 1
+    
+    if window is not None :
+        window.destroy()
         
     print("===============================================================")
     print("| Result of CTJ algorithm")

@@ -8,11 +8,11 @@ import random as rd
 import numpy as np
 import time
 
-from .util import SSR, Rescale, ready
+from .util import SSR, Rescale, ready, WindowManager
 
 ###############################         FUNCTIONS       ############################################
 
-def make_Rubric_assessment(items, item, sensibility, true_values, estimated_values, assessment_method, nb_assessment ):
+def make_Rubric_assessment(items, item, sensibility, true_values, estimated_values, assessment_method, nb_assessment, window):
     """
     This function is used to do the assessment on an item and return the value of it
 
@@ -53,12 +53,12 @@ def make_Rubric_assessment(items, item, sensibility, true_values, estimated_valu
     
     if assessment_method is not None :
         
-        ready()
+        ready(window)
 
         a = time.time()
         
         #We let the judges make the assessment
-        estimated_values[items.index(item)] = assessment_method(item, nb_assessment)
+        estimated_values[items.index(item)] = assessment_method(item, nb_assessment, window)
         
         b = time.time()
         
@@ -91,7 +91,6 @@ def make_Rubric_assessment(items, item, sensibility, true_values, estimated_valu
         assessment_duration = b-a
         
     else :
-        
         raise Exception("There are no true value nor assessment_method, both are None")
     
     return estimated_values , assessment_duration, one_more_bias
@@ -148,26 +147,33 @@ def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, a
     
     nb_bias = 0
     
+    window = None
+    
     estimated_values = np.zeros(len(items))
     
     if assessment_method is not None :
         
-        skip_tutorial = ready(info="The Rubric assessment involves individually grading each item.\n\n On each iteration, you will be asked to enter the value of the item shown, in a box below.\n\n By clicking on the 'Tutorial' button, you can access the tutorial.\nThe tutorial consists of an evaluation of the algorithm. After completing the tutorial evaluation, the actual test will begin.\n\n Between each evaluation, a button will appear.\n Ensure you are ready before clicking on it, as once clicked, a countdown will start. At the end of the countdown, you can evaluate the item, so make sure you are prepared.", status="Tuto")
+        window = WindowManager()
+        
+        skip_tutorial = ready(window, info="The Rubric assessment involves individually grading each item.\n\n On each iteration, you will be asked to enter the value of the item shown, in a box below.\n\n By clicking on the 'Tutorial' button, you can access the tutorial.\nThe tutorial consists of an evaluation of the algorithm. After completing the tutorial evaluation, the actual test will begin.\n\n Between each evaluation, a button will appear.\n Ensure you are ready before clicking on it, as once clicked, a countdown will start. At the end of the countdown, you can evaluate the item, so make sure you are prepared.", status="Tuto")
     
         if not skip_tutorial:
             item = rd.choice(items)
-            _ = assessment_method(item , -1)    
+            _ = assessment_method(item , -1, window)    
 
     while len(items_copy) != 0 :
         
         item = items_copy.pop()
-        estimated_values, time, one_more_bias = make_Rubric_assessment(items, item, sensibility, true_values, estimated_values, assessment_method, len(items)-len(items_copy) )
+        estimated_values, time, one_more_bias = make_Rubric_assessment(items, item, sensibility, true_values, estimated_values, assessment_method, len(items)-len(items_copy), window)
         assessments_time += time
         nb_bias += one_more_bias
     
     estimated_values = Rescale(min_item[0], max_item[0], estimated_values)
     
     acc = None
+    
+    if window is not None :
+        window.destroy()
     
     print("===============================================================")
     print("| Result of Rubric algorithm")

@@ -61,12 +61,14 @@ def SSR (true_values,estimated_values):
         SSR=1
     return SSR
 
-def ready(info="", status=None):
+def ready(window, info="", status=None):
     """
     If the assessment is done by the user, create a window to check if the user is ready
 
     Parameters
     ------
+    window : windowManager
+        windowManager object
     info : string
         A string for display information.
     status : string 
@@ -83,6 +85,12 @@ def ready(info="", status=None):
         True if the user skip the tutorial.
 
     """
+    def exit_program():
+        nonlocal testing
+        nonlocal BadEnding
+        testing = False
+        BadEnding = True
+            
     def close():
         close_button.destroy()
         if status is not None :
@@ -91,58 +99,116 @@ def ready(info="", status=None):
         countdown(3)
 
     def countdown(seconds):
-        nonlocal Bad_Ending
+        nonlocal testing
         if seconds > 0:
             countdown_label.config(text=f"The test begin in {seconds} seconds...")
-            root.after(1000, countdown, seconds - 1)
+            window.root.after(1000, countdown, seconds - 1)
         else:
-            Bad_Ending = False
-            root.destroy()
+            testing = False
     
     def skip_tutorial():
         nonlocal skip
-        nonlocal Bad_Ending
+        nonlocal testing
         skip = True
-        Bad_Ending = False
-        root.destroy()
-
-    Bad_Ending = True
+        testing = False
+    
     skip = False
-    bg_color = "#f0f0f0"
+    testing = True
+    BadEnding = False
     
-    root = tk.Tk()
-    root.title("Ready ?")
-    try:
-        root.wm_attributes("-zoomed", True)
-    except tk.TclError :
-        root.state('zoomed')
-    root.config(bg=bg_color)
-    root.option_add("*Font", ("TkDefaultFont", 14))
-    root.resizable(False, False)
-    
+    window.create_window("Ready ?")
+
     if status is None:
         t = 'Next Test'
     else:
         t = 'Tutorial'
         
-    l = tk.Label(root, padx=10, pady=10, text=info)
-    l.config(bg=bg_color)
+    l = tk.Label(window.root, padx=10, pady=10, text=info)
+    l.config(bg=window.bgcolor)
     l.pack()
 
-    countdown_label = tk.Label(root, padx=10, pady=10, text="", fg="red")
-    countdown_label.config(bg=bg_color)
+    countdown_label = tk.Label(window.root, padx=10, pady=10, text="", fg="red")
+    countdown_label.config(bg=window.bgcolor)
     countdown_label.pack()
 
-    close_button = tk.Button(root, text=t, command=close)
+    close_button = tk.Button(window.root, text=t, command=close)
     close_button.pack(pady=10)
     
     if status is not None :
     
-        skip_button = tk.Button(root, text="Skip Tutorial", command=skip_tutorial)
+        skip_button = tk.Button(window.root, text="Skip Tutorial", command=skip_tutorial)
         skip_button.pack(pady=10)
     
-    root.mainloop()
+    window.root.protocol("WM_DELETE_WINDOW", exit_program)
     
-    if Bad_Ending:
+    while testing :
+        window.root.update()
+    for widget in window.root.winfo_children():
+        widget.destroy()
+    if BadEnding :
+        window.root.destroy()
         raise Exception("You are not ready.. You must click on the 'Ready' button.")
+
     return skip
+
+
+class WindowManager():
+    def __init__(self):
+        self._root = None
+        self._bgcolor = '#f0f0f0'
+    
+    @property
+    def root(self):
+        return self._root
+    
+    @root.setter
+    def root(self, value):
+        self._root = value
+    
+    @property
+    def bgcolor(self):
+        return self._bgcolor
+    
+    @bgcolor.setter
+    def bgcolor(self, value):
+        self._bgcolor = value
+    
+    def change_bg_color(self):
+        color = tk.colorchooser.askcolor()[1]
+        if color:
+            self.bgcolor = color
+            self.root.config(bg=self.bgcolor)
+    
+    def destroy(self):
+        if self.root is not None :
+            self.root.destroy()
+        
+                
+    def create_window(self, title):
+                
+        if self.root is None:
+            self.root = tk.Tk()
+            self.root.title(title)
+            try:
+                self.root.wm_attributes("-zoomed", True)
+            except tk.TclError:
+                self.root.state('zoomed')
+            self.root.config(bg=self.bgcolor)
+            self.root.option_add("*Font", ("TkDefaultFont", 14))
+            self.root.resizable(False, False)
+            
+            menu_bar = tk.Menu(self.root)
+            self.root.config(menu=menu_bar)
+            parameters_menu = tk.Menu(menu_bar, tearoff=0)
+            menu_bar.add_cascade(label="Parameters", menu=parameters_menu)
+            parameters_menu.add_command(label="Change Background Color", command=self.change_bg_color)
+
+        else:
+            for widget in self.root.winfo_children():
+                widget.destroy()
+            self.root.title(title)
+            menu_bar = tk.Menu(self.root)
+            self.root.config(menu=menu_bar)
+            parameters_menu = tk.Menu(menu_bar, tearoff=0)
+            menu_bar.add_cascade(label="Parameters", menu=parameters_menu)
+            parameters_menu.add_command(label="Change Background Color", command=self.change_bg_color)
