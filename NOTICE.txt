@@ -63,7 +63,7 @@ The CTJ package imports a number of libraries that are compatibly licensed. We l
    - License: PSF (Python Software Foundation)
    - For details, see: https://github.com/python/cpython/blob/3.12/LICENSE
 
-9. Name: ImportLib
+9. Name: os
    - Imported in: CTJ/[assessment_method.py]
    - License: PSF (Python Software Foundation)
    - For details, see: https://github.com/python/cpython/blob/3.12/LICENSE
