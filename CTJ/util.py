@@ -180,6 +180,9 @@ class WindowManager():
         if color:
             self.bgcolor = color
             self.root.config(bg=self.bgcolor)
+            for widget in self.root.winfo_children():
+                if isinstance(widget, tk.Frame) or isinstance(widget, tk.Label) or isinstance(widget, tk.Text) :
+                    widget.config(bg=self.bgcolor)
     
     def destroy(self):
         if self.root is not None :

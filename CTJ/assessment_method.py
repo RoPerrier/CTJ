@@ -289,7 +289,7 @@ def ctj_assessment_method(slider_range, trio, nb_assessment, window):
 
     selected_index = None
     
-    slider = tk.Scale(frame, from_=0, to=slider_range, orient=tk.HORIZONTAL, length=400, bg=window.bgcolor)
+    slider = tk.Scale(frame, from_=0, to=slider_range, orient=tk.HORIZONTAL, length=400)
     slider.grid(row=1, column=0, columnspan=len(trio), pady=10)
 
     close_button = tk.Button(window.root, text="Next", command=close)
