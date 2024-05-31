@@ -9,10 +9,10 @@ import numpy as np
 
 try:
     import tkinter as tk
-    from tkinter import colorchooser
 except ImportError:
     raise Exception("tkinter is not installed, for more information refer to : https://github.com/RoPerrier/CTJ/blob/main/fix_import_error_tkinter.md")
 
+from tkinter import colorchooser
 from sklearn.preprocessing import MinMaxScaler
 
 ###############################         FUNCTIONS       ############################################

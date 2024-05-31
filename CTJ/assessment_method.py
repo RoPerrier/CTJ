@@ -10,11 +10,7 @@ try:
 except ImportError:
     raise Exception("tkinter is not installed, for more information refer to : https://github.com/RoPerrier/CTJ/blob/main/fix_import_error_tkinter.md")
 
-try:
-    from PIL import Image, ImageTk
-except ImportError:
-    raise Exception("PIL import error, tkinter is probably not installed, for more information refer to : https://github.com/RoPerrier/CTJ/blob/main/fix_import_error_tkinter.md")
-
+from PIL import Image, ImageTk
     
 import os
 
