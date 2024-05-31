@@ -13,11 +13,11 @@ with open("README.md", "r", encoding="utf-8") as f :
 try:
     import tkinter
 except ImportError:
-    print("tkinter is not installed, for more information refer to : https://stackoverflow.com/a/76105219")
+    print("tkinter is not installed, for more information refer to : https://github.com/RoPerrier/CTJ/blob/main/fix_import_error_tkinter.md")
 
 setup(
       name = 'CTJ',
-      version = '1.0.3',
+      version = '1.0.4',
       packages = find_packages(),
       url = 'https://github.com/RoPerrier/CTJ',
       install_requires =[
