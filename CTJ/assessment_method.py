@@ -269,9 +269,6 @@ def rubric_assessment_method(item, nb_assessment, window):
     l.config(bg=window.bgcolor)
     l.pack ()
     
-    frame = tk.Frame(window.root, bg=window.bgcolor)
-    frame.pack(padx=10, pady=10)
-    
     # Load images dynamically based on list elements
     
     image_path = item + ".png"
@@ -283,12 +280,18 @@ def rubric_assessment_method(item, nb_assessment, window):
     
     image = resize_image(image_path, (window.root.winfo_screenwidth() * 0.9)//3,window.root.winfo_screenheight() * 0.6)
     
-    label = tk.Label(frame, image=image, bg=window.bgcolor)
+    label_frame = tk.Frame(window.root, bg=window.bgcolor)
+    label_frame.pack(padx=10, pady=10)
+    
+    label = tk.Label(label_frame, image=image, bg=window.bgcolor)
     label.grid(row=0, column=0, padx=10, pady=10)
     
     # Entry only for int
+    entry_frame = tk.Frame(window.root, bg=window.bgcolor)
+    entry_frame.pack(padx=10, pady=10)
+    
     vcmd = window.root.register(rubric_assessment.validate_entry)
-    entry = tk.Entry(window.root, validate="key", validatecommand=(vcmd, '%P'))
+    entry = tk.Entry(entry_frame, validate="key", validatecommand=(vcmd, '%P'))
     entry.pack(padx=10, pady=10)
     
     close_button = tk.Button(window.root, text="Next", command = lambda: rubric_assessment.rubric_close(entry))
@@ -428,8 +431,8 @@ def ctj_assessment_method(slider_range, trio, nb_assessment, window):
     l.config(bg=window.bgcolor)
     l.pack ()
 
-    frame = tk.Frame(window.root, bg=window.bgcolor)
-    frame.pack(padx=10, pady=10)
+    label_frame = tk.Frame(window.root, bg=window.bgcolor)
+    label_frame.pack(padx=10, pady=10)
 
     for image_name in trio:
         image_path = image_name + ".png"
@@ -441,13 +444,16 @@ def ctj_assessment_method(slider_range, trio, nb_assessment, window):
 
         ctj_assessment.sort.append(resize_image(image_path, (window.root.winfo_screenwidth() * 0.9)//3,window.root.winfo_screenheight() * 0.6))
     
-    ctj_assessment.sort_label = [tk.Label(frame, image=image) for image in ctj_assessment.sort]
+    ctj_assessment.sort_label = [tk.Label(label_frame, image=image) for image in ctj_assessment.sort]
     
     for i, label in enumerate(ctj_assessment.sort_label):
         label.grid(row=0, column=i, padx=10, pady=10)
         label.bind("<Button-1>", lambda event, idx=i: ctj_assessment.swap_images(event, idx, trio))
     
-    slider = tk.Scale(frame, from_=0, to=slider_range, orient=tk.HORIZONTAL, length=400)
+    slider_frame = tk.Frame(window.root, bg=window.bgcolor)
+    slider_frame.pack(padx=10, pady=10)
+    
+    slider = tk.Scale(slider_frame, from_=0, to=slider_range, orient=tk.HORIZONTAL, length=400)
     slider.grid(row=1, column=0, columnspan=len(trio), pady=10)
 
     close_button = tk.Button(window.root, text="Next", command=lambda: ctj_assessment.ctj_close(trio, slider, slider_range))
