@@ -32,6 +32,12 @@ This package therefore proposes an implementation of the `CTJ`, the `ACJ`, and t
 pip install CTJ
 ```
 
+Or depending of your version of python :
+
+```
+pip3 install CTJ
+```
+
 Then you need to restart the Python kernel to finish the installation.
 
 ## Usage
