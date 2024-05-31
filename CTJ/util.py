@@ -6,9 +6,13 @@ Created on Wed May  1 15:56:51 2024
 """
 
 import numpy as np
-import tkinter as tk
 
-from tkinter import colorchooser
+try:
+    import tkinter as tk
+    from tkinter import colorchooser
+except ImportError:
+    print("tkinter is not installed, for more information refer to : https://github.com/RoPerrier/CTJ/blob/main/fix_import_error_tkinter.md")
+
 from sklearn.preprocessing import MinMaxScaler
 
 ###############################         FUNCTIONS       ############################################

@@ -10,14 +10,9 @@ from setuptools import setup, find_packages
 with open("README.md", "r", encoding="utf-8") as f :
     l_description = f.read()
     
-try:
-    import tkinter
-except ImportError:
-    print("tkinter is not installed, for more information refer to : https://github.com/RoPerrier/CTJ/blob/main/fix_import_error_tkinter.md")
-
 setup(
       name = 'CTJ',
-      version = '1.0.4',
+      version = '1.0.5',
       packages = find_packages(),
       url = 'https://github.com/RoPerrier/CTJ',
       install_requires =[
