@@ -295,7 +295,7 @@ Generate a window to let the user make the `Rubric` assessment.
 
 **Returns:**
 
-- item_value (*int*) – The estimated value made by the user for this item.
+- `item_value` (*int*) – The estimated value made by the user for this item.
 
 #### ACJ Assessment Method
 
@@ -315,7 +315,8 @@ Generate a window to let the user make the `ACJ` assessment.
 
 **Returns:**
 
-- sort (*list of string*) – A list of string containing the assessment results in the format [Max, Min].
+- `sort` (*list of string*) – A list of string containing the assessment results in the format [Max, Min].
+
 #### CTJ Assessment Method
 
 #### `CTJ.ctj_assessment_method(slider_range, trio, nb_assessment)`
