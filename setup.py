@@ -12,7 +12,7 @@ with open("README.md", "r", encoding="utf-8") as f :
     
 setup(
       name = 'CTJ',
-      version = '1.0.8',
+      version = '1.0.9',
       packages = find_packages(),
       url = 'https://github.com/RoPerrier/CTJ',
       install_requires =[
@@ -23,6 +23,7 @@ setup(
           'scipy>=1.11.4',
           'setuptools>=68.2.2',
             ],
+      python_requires='>=3.11.7',
       license = 'Apache 2.0',
       author = 'Romain Perrier',
       author_email ='romain.perrier2@etu.isima.fr',
