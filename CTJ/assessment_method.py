@@ -12,6 +12,102 @@ from PIL import Image, ImageTk
 
 ###############################         FUNCTIONS       ############################################
 
+class AssessmentManager():
+    def __init__(self):
+        self._testing = True
+        self._bad_ending = False
+        self._sort = []
+        self._sort_label = []
+        self._selected_index = None
+        self._dist = -1
+    
+    @property
+    def testing(self):
+        return self._testing
+    
+    @testing.setter
+    def testing(self, value):
+        self._testing = value
+    
+    @property
+    def bad_ending(self):
+        return self._bad_ending
+    
+    @bad_ending.setter
+    def bad_ending(self, value):
+        self._bad_ending = value
+    
+    @property
+    def sort(self):
+        return self._sort
+
+    @sort.setter
+    def sort(self, value):
+        self._sort = value
+        
+    @property
+    def sort_label(self):
+        return self._sort_label
+
+    @sort_label.setter
+    def sort_label(self, value):
+        self._sort_label = value
+        
+    @property
+    def selected_index(self):
+        return self._selected_index
+
+    @selected_index.setter
+    def selected_index(self, value):
+        self._selected_index = value
+    
+    @property
+    def dist(self):
+        return self._dist
+
+    @dist.setter
+    def dist(self, value):
+        self._dist = value
+    
+    def exit_program(self):
+        self.testing = False
+        self.bad_ending = True
+        
+    def rubric_close(self, entry):
+        self.dist = entry.get()
+        self.testing = False
+        
+    def validate_entry(self, input):
+        if input.isdigit() or input == "":
+            return True
+        else:
+            return False
+
+    def acj_close(self, element, pair):
+        self.sort = sorted(pair, key=lambda x: x != element)
+        self.testing = False
+        
+    def swap_images(self, event, index, trio):
+        if self.selected_index is None:
+            self.selected_index = index
+        else:
+            self.sort[index],  self.sort[self.selected_index] =  self.sort[self.selected_index],  self.sort[index]
+            trio[index], trio[self.selected_index] = trio[self.selected_index], trio[index]
+            
+            self.sort_label[index].config(image=self.sort[index])
+            self.sort_label[self.selected_index].config(image=self.sort[self.selected_index])
+            
+            self.selected_index = None
+    
+    def ctj_close(self, trio, slider, slider_range):
+        
+        self.sort = [trio[i] for i in range(len(trio))]
+        self.dist = slider.get()
+        if self.dist >= slider_range:
+            self.dist = slider_range - 1
+        if self.dist <= -1:
+            self.dist = 0 
+        self.testing = False
 
 def rubric_assessment_method(item, nb_assessment, window):
     """
@@ -35,30 +131,14 @@ def rubric_assessment_method(item, nb_assessment, window):
 
     Returns
     -------
-    int
+    item_value : int
         The estimated value made by the user for this item.
 
     """
-    def exit_program():
-        nonlocal testing, BadEnding
-        testing = False
-        BadEnding = True
-        
-    def close():
-        nonlocal item_value
-        nonlocal testing
-        item_value = entry.get()
-        testing = False
     
-    def validate_entry(input):
-        if input.isdigit() or input == "":
-            return True
-        else:
-            return False
+    rubric_assessment  = AssessmentManager()
         
     item_value = None
-    testing = True
-    BadEnding = False
 
     # Check if root and window.bgcolor are already defined
     window.create_window("Rubric")
@@ -76,7 +156,7 @@ def rubric_assessment_method(item, nb_assessment, window):
     image_path = item + ".png"
     
     if not os.path.exists(image_path):
-        testing = False
+        rubric_assessment.testing = False
         window.root.destroy()
         raise Exception(image_path + " not in directory.")
     
@@ -86,28 +166,30 @@ def rubric_assessment_method(item, nb_assessment, window):
     label.grid(row=0, column=0, padx=10, pady=10)
     
     # Entry only for int
-    vcmd = window.root.register(validate_entry)
+    vcmd = window.root.register(rubric_assessment.validate_entry)
     entry = tk.Entry(window.root, validate="key", validatecommand=(vcmd, '%P'))
     entry.pack(padx=10, pady=10)
     
-    close_button = tk.Button(window.root, text="Next", command=close)
+    close_button = tk.Button(window.root, text="Next", command = lambda: rubric_assessment.rubric_close(entry))
     close_button.pack(pady=10)
     
     assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} assessment")
     assessment_label.config(bg=window.bgcolor)
     assessment_label.pack(side=tk.BOTTOM, pady=10)
     
-    window.root.protocol("WM_DELETE_WINDOW", exit_program)
-
-    while testing:
+    window.root.protocol("WM_DELETE_WINDOW", rubric_assessment.exit_program)
+    
+    while rubric_assessment.testing:
         window.root.update()
     for widget in window.root.winfo_children():
         widget.destroy()
-    if BadEnding:
+    if rubric_assessment.bad_ending or rubric_assessment.dist == "":
         window.root.destroy()
         raise Exception("Assessment not done !")
-        
-    return int(item_value)
+    
+    item_value = int(rubric_assessment.dist)
+    
+    return item_value
 
 def acj_assessment_method(id_judge, pair, nb_assessment, window):
     """
@@ -133,22 +215,11 @@ def acj_assessment_method(id_judge, pair, nb_assessment, window):
 
     Returns
     -------
-    list
+    sort : list
         A list of string containing the assessment results in the format [Max, Min].
     """
-    def exit_program():
-        nonlocal testing, BadEnding
-        testing = False
-        BadEnding = True
-        
-    def close(element):
-        nonlocal sort, testing
-        sort = sorted(pair, key=lambda x: x != element)
-        testing = False
-        
-    sort = []
-    testing = True
-    BadEnding = False
+    
+    acj_assessment = AssessmentManager()
 
     window.create_window("ACJ")
         
@@ -168,32 +239,34 @@ def acj_assessment_method(id_judge, pair, nb_assessment, window):
         
         if not os.path.exists(image_path):
             window.root.destroy()
-            testing = False
+            acj_assessment.testing = False
             raise Exception(image_path + " not in directory.")
     
         images.append(resize_image(image_path, (window.root.winfo_screenwidth() * 0.9)//3, window.root.winfo_screenheight() * 0.6))
                       
     label1 = tk.Label(frame, image=images[0], bg=window.bgcolor)
     label1.grid(row=0, column=0, padx=10, pady=10)
-    label1.bind("<Button-1>", lambda event: close(pair[0]))
+    label1.bind("<Button-1>", lambda event: acj_assessment.acj_close(pair[0], pair))
     
     label2 = tk.Label(frame, image=images[1], bg=window.bgcolor)
     label2.grid(row=0, column=1, padx=10, pady=10)
-    label2.bind("<Button-1>", lambda event: close(pair[1]))
+    label2.bind("<Button-1>", lambda event: acj_assessment.acj_close(pair[1], pair))
     
     assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} assessment")
     assessment_label.config(bg=window.bgcolor)
     assessment_label.pack(side=tk.BOTTOM, pady=10)
 
-    window.root.protocol("WM_DELETE_WINDOW", exit_program)
+    window.root.protocol("WM_DELETE_WINDOW", acj_assessment.exit_program)
     
-    while testing:
+    while acj_assessment.testing:
         window.root.update()
     for widget in window.root.winfo_children():
         widget.destroy()
-    if BadEnding:
+    if acj_assessment.bad_ending:
         window.root.destroy()
         raise Exception("Assessment not done !")
+    
+    sort = acj_assessment.sort
     
     return sort
     
@@ -221,44 +294,12 @@ def ctj_assessment_method(slider_range, trio, nb_assessment, window):
 
     Returns
     -------
-    A tuple containing the assessment results (Max,(dist,Average),Min).In the format (int, (int, int), int).
+    tup : tuple
+        A tuple containing the assessment results ([Max, Average, Min], dist).In the format ([int, int, int], int).
     """
-    def exit_program():
-        nonlocal testing
-        nonlocal BadEnding
-        testing = False
-        BadEnding = True
-        
-    def swap_images(event, index):
-        nonlocal selected_index, images, image_labels
-        if selected_index is None:
-            selected_index = index
-        else:
-            images[index], images[selected_index] = images[selected_index], images[index]
-            trio[index], trio[selected_index] = trio[selected_index], trio[index]
-            
-            image_labels[index].config(image=images[index])
-            image_labels[selected_index].config(image=images[selected_index])
-            
-            selected_index = None
-
-    def close():
-        nonlocal permutation
-        nonlocal dist
-        nonlocal testing
-        permutation = [trio[i] for i in range(len(trio))]
-        dist = slider.get()
-        if dist >= slider_range:
-            dist = slider_range - 1
-        if dist <= -1:
-            dist = 0 
-        testing = False
     
-    permutation = []
-    dist = -1
-    testing = True
-    BadEnding = False
-
+    ctj_assessment = AssessmentManager()
+    
     window.create_window("CTJ")
 
     #create text block
@@ -269,47 +310,46 @@ def ctj_assessment_method(slider_range, trio, nb_assessment, window):
     frame = tk.Frame(window.root, bg=window.bgcolor)
     frame.pack(padx=10, pady=10)
 
-    images = []
-    
     for image_name in trio:
         image_path = image_name + ".png"
         
         if not os.path.exists(image_path):
-            testing = False
+            ctj_assessment.testing = False
             window.root.destroy()
             raise Exception(image_path + " not in directory.")
 
-        images.append(resize_image(image_path, (window.root.winfo_screenwidth() * 0.9)//3,window.root.winfo_screenheight() * 0.6))
+        ctj_assessment.sort.append(resize_image(image_path, (window.root.winfo_screenwidth() * 0.9)//3,window.root.winfo_screenheight() * 0.6))
     
-    image_labels = [tk.Label(frame, image=image) for image in images]
-
-    for i, label in enumerate(image_labels):
+    ctj_assessment.sort_label = [tk.Label(frame, image=image) for image in ctj_assessment.sort]
+    
+    for i, label in enumerate(ctj_assessment.sort_label):
         label.grid(row=0, column=i, padx=10, pady=10)
-        label.bind("<Button-1>", lambda event, idx=i: swap_images(event, idx))
-
-    selected_index = None
+        label.bind("<Button-1>", lambda event, idx=i: ctj_assessment.swap_images(event, idx, trio))
     
     slider = tk.Scale(frame, from_=0, to=slider_range, orient=tk.HORIZONTAL, length=400)
     slider.grid(row=1, column=0, columnspan=len(trio), pady=10)
 
-    close_button = tk.Button(window.root, text="Next", command=close)
+    close_button = tk.Button(window.root, text="Next", command=lambda: ctj_assessment.ctj_close(trio, slider, slider_range))
     close_button.pack(pady=10)
     
     assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} assessment")
     assessment_label.config(bg=window.bgcolor)
     assessment_label.pack(side=tk.BOTTOM, pady=10)
 
-    window.root.protocol("WM_DELETE_WINDOW", exit_program)
+    window.root.protocol("WM_DELETE_WINDOW", ctj_assessment.exit_program)
     
-    while testing :
+    while ctj_assessment.testing :
         window.root.update()
+        
     for widget in window.root.winfo_children():
         widget.destroy()
-    if BadEnding :
+    if ctj_assessment.bad_ending :
         window.root.destroy()
         raise Exception("Assessment not done !")
-
-    return permutation,dist
+    
+    tup = (ctj_assessment.sort, ctj_assessment.dist)
+    
+    return tup
 
 def resize_image(image_path, width, height):
     """
