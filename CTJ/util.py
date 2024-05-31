@@ -153,8 +153,35 @@ def ready(window, info="", status=None):
 
     return skip
 
+class WindowManager:
+    """
+    A class to manage the creation and configuration of a Tkinter window with customizable properties.
 
-class WindowManager():
+    Attributes:
+    -----------
+    _root : tk.Tk or None
+        The root window of the Tkinter application. Initialized as None.
+    _bgcolor : str
+        The background color of the window, specified as a hexadecimal color code. Default is '#f0f0f0'.
+
+    Methods:
+    --------
+    root() -> tk.Tk or None:
+        Property to get the root window.
+    root(value: tk.Tk or None):
+        Property to set the root window.
+    bgcolor() -> str:
+        Property to get the background color of the window.
+    bgcolor(value: str):
+        Property to set the background color of the window.
+    change_bg_color():
+        Opens a color chooser dialog to change the background color of the window and its child widgets.
+    destroy():
+        Destroys the root window if it exists.
+    create_window(title: str):
+        Creates and configures a new root window with the specified title, or reconfigures the existing root window.
+    """
+
     def __init__(self):
         self._root = None
         self._bgcolor = '#f0f0f0'
@@ -176,21 +203,35 @@ class WindowManager():
         self._bgcolor = value
     
     def change_bg_color(self):
+        """
+        Opens a color chooser dialog to change the background color of the window and its child widgets.
+        Updates the background color of all frames, labels, and text widgets within the root window.
+        """
         color = colorchooser.askcolor()[1]
         if color:
             self.bgcolor = color
             self.root.config(bg=self.bgcolor)
             for widget in self.root.winfo_children():
-                if isinstance(widget, tk.Frame) or isinstance(widget, tk.Label) or isinstance(widget, tk.Text) :
+                if isinstance(widget, tk.Frame) or isinstance(widget, tk.Label) or isinstance(widget, tk.Text):
                     widget.config(bg=self.bgcolor)
     
     def destroy(self):
-        if self.root is not None :
+        """
+        Destroys the root window if it exists.
+        """
+        if self.root is not None:
             self.root.destroy()
         
-                
     def create_window(self, title):
-                
+        """
+        Creates and configures a new root window with the specified title.
+        If a root window already exists, it reconfigures the existing window with the new title.
+
+        Parameters:
+        -----------
+        title : str
+            The title for the Tkinter window.
+        """
         if self.root is None:
             self.root = tk.Tk()
             self.root.title(title)
@@ -207,7 +248,6 @@ class WindowManager():
             parameters_menu = tk.Menu(menu_bar, tearoff=0)
             menu_bar.add_cascade(label="Parameters", menu=parameters_menu)
             parameters_menu.add_command(label="Change Background Color", command=self.change_bg_color)
-
         else:
             for widget in self.root.winfo_children():
                 widget.destroy()

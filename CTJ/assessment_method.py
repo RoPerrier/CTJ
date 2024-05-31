@@ -12,7 +12,66 @@ from PIL import Image, ImageTk
 
 ###############################         FUNCTIONS       ############################################
 
-class AssessmentManager():
+class AssessmentManager:
+    """
+    A class to manage various assessment-related operations such as sorting elements, 
+    handling user inputs, and managing the state of the assessment process.
+
+    Attributes:
+    -----------
+    _testing : bool
+        Indicates if the assessment is currently in testing mode. Default is True.
+    _bad_ending : bool
+        Indicates if the assessment ended in an error state. Default is False.
+    _sort : list
+        A list used for storing sorted elements.
+    _sort_label : list
+        A list of labels corresponding to the sorted elements.
+    _selected_index : int or None
+        The currently selected index in the sorting process. Default is None.
+    _dist : int
+        A distance metric used in the CTJ assessment process. Or the value entered by the user in Rubric assessment. Default is -1.
+
+    Methods:
+    --------
+    testing() -> bool:
+        Property to get the testing status.
+    testing(value: bool):
+        Property to set the testing status.
+    bad_ending() -> bool:
+        Property to get the bad ending status.
+    bad_ending(value: bool):
+        Property to set the bad ending status.
+    sort() -> list:
+        Property to get the sorted elements list.
+    sort(value: list):
+        Property to set the sorted elements list.
+    sort_label() -> list:
+        Property to get the sorted labels list.
+    sort_label(value: list):
+        Property to set the sorted labels list.
+    selected_index() -> int or None:
+        Property to get the selected index.
+    selected_index(value: int or None):
+        Property to set the selected index.
+    dist() -> int:
+        Property to get the distance metric.
+    dist(value: int):
+        Property to set the distance metric.
+    exit_program():
+        Sets the testing status to False and bad ending status to True.
+    rubric_close(entry):
+        Sets the distance metric from the given entry and sets the testing status to False.
+    validate_entry(input: str) -> bool:
+        Validates the user input, allowing only digits or an empty string.
+    acj_close(element, pair):
+        Sorts the pair of elements based on a condition and sets the testing status to False.
+    swap_images(event, index: int, trio: list):
+        Swaps images in the trio based on the selected index.
+    ctj_close(trio: list, slider, slider_range: int):
+        Configures the sorted elements and distance metric based on the trio and slider values, and sets the testing status to False.
+    """
+
     def __init__(self):
         self._testing = True
         self._bad_ending = False
@@ -70,24 +129,70 @@ class AssessmentManager():
         self._dist = value
     
     def exit_program(self):
+        """
+        Sets the testing status to False and bad ending status to True.
+        """
         self.testing = False
         self.bad_ending = True
         
     def rubric_close(self, entry):
+        """
+        Sets the distance metric from the given entry and sets the testing status to False.
+        
+        Parameters:
+        -----------
+        entry : Entry
+            The entry widget containing the distance metric.
+        """
         self.dist = entry.get()
         self.testing = False
         
     def validate_entry(self, input):
+        """
+        Validates the user input, allowing only digits or an empty string.
+        
+        Parameters:
+        -----------
+        input : str
+            The user input to be validated.
+        
+        Returns:
+        --------
+        bool
+            True if the input is valid, False otherwise.
+        """
         if input.isdigit() or input == "":
             return True
         else:
             return False
 
     def acj_close(self, element, pair):
+        """
+        Sorts the pair of elements based on a condition and sets the testing status to False.
+        
+        Parameters:
+        -----------
+        element : any
+            The element to be used as a key for sorting.
+        pair : list
+            The list of elements to be sorted.
+        """
         self.sort = sorted(pair, key=lambda x: x != element)
         self.testing = False
         
     def swap_images(self, event, index, trio):
+        """
+        Swaps images in the trio based on the selected index.
+        
+        Parameters:
+        -----------
+        event : Event
+            The event that triggered the swap.
+        index : int
+            The index of the image to be swapped.
+        trio : list
+            The list containing the images.
+        """
         if self.selected_index is None:
             self.selected_index = index
         else:
@@ -100,7 +205,18 @@ class AssessmentManager():
             self.selected_index = None
     
     def ctj_close(self, trio, slider, slider_range):
+        """
+        Configures the sorted elements and distance metric based on the trio and slider values, and sets the testing status to False.
         
+        Parameters:
+        -----------
+        trio : list
+            The list of elements to be sorted.
+        slider : Scale
+            The slider widget to get the distance metric.
+        slider_range : int
+            The range of the slider.
+        """
         self.sort = [trio[i] for i in range(len(trio))]
         self.dist = slider.get()
         if self.dist >= slider_range:
@@ -108,6 +224,7 @@ class AssessmentManager():
         if self.dist <= -1:
             self.dist = 0 
         self.testing = False
+
 
 def rubric_assessment_method(item, nb_assessment, window):
     """
