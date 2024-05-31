@@ -9,10 +9,15 @@ from setuptools import setup, find_packages
 
 with open("README.md", "r", encoding="utf-8") as f :
     l_description = f.read()
+    
+try:
+    import tkinter
+except ImportError:
+    print("tkinter is not installed, for more information refer to : https://stackoverflow.com/a/76105219")
 
 setup(
       name = 'CTJ',
-      version = '1.0.1',
+      version = '1.0.3',
       packages = find_packages(),
       url = 'https://github.com/RoPerrier/CTJ',
       install_requires =[
