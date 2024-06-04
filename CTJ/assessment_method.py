@@ -299,7 +299,7 @@ def rubric_assessment_method(item, nb_assessment, window):
     close_button = tk.Button(window.root, text="Next", command = lambda: rubric_assessment.rubric_close(entry))
     close_button.pack(pady=10)
     
-    assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} assessment")
+    assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} judgement")
     assessment_label.config(bg=window.bgcolor)
     assessment_label.pack(side=tk.BOTTOM, pady=10)
     
@@ -378,7 +378,7 @@ def acj_assessment_method(id_judge, pair, nb_assessment, window):
     label2.grid(row=0, column=1, padx=10, pady=10)
     label2.bind("<Button-1>", lambda event: acj_assessment.acj_close(pair[1], pair))
     
-    assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} assessment")
+    assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} judgement")
     assessment_label.config(bg=window.bgcolor)
     assessment_label.pack(side=tk.BOTTOM, pady=10)
 
@@ -463,7 +463,7 @@ def ctj_assessment_method(slider_range, trio, nb_assessment, window):
     close_button = tk.Button(window.root, text="Next", command=lambda: ctj_assessment.ctj_close(trio, slider, slider_range))
     close_button.pack(pady=10)
     
-    assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} assessment")
+    assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} judgement")
     assessment_label.config(bg=window.bgcolor)
     assessment_label.pack(side=tk.BOTTOM, pady=10)
 

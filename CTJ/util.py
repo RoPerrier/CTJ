@@ -101,13 +101,13 @@ def ready(window, info="", status=None):
         close_button.destroy()
         if status is not None :
             skip_button.destroy()
-        countdown_label.config(text="The test begin in 3 seconds...")
+        countdown_label.config(text="The sample appear in 3 seconds...")
         countdown(3)
 
     def countdown(seconds):
         nonlocal testing
         if seconds > 0:
-            countdown_label.config(text=f"The test begin in {seconds} seconds...")
+            countdown_label.config(text=f"The sample appear in {seconds} seconds...")
             window.root.after(1000, countdown, seconds - 1)
         else:
             testing = False
@@ -125,7 +125,7 @@ def ready(window, info="", status=None):
     window.create_window("Ready ?")
 
     if status is None:
-        t = 'Next Test'
+        t = 'Next Sample'
     else:
         t = 'Tutorial'
         
@@ -218,13 +218,6 @@ class WindowManager:
             for widget in self.root.winfo_children():
                 if isinstance(widget, tk.Frame) or isinstance(widget, tk.Label) or isinstance(widget, tk.Text):
                     widget.config(bg=self.bgcolor)
-    
-    def destroy(self):
-        """
-        Destroys the root window if it exists.
-        """
-        if self.root is not None:
-            self.root.destroy()
         
     def create_window(self, title):
         """
