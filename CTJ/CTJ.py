@@ -471,7 +471,7 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
         iteration += 1
     
     if window is not None :
-        window.destroy()
+        window.root.destroy()
         
     print("===============================================================")
     print("| Result of CTJ algorithm")

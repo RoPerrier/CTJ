@@ -409,7 +409,7 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_va
         iteration += 1
     
     if window is not None :
-        window.destroy()
+        window.root.destroy()
         
     print("===============================================================")
     print("| Result of ACJ algorithm")

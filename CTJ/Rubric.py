@@ -173,7 +173,7 @@ def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, a
     acc = None
     
     if window is not None :
-        window.destroy()
+        window.root.destroy()
     
     print("===============================================================")
     print("| Result of Rubric algorithm")
