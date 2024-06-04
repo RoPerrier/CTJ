@@ -87,13 +87,13 @@ By using the incorporated function:
 
 ```py
 
-from CTJ import _rubric_assessment_method, _acj_assessment_method, _ctj_assessment_method
+from CTJ import rubric_assessment_method, acj_assessment_method, ctj_assessment_method
 
-Rubric(worst_element, best_element, shade, assessment_method = _rubric_assessment_method)
+Rubric(worst_element, best_element, shade, assessment_method = rubric_assessment_method)
 
-ACJ(worst_element, best_element, shade, assessment_method = _acj_assessment_method, max_accuracy = 0.99)
+ACJ(worst_element, best_element, shade, assessment_method = acj_assessment_method, max_accuracy = 0.99)
 
-CTJ(worst_element, best_element, shade, assessment_method = _ctj_assessment_method, max_accuracy = 0.99)
+CTJ(worst_element, best_element, shade, assessment_method = ctj_assessment_method, max_accuracy = 0.99)
 
 ```
 
@@ -121,15 +121,15 @@ By using the incorporated function:
 
 ```py
 
-from CTJ import _rubric_assessment_method, _acj_assessment_method, _ctj_assessment_method
+from CTJ import rubric_assessment_method, acj_assessment_method, ctj_assessment_method
 
 real_values = [160, 106, 209, 80, 135]
 
-Rubric(worst_element, best_element, shade, true_values = real_values, assessment_method = _rubric_assessment_method)
+Rubric(worst_element, best_element, shade, true_values = real_values, assessment_method = rubric_assessment_method)
 
-ACJ(worst_element, best_element, shade, true_values = real_values, assessment_method = _acj_assessment_method)
+ACJ(worst_element, best_element, shade, true_values = real_values, assessment_method = acj_assessment_method)
 
-CTJ(worst_element, best_element, shade, true_values = real_values , assessment_method = _ctj_assessment_method)
+CTJ(worst_element, best_element, shade, true_values = real_values , assessment_method = ctj_assessment_method)
 
 ```
 
