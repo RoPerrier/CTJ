@@ -11,10 +11,10 @@ If you encounter an import error with Tkinter on Windows, you can use the repair
 
 ## Linux
 
-For Linux systems, you can install the required packages using the package manager. Run the following command in your terminal:
+For Linux systems, you can install the required packages using the package manager. Run the following command in your terminal, replaccing X;X by  the version of python:
 
 ```
-sudo apt-get install python3-tk
+sudo apt-get install pythonX.X-tk
 ```
 
 ## macOS
