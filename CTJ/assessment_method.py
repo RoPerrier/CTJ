@@ -294,6 +294,8 @@ def rubric_assessment_method(item, nb_assessment, window):
     entry = tk.Entry(entry_frame, validate="key", validatecommand=(vcmd, '%P'))
     entry.pack(padx=10, pady=10)
     
+    window.root.update_idletasks() #For macOs
+    
     close_button = tk.Button(window.root, text="Next", command = lambda: rubric_assessment.rubric_close(entry))
     close_button.pack(pady=10)
     
@@ -455,6 +457,8 @@ def ctj_assessment_method(slider_range, trio, nb_assessment, window):
     
     slider = tk.Scale(slider_frame, from_=0, to=slider_range, orient=tk.HORIZONTAL, length=400)
     slider.grid(row=1, column=0, columnspan=len(trio), pady=10)
+    
+    window.root.update_idletasks() #For macOs
 
     close_button = tk.Button(window.root, text="Next", command=lambda: ctj_assessment.ctj_close(trio, slider, slider_range))
     close_button.pack(pady=10)

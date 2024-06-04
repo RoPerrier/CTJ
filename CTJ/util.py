@@ -252,6 +252,9 @@ class WindowManager:
             parameters_menu = tk.Menu(menu_bar, tearoff=0)
             menu_bar.add_cascade(label="Parameters", menu=parameters_menu)
             parameters_menu.add_command(label="Change Background Color", command=self.change_bg_color)
+        
+            self.root.update_idletasks()
+            
         else:
             for widget in self.root.winfo_children():
                 widget.destroy()
@@ -261,3 +264,7 @@ class WindowManager:
             parameters_menu = tk.Menu(menu_bar, tearoff=0)
             menu_bar.add_cascade(label="Parameters", menu=parameters_menu)
             parameters_menu.add_command(label="Change Background Color", command=self.change_bg_color)
+            
+            self.root.update_idletasks()
+            
+            
