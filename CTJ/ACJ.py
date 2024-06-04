@@ -29,8 +29,8 @@ def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assess
         A list of strings representing the pair of items being assessed.
     id_judge : int
         The id of the judge making the assesment.
-    sensibility : tuple
-         A  tuple cointaining the sensibility treshold, and the probability of making a mystake. In the format (int, double).
+    sensibility: int
+        The sensitivity threshold. If the margin between two items is equal to this value, there is a 90% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.
     true_values : list of int
         A list of int containing the true values corresponding to each item in the `items` list.
     assessment_method : fun
@@ -80,7 +80,10 @@ def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assess
         
         r = rd.random()
         
-        if (np.abs(true_values[items.index(pair[0])]-true_values[items.index(pair[1])]) <= sensibility[0]) and (r < sensibility[1]) :
+        val = np.abs(true_values[items.index(pair[0])]-true_values[items.index(pair[1])])
+        k = -np.log(1/9)/(sensibility + np.finfo(float).eps)
+        if r >= 1/(1+np.exp(- k * val)) :
+        #if (np.abs(true_values[items.index(pair[0])]-true_values[items.index(pair[1])]) <= sensibility[0]) and (r < sensibility[1]) :
             Booleen = False
             one_more_bias = 1
         pair = sorted(pair, key=lambda x: true_values[items.index(x)], reverse = Booleen)
@@ -217,8 +220,8 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
         A list of int containing the true values corresponding to each item in the `items` list.
     nb_judge : int, optional
         The number of judge that make the evaluation.
-    sensibility :list of tuple
-         A list of tuple cointaining the sensibility treshold for each simulated judge, and the probability of making a mystake. In the format (int, double).
+    sensibility: int
+        The sensitivity threshold. If the margin between two items is equal to this value, there is a 90% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.
     assessment_method : fun
         The assessment method. If none, the assessment is automatically performed using the true value.
 
@@ -285,7 +288,7 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
         
     return assessments, assessments_time, nb_bias, window
 
-def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_values = None, max_iteration = 30, max_accuracy = 0.9, assessment_method = None):
+def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values = None, max_iteration = 30, max_accuracy = 0.9, assessment_method = None):
     """
     Adaptive Comparative Judgment (ACJ) is an evaluation method based on the comparison of pairs of items. Rather than scoring each item on a fixed scale, evaluators directly compare two items at a time and judge which is better according to certain criteria.
 
@@ -299,8 +302,8 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_va
         A list of strings representing the items to be assessed.
     nb_judge : int, optional
         The number of judge that make the evaluation. The default is 1.
-    sensibility : list of tuple
-         A list of tuple cointaining the sensibility treshold for each simulated judge, and the probability of making a mystake. In the format (int, double). The default is [(0,0)]
+    sensibility : list of int    
+        The sensitivity threshold. If the margin between two items is equal to this value, there is a 90% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items. The default is [0]
     true_values : list of int, optional
         A list of int containing the true values corresponding to each item in the `items` list. The default is None.
     max_iteration : int, optional
@@ -343,8 +346,8 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_va
          if true_values is not None :
              true_values.append(max_item[0])
              
-    if sensibility == [(0,0)] :
-        sensibility = [(0,0) for i in range(nb_judge)]
+    if sensibility == [0] :
+        sensibility = [0 for i in range(nb_judge)]
         
     if len(sensibility) != nb_judge :
         raise Exception("All the judge need a sensibility tuple ! The len of sensitbility is not equal to the number of judge.")
@@ -419,7 +422,7 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [(0,0)], true_va
     print("| Estimated values : ", estimated_values)
     if true_values is not None :
         print("| Accuracy : ", cond)
-    if sensibility != [(0,0) for i in range(nb_judge)] :
+    if sensibility != [0 for i in range(nb_judge)] :
         print("| Number of bias : ", nb_bias)
     print("| Iteration : ", len(assessments))
     if assessment_method is not None :

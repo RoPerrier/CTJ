@@ -160,13 +160,13 @@ Rubric(worst_element, best_element, shade, true_values = real_values, sensibilit
 
 ```
 
-The `ACJ`'s sensibility is a list of tuples containing two elements.
-Each tuple corresponds to the sensibility of a judge, the first tuple corresponds to the sensibility of the first judge, and etc..
-The first value of each tuple corresponds to the gap that could lead to a misjudgement, the second value is the probability of making a mistake.
+The `ACJ`'s sensibility is a liqt of int.
+Each int corresponds to the sensibility of a judge, the first int corresponds to the sensibility of the first judge, and etc..
+The int represent the sensitivity threshold. If the margin between two items is equal to this value, there is a 99% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.
 
 ```py
 
-ACJ(worst_element, best_element, shade, true_values = real_values, nb_judge = 2, sensibility = [(gap_1, proba_1), (gap_2, proba_2)])
+ACJ(worst_element, best_element, shade, true_values = real_values, nb_judge = 2, sensibility = [gap_1, gap_2])
 
 ```
 
@@ -228,7 +228,7 @@ You can look at these jupyter notebook Tutorial :
 
 #### ACJ Algorithm
 
-#### `CTJ.ACJ(min_item, max_item, items, nb_judge=1, sensibility=[(0,0)], true_values=None, max_iteration=30, max_accuracy=0.9, assessment_method=None)`
+#### `CTJ.ACJ(min_item, max_item, items, nb_judge=1, sensibility=[0], true_values=None, max_iteration=30, max_accuracy=0.9, assessment_method=None)`
 
 Adaptive Comparative Judgment (`ACJ`) is an evaluation method based on the comparison of pairs of items. Rather than scoring each item on a fixed scale, evaluators directly compare two items at a time and judge which is better according to certain criteria.
 
@@ -238,7 +238,8 @@ Adaptive Comparative Judgment (`ACJ`) is an evaluation method based on the compa
 - `max_item` (*tuple*) – The max_item we want to use. In the format (*int*, *string*).
 - `items` (*list of string*) – A list of strings representing the items to be assessed.
 - `nb_judge` (*int, optional*) – The number of judges that make the evaluation. The default is 1.
-- `sensibility` (*list of tuple*) – A list of tuples containing the sensibility threshold for each simulated judge, and the probability of making a mistake. In the format (*int*, *double*). The default is [(0,0)].
+- `sensibility` (*list of int*) – The sensitivity threshold. If the margin between two items is equal to this value, there is a 99% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/99) / sensibility * x)) where x is the margin between two items. The default is [0]
+
 - `true_values` (*list of int, optional*) – A list of int containing the true values corresponding to each item in the `items` list. The default is None.
 - `max_iteration` (*int, optional*) – Number of maximum iterations of the algorithm. The default is 30.
 - `max_accuracy` (*float, optional*) – Accuracy of the model. The default is 0.9.
