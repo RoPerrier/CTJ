@@ -238,7 +238,7 @@ Adaptive Comparative Judgment (`ACJ`) is an evaluation method based on the compa
 - `max_item` (*tuple*) – The max_item we want to use. In the format (*int*, *string*).
 - `items` (*list of string*) – A list of strings representing the items to be assessed.
 - `nb_judge` (*int, optional*) – The number of judges that make the evaluation. The default is 1.
-- `sensibility` (*list of int*) – The sensitivity threshold. If the margin between two items is equal to this value, there is a 99% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/99) / sensibility * x)) where x is the margin between two items. The default is [0]
+- `sensibility` (*list of int*) – The sensitivity threshold. If the margin between two items is equal to this value, there is a 10% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items. The default is [0]
 
 - `true_values` (*list of int, optional*) – A list of int containing the true values corresponding to each item in the `items` list. The default is None.
 - `max_iteration` (*int, optional*) – Number of maximum iterations of the algorithm. The default is 30.

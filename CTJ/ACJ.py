@@ -30,7 +30,7 @@ def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assess
     id_judge : int
         The id of the judge making the assesment.
     sensibility: int
-        The sensitivity threshold. If the margin between two items is equal to this value, there is a 90% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.
+        The sensitivity threshold. If the margin between two items is equal to this value, there is a 10% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.
     true_values : list of int
         A list of int containing the true values corresponding to each item in the `items` list.
     assessment_method : fun
@@ -219,7 +219,7 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
     nb_judge : int, optional
         The number of judge that make the evaluation.
     sensibility: int
-        The sensitivity threshold. If the margin between two items is equal to this value, there is a 90% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.
+        The sensitivity threshold. If the margin between two items is equal to this value, there is a 10% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.
     assessment_method : fun
         The assessment method. If none, the assessment is automatically performed using the true value.
 
@@ -301,7 +301,7 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values
     nb_judge : int, optional
         The number of judge that make the evaluation. The default is 1.
     sensibility : list of int    
-        The sensitivity threshold. If the margin between two items is equal to this value, there is a 90% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items. The default is [0]
+        The sensitivity threshold. If the margin between two items is equal to this value, there is a 10% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items. The default is [0]
     true_values : list of int, optional
         A list of int containing the true values corresponding to each item in the `items` list. The default is None.
     max_iteration : int, optional
