@@ -149,7 +149,7 @@ CTJ(worst_element, best_element, shade, true_values = real_values)
 
 ```
 
-Furthermore, in this case, you could use the sensibility parameter to introduce some bias.
+Furthermore, in this case, you could use the sensibility parameter to introduce some errors.
 
 The `Rubric`'s sensibility is a tuple containing two elements.
 The first value corresponds to the mistake that the user could make by judging an item, the second value is the probability of making a mistake.
@@ -160,9 +160,9 @@ Rubric(worst_element, best_element, shade, true_values = real_values, sensibilit
 
 ```
 
-The `ACJ`'s sensibility is a liqt of int.
+The `ACJ`'s sensibility is a list of int.
 Each int corresponds to the sensibility of a judge, the first int corresponds to the sensibility of the first judge, and etc..
-The int represent the sensitivity threshold. If the margin between two items is equal to this value, there is a 99% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.
+The int represent the sensitivity threshold. If the margin between two items is equal to this value, there is a probability of 0.9 of inverting them. The probability is calculated with this sigmoid function:  $\frac{1}{1 + \exp\left(-\frac{\log\left(\frac{1}{9}\right)}{\text{sensibility}} \times x\right)}$ where x is the margin between two items. 
 
 ```py
 
@@ -171,11 +171,11 @@ ACJ(worst_element, best_element, shade, true_values = real_values, nb_judge = 2,
 ```
 
 The `CTJ`'s sensibility is a tuple containing three elements.
-The first value corresponds to the distance between the nearest item that the judge could misjudge, the second value is the mistake made on the scale, and the third value is the probability of making one of those mistakes.
+The first value corresponds to the distance between the nearest item that the judge could misjudge with a propability of 0.9. We use also the sigmoid fonction to calculate the propability of inverting two element : $\frac{1}{1 + \exp\left(-\frac{\log\left(\frac{1}{9}\right)}{\text{sensibility[0]}} \times x\right)}$ where x is the absolute value of the gap betwween two items.. The second value is the mistake made on the scale, and the third value is the probability of making a scale error.
 
 ```py
 
-CTJ(worst_element, best_element, shade, true_values = real_values, sensibility = (distance_error, scale_error, proba))
+CTJ(worst_element, best_element, shade, true_values = real_values, sensibility = (distance_error, scale_error, proba_scale_error))
 
 ```
 
@@ -223,7 +223,7 @@ You can look at these jupyter notebook Tutorial :
 - `estimated_values` (*list of int*) – A list of int containing the estimated values corresponding to each item in the `items` list.
 - (*int*) – Number of iterations.
 - `cond` (*float*) – Accuracy of estimated value at the end of the algorithm.
-- `nb_bias` (*int*) – Number of biases.
+- `error` (*int*) – Number of errors.
 - `assessments_time` (*int*) – The duration of the assessments.
 
 #### ACJ Algorithm
@@ -254,7 +254,7 @@ Adaptive Comparative Judgment (`ACJ`) is an evaluation method based on the compa
 - `estimated_values` (*list of int*) – A list of int containing the estimated values corresponding to each item in the `items` list.
 - (*int*) – Number of iterations.
 - `cond` (*float*) – Accuracy of estimated value at the end of the algorithm.
-- `nb_bias` (*list of int*) – A list containing the number of biases for each judge.
+- `error` (*list of int*) – A list containing the number of errors for each judge.
 - `assessments_time` (*int*) – The duration of the assessments.
 
 #### CTJ Algorithm
@@ -268,7 +268,7 @@ Comparative Triple judgement (`CTJ`) is an evaluation method based on the compar
 - `min_item` (*tuple*) – The min_item we want to use. In the format (*int*, *string*).
 - `max_item` (*tuple*) – The max_item we want to use. In the format (*int*, *string*).
 - `items` (*list of string*) – A list of strings representing the items to be assessed.
-- `sensibility` (*tuple*) – A tuple containing the sensibility threshold, the absolute value of the error on the scale, and the probability of making a mistake. In the format (*int*, *int*, *double*).
+- `sensibility` (*tuple*) – A tuple containing the sensibility threshold, the absolute value of the error on the scale, and the probability of making a scale mistake. In the format (*int*, *int*, *double*).
 - `true_values` (*list of int, optional*) – A list of int containing the true values corresponding to each item in the `items` list. The default is None.
 - `max_iteration` (*int, optional*) – Number of maximum iterations of the algorithm. The default is 30.
 - `max_accuracy` (*float, optional*) – Accuracy of the model. The default is 0.9.
@@ -280,7 +280,7 @@ Comparative Triple judgement (`CTJ`) is an evaluation method based on the compar
 - `estimated_values` (*list of int*) – A list of int containing the estimated values corresponding to each item in the `items` list.
 - (*int*) – Number of iterations.
 - `cond` (*float*) – Accuracy of estimated value at the end of the algorithm.
-- `nb_bias` (*int*) – Number of biases.
+- `error` (*list of int*) – The first element is the number of inversion done in automated assessment, the second is the number of scale error. Default is [0,0].
 - `assessments_time` (*int*) – The duration of the assessments.
 
 ### Assessment Methods
