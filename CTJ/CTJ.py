@@ -119,11 +119,6 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
         
         ###################
         
-        if dmax == 0:
-            dist = scale//2
-        else :
-            dist = round(scale*dmin/dmax)
-        
         if rd.random() <= sensibility[2] :
             
             bias = sensibility[1]
@@ -132,16 +127,19 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
             
             if r < 0.5 :
                 bias = bias * -1
-            
-            dist += bias
                 
             nb_scale_error = 1
-           
-            if dist >= scale:
-                dist = scale-1
-            elif dist <= -1:
-                dist = 0  
         
+        if dmax == 0:
+            dist = scale//2 + bias
+        else :
+            dist = round(scale*dmin/dmax + bias)
+            
+        if dist >= scale:
+            dist = scale-1
+        elif dist <= -1:
+            dist = 0  
+                
         assessment_duration = b-a
                 
     else :
