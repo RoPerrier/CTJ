@@ -119,6 +119,8 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
         
         ###################
         
+        bias = 0
+        
         if rd.random() <= sensibility[2] :
             
             bias = sensibility[1]
