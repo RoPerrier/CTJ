@@ -52,13 +52,14 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
         Duration of the assessment in second.
     assessments_time : int
         The duration of the assessments.
-    one_more_bias : int
-        One if the judgment is biaised else 0.
+    error : list of int
+        The first element is the number of inversion done in automated assessment, the second is the number of scale error. Default is [0,0].
         
 
     """
     
-    one_more_bias = 0
+    nb_inversion = 0
+    nb_scale_error = 0
             
     if assessment_method is not None :
         
@@ -78,7 +79,7 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
         a = time.time()
         
         #We sort the trio
-        trio=sorted(trio, key=lambda x: true_values[items.index(x)], reverse = True)
+        trio = sorted(trio, key=lambda x: true_values[items.index(x)], reverse = True)
         
         b = time.time()
         
@@ -88,38 +89,54 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
         #We calculate the distance between the Min and the Max value
         dmax = true_values[items.index(trio[2])] - true_values[items.index(trio[0])]
         
+        ###################
+        
+        k = -np.log(1/9)/(sensibility[0] + np.finfo(float).eps)
+        
+        val = np.abs(true_values[items.index(trio[0])]-true_values[items.index(trio[1])])
+        
+        if rd.random() >= 1/(1+np.exp(- k * val)) :
+            
+            trio[0], trio[1] = trio[1], trio[0]
+            
+            nb_inversion += 1
+        
+        val = np.abs(true_values[items.index(trio[1])]-true_values[items.index(trio[2])])
+            
+        if rd.random() >= 1/(1+np.exp(- k * val)) :
+                
+            trio[1], trio[2] = trio[2], trio[1]
+                
+            val = np.abs(true_values[items.index(trio[0])]-true_values[items.index(trio[1])])
+            
+            nb_inversion += 1
+                    
+            if rd.random() >= 1/(1+np.exp(- k * val)) :
+                        
+                trio[0], trio[1] = trio[1], trio[0]
+                
+                nb_inversion += 1
+        
+        ###################
+        
         if dmax == 0:
             dist = scale//2
         else :
-            
             dist = round(scale*dmin/dmax)
+        
+        if rd.random() <= sensibility[2] :
+            
+            bias = sensibility[1]
             
             r = rd.random()
             
-            if r <= sensibility[2] :
-                
-                if scale-dist < sensibility[1] :
-                    trio[1],trio [2] = trio[2], trio[1]
-                elif dist < sensibility[1] :
-                    trio[0],trio [1] = trio[1], trio[0]
-                
-                one_more_bias = 1
+            if r < 0.5 :
+                bias = bias * -1
             
-            r = rd.random()
-            
-            if r <= sensibility[2] :
+            dist += bias
                 
-                bias = sensibility[0]
-                
-                r = rd.random()
-                
-                if r < 0.5 :
-                    bias = bias * -1
-                
-                dist += bias
-                    
-                one_more_bias = 1
-                
+            nb_scale_error = 1
+           
             if dist >= scale:
                 dist = scale-1
             elif dist <= -1:
@@ -130,11 +147,10 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
     else :
         
         raise Exception("There are no true value nor assessment_method, both are None")
+    
+    error = [nb_inversion, nb_scale_error]
         
-    if one_more_bias > 1 :
-        one_more_bias = 1
-  
-    return (trio[0], (dist, trio[1]), trio[2]), assessment_duration, one_more_bias
+    return (trio[0], (dist, trio[1]), trio[2]), assessment_duration, error
 
 def CTJ_assessments (items, A, b, assessment,scale):
     """
@@ -295,8 +311,8 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
         Array of zeros execept for two value, the fixed point of the model.
     assessments : list of tuple
          A list containing all the assessments done in the format (int,(int,int),int).
-    nb_bias : list of int
-        A list containing the number of bias for each judges.
+    error : list of int
+        The first element is the number of inversion done in automated assessment, the second is the number of scale error. Default is [0,0].
     window : WindowManager
         an object to manage human assessments.
 
@@ -323,7 +339,7 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
     
     assessments_time = 0
     
-    nb_bias = 0
+    error = [0,0]
     
     #if assessment method not None then Show a tutorial
     if assessment_method is not None :
@@ -348,7 +364,8 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
         assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1, window)
         assessments.append(assessment[0])
         assessments_time += assessment[1]
-        nb_bias += assessment[2]
+        error[0] += assessment[2][0]
+        error[1] += assessment[2][1]
         line = CTJ_assessments(items, A, b, assessments[-1], scale)
         A = np.vstack([A, line])
         b = np.vstack([b, [0]])
@@ -358,11 +375,12 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
         assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1, window)
         assessments.append(assessment[0])
         assessments_time += assessment[1]
-        nb_bias += assessment[2]
+        error[0] += assessment[2][0]
+        error[1] += assessment[2][1]
         A = np.vstack([A, line])
         b = np.vstack([b, [0]])
         
-    return A, b, assessments, assessments_time, nb_bias, window
+    return A, b, assessments, assessments_time, error, window
 
 def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, max_iteration = 30, max_accuracy = 0.9, scale = 10, assessment_method = None):
     """
@@ -399,8 +417,8 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
         Number of iteration.
     cond : float
         Accuracy of estimated value at the end of algorithm.
-    nb_bias : int
-        Number of bias.
+    error : list of int
+        The first element is the number of inversion done in automated assessment, the second is the number of scale error. Default is [0,0].
     assessments_time : int
         The duration of the assessments.
 
@@ -417,7 +435,7 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
              true_values.append(max_item[0])
     
     #We initialize the A array, b array and assessments list
-    A, b, assessments, assessments_time, nb_bias, window = CTJ_init(items, items.index(max_item[1]), items.index(min_item[1]), max_item[0], min_item[0], sensibility, true_values, scale, assessment_method )
+    A, b, assessments, assessments_time, error, window = CTJ_init(items, items.index(max_item[1]), items.index(min_item[1]), max_item[0], min_item[0], sensibility, true_values, scale, assessment_method )
     
     iteration = 0
     
@@ -449,7 +467,8 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
         assessment = make_CTJ_assessment(items, trio, sensibility, true_values, scale, assessment_method, len(assessments)+1, window)
         assessments.append(assessment[0])
         assessments_time += assessment[1]
-        nb_bias += assessment[2]
+        error[0] += assessment[2][0]
+        error[1] += assessment[2][1]
         
         #We upgrade the A and b array
         line = CTJ_assessments(items, A, b, assessments[-1], scale)
@@ -482,9 +501,10 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
     if true_values is not None :
         print("| Accuracy : ", cond)
     if sensibility != (0,0,0) :
-        print("| Number of bias : ", nb_bias)
+        print("| Number of inversion : ", error[0])
+        print("| Number of scale error : ", error[1])
     print("| Iteration : ", len(assessments))
     if assessment_method is not None :
         print("| Total duration : ", assessments_time)
     print("===============================================================")
-    return estimated_values, len(assessments), cond, nb_bias, assessments_time
+    return estimated_values, len(assessments), cond, error, assessments_time

@@ -78,11 +78,9 @@ def make_ACJ_assessment (items, pair, id_judge, sensibility, true_values, assess
         #We sort the pair        
         Booleen = True
         
-        r = rd.random()
-        
         val = np.abs(true_values[items.index(pair[0])]-true_values[items.index(pair[1])])
         k = -np.log(1/9)/(sensibility + np.finfo(float).eps)
-        if r >= 1/(1+np.exp(- k * val)) :
+        if rd.random() >= 1/(1+np.exp(- k * val)) :
         #if (np.abs(true_values[items.index(pair[0])]-true_values[items.index(pair[1])]) <= sensibility[0]) and (r < sensibility[1]) :
             Booleen = False
             one_more_bias = 1
@@ -231,8 +229,8 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
          A list containing all the assessments done in the format (int,int).
     assessments_time : int
         The duration of the assessments.
-    nb_bias : list of int
-        A list containing the number of bias for each judges.
+    error : list of int
+        A list containing the number of error for each judges.
     window : WindowManager
         an object to manage human assessments.
 
@@ -247,7 +245,7 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
     
     assessments = []
     assessments_time = np.zeros(nb_judge)
-    nb_bias = np.zeros(nb_judge)
+    error = np.zeros(nb_judge)
     
     window  = None
     
@@ -273,7 +271,7 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
         ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1, window) for id_judge in range(nb_judge)]
         assessments_done = [assessment[0] for assessment in ACJ_assessment]
         assessments_time += np.array([assessment[1] for assessment in ACJ_assessment])
-        nb_bias += np.array([assessment[2] for assessment in ACJ_assessment])
+        error += np.array([assessment[2] for assessment in ACJ_assessment])
         
         assessments.append(max(set(assessments_done), key=assessments_done.count))
 
@@ -282,11 +280,11 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
         ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1, window) for id_judge in range(nb_judge)]
         assessments_done = [assessment[0] for assessment in ACJ_assessment]
         assessments_time += np.array([assessment[1] for assessment in ACJ_assessment])
-        nb_bias += np.array([assessment[2] for assessment in ACJ_assessment])
+        error += np.array([assessment[2] for assessment in ACJ_assessment])
         
         assessments.append(max(set(assessments_done), key=assessments_done.count))
         
-    return assessments, assessments_time, nb_bias, window
+    return assessments, assessments_time, error, window
 
 def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values = None, max_iteration = 30, max_accuracy = 0.9, assessment_method = None):
     """
@@ -327,8 +325,8 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values
         Number of iteration.
     cond : float
         Accuracy of estimated value at the end of algorithm.
-    nb_bias : list of int
-        A list containing the number of bias for each judges.
+    error : list of int
+        A list containing the number of error for each judges.
     assessments_time : int
         The duration of the assessments.
 
@@ -353,7 +351,7 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values
         raise Exception("All the judge need a sensibility tuple ! The len of sensitbility is not equal to the number of judge.")
     
     #We initialize the assessments list
-    assessments, assessments_time, nb_bias, window = ACJ_init(items, true_values, nb_judge, sensibility, assessment_method)
+    assessments, assessments_time, error, window = ACJ_init(items, true_values, nb_judge, sensibility, assessment_method)
     
     iteration = 0
     
@@ -391,7 +389,7 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values
         ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1, window) for id_judge in range(nb_judge)]
         assessments_done = [assessment[0] for assessment in ACJ_assessment]
         assessments_time += np.array([assessment[1] for assessment in ACJ_assessment])
-        nb_bias += np.array([assessment[2] for assessment in ACJ_assessment])
+        error += np.array([assessment[2] for assessment in ACJ_assessment])
         
         assessments.append(max(set(assessments_done), key=assessments_done.count))
 
@@ -423,9 +421,9 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values
     if true_values is not None :
         print("| Accuracy : ", cond)
     if sensibility != [0 for i in range(nb_judge)] :
-        print("| Number of bias : ", nb_bias)
+        print("| Number of error : ", error)
     print("| Iteration : ", len(assessments))
     if assessment_method is not None :
         print("| Total duration : ", assessments_time)
     print("===============================================================")
-    return estimated_values, len(assessments), cond, nb_bias, assessments_time
+    return estimated_values, len(assessments), cond, error, assessments_time

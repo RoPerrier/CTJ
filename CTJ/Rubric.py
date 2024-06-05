@@ -70,15 +70,11 @@ def make_Rubric_assessment(items, item, sensibility, true_values, estimated_valu
         
         bias = 0
         
-        r = rd.random()
-        
-        if r < sensibility[1] :
+        if rd.random() < sensibility[1] :
         
             bias = sensibility[0]
             
-            r = rd.random()
-            
-            if r < 0.5 :
+            if rd.random() < 0.5 :
                 bias = bias * -1
                 
             one_more_bias = 1
@@ -122,8 +118,8 @@ def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, a
         Number of iteration.
     cond : float
         Accuracy of estimated value at the end of algorithm.
-    nb_bias : int
-        Number of biases.
+    error : int
+        Number of error.
     assessments_time : int
         The duration of the assessments.
         
@@ -145,7 +141,7 @@ def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, a
     
     assessments_time = 0
     
-    nb_bias = 0
+    error = 0
     
     window = None
     
@@ -166,7 +162,7 @@ def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, a
         item = items_copy.pop()
         estimated_values, time, one_more_bias = make_Rubric_assessment(items, item, sensibility, true_values, estimated_values, assessment_method, len(items)-len(items_copy), window)
         assessments_time += time
-        nb_bias += one_more_bias
+        error += one_more_bias
     
     estimated_values = Rescale(min_item[0], max_item[0], estimated_values)
     
@@ -185,9 +181,9 @@ def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, a
         acc = SSR(true_values, estimated_values)
         print("| Accuracy : ", acc)
     if sensibility != (0,0) :
-        print("| Number of bias : ", nb_bias)
+        print("| Number of error : ", error)
     print("| Iteration : ", len(items))
     if assessment_method is not None :
         print("| Total duration : ", assessments_time)
     print("===============================================================")
-    return estimated_values, len(items), acc, nb_bias, assessments_time
+    return estimated_values, len(items), acc, error, assessments_time
