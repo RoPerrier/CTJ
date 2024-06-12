@@ -278,7 +278,7 @@ def rubric_assessment_method(item, nb_assessment, window):
         window.root.destroy()
         raise Exception(image_path + " not in directory.")
     
-    image = resize_image(image_path, (window.root.winfo_screenwidth() * 0.9)//3,window.root.winfo_screenheight() * 0.6)
+    image = resize_image(image_path, (window.root.winfo_screenwidth() * 0.9)//3,window.root.winfo_screenheight() * 0.5)
     
     label_frame = tk.Frame(window.root, bg=window.bgcolor)
     label_frame.pack(padx=10, pady=10)
@@ -368,7 +368,7 @@ def acj_assessment_method(id_judge, pair, nb_assessment, window):
             acj_assessment.testing = False
             raise Exception(image_path + " not in directory.")
     
-        images.append(resize_image(image_path, (window.root.winfo_screenwidth() * 0.9)//3, window.root.winfo_screenheight() * 0.6))
+        images.append(resize_image(image_path, (window.root.winfo_screenwidth() * 0.9)//3, window.root.winfo_screenheight() * 0.5))
                       
     label1 = tk.Label(frame, image=images[0], bg=window.bgcolor)
     label1.grid(row=0, column=0, padx=10, pady=10)
@@ -444,7 +444,7 @@ def ctj_assessment_method(slider_range, trio, nb_assessment, window):
             window.root.destroy()
             raise Exception(image_path + " not in directory.")
 
-        ctj_assessment.sort.append(resize_image(image_path, (window.root.winfo_screenwidth() * 0.9)//3,window.root.winfo_screenheight() * 0.6))
+        ctj_assessment.sort.append(resize_image(image_path, (window.root.winfo_screenwidth() * 0.9)//3,window.root.winfo_screenheight() * 0.5))
     
     ctj_assessment.sort_label = [tk.Label(label_frame, image=image) for image in ctj_assessment.sort]
     
