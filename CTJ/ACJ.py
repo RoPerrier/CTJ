@@ -170,13 +170,13 @@ def ACJ_new_pair (items, max_item, assessments, estimated_values):
             nb_joint = sum(1 for tup in assessments if item_2 in tup and item_1 in tup)
             JointProba[i][j] =  nb_joint / len(assessments)
             
-            #Let's calculate the proximity of the ith, jth and kth items
+            #Let's calculate the proximity of the ith and jth items
             Prox[i][j]=np.abs(estimated_values[i]-estimated_values[j])
 
     #Let's calculate the array of Mutual Interaction
     mi=MI(JointProba,Proba)
 
-    #a high proximity must be more important in selection  than  
+    #a high proximity must be more important in selection
     Disp = max_item[0]/(Prox+np.finfo(float).eps)
 
     #Let's create all pairs possible
@@ -400,7 +400,6 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values
             val = true_values
             
         estimated_values = estimate_ACJ(items, assessments, val)
-        estimated_values = Rescale(min_item[0], max_item[0], estimated_values)
         
         all_estimated_values.append(estimated_values)
         
@@ -411,7 +410,8 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values
     
     if window is not None :
         window.root.destroy()
-        
+    
+    estimated_values = Rescale(min_item[0], max_item[0], estimated_values)
     print("===============================================================")
     print("| Result of ACJ algorithm")
     print("| Items : ", items)
