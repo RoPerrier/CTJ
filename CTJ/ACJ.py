@@ -154,7 +154,7 @@ def ACJ_new_pair (items, max_item, assessments, estimated_values, entropy):
     
     nb_items = len(items)
     
-    if entropy :
+    if not entropy :
         info_of_quality_assessment = 10000
         
         assessments_ind = [(items.index(x),items.index(y)) for (x,y) in assessments]
