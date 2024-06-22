@@ -133,7 +133,7 @@ def estimate_ACJ (items, assessments, true_values):
 
     return estimated_values
 
-def ACJ_new_pair (items, max_item, assessments, estimated_values):
+def ACJ_new_pair (items, max_item, assessments, estimated_values, entropy):
     """
     This function select the best new pair to assess.
 
@@ -154,55 +154,74 @@ def ACJ_new_pair (items, max_item, assessments, estimated_values):
     
     nb_items = len(items)
     
-    #Initialize the proximity of items tuples (i,j) to 0
-    Prox = np.zeros((nb_items,nb_items))
-    
-    #Initialize the apparition probabilities
-    JointProba = np.zeros((nb_items,nb_items))
-    Proba = np.zeros(nb_items)
-    
-    #let's fill all the probabilities array
-    for i, item_1 in enumerate(items):
-        nb = sum(1 for tup in assessments if item_1 in tup)
-        Proba[i] = nb / (2 * len(assessments))
+    if entropy :
+        info_of_quality_assessment = 10000
         
-        for j, item_2 in enumerate(items):
-            nb_joint = sum(1 for tup in assessments if item_2 in tup and item_1 in tup)
-            JointProba[i][j] =  nb_joint / len(assessments)
+        assessments_ind = [(items.index(x),items.index(y)) for (x,y) in assessments]
+        parameters = choix.ilsr_pairwise(nb_items, assessments_ind, alpha=0.1)
+        
+        
+        for i in range(0,nb_items):
+            for k in range(0,i):
+                if i != k:
+                    info = choix.probabilities([i, k],parameters)
+                    info = abs(0.5 - round(info[0],2))        
+                    if info < info_of_quality_assessment:
+                        quality_assessment = (i, k)  # i > k
+                        info_of_quality_assessment = info
+        
+        pair = [items[quality_assessment[0]], items[quality_assessment[1]]]
+    
+    else :
+        #Initialize the proximity of items tuples (i,j) to 0
+        Prox = np.zeros((nb_items,nb_items))
+        
+        #Initialize the apparition probabilities
+        JointProba = np.zeros((nb_items,nb_items))
+        Proba = np.zeros(nb_items)
+        
+        #let's fill all the probabilities array
+        for i, item_1 in enumerate(items):
+            nb = sum(1 for tup in assessments if item_1 in tup)
+            Proba[i] = nb / (2 * len(assessments))
             
-            #Let's calculate the proximity of the ith and jth items
-            Prox[i][j]=np.abs(estimated_values[i]-estimated_values[j])
-
-    #Let's calculate the array of Mutual Interaction
-    mi=MI(JointProba,Proba)
-
-    #a high proximity must be more important in selection
-    Disp = max_item[0]/(Prox+np.finfo(float).eps)
-
-    #Let's create all pairs possible
-    pairs = list(combinations(items, 2))
-    fit=[]
+            for j, item_2 in enumerate(items):
+                nb_joint = sum(1 for tup in assessments if item_2 in tup and item_1 in tup)
+                JointProba[i][j] =  nb_joint / len(assessments)
+                
+                #Let's calculate the proximity of the ith and jth items
+                Prox[i][j]=np.abs(estimated_values[i]-estimated_values[j])
     
-    #For all pair estimate the fitness for the wheel selection
-    for pair in pairs:
-        i, j = items.index(pair[0]), items.index(pair[1])
-        fit.append((mi[i][j])*Disp[i][j])
+        #Let's calculate the array of Mutual Interaction
+        mi=MI(JointProba,Proba)
     
-    #Select a pair with a roulette wheel algorithm
-    selected_index = roulette(fit)
-
-    p = permutations([pairs[selected_index][0], pairs[selected_index][1]], 2)
+        #a high proximity must be more important in selection
+        Disp = max_item[0]/(Prox+np.finfo(float).eps)
     
-    #If the intersection of assessment and p is not Null then change the selected pair
-    i = 0
-    while bool(set(assessments) & set(p)):
+        #Let's create all pairs possible
+        pairs = list(combinations(items, 2))
+        fit=[]
+        
+        #For all pair estimate the fitness for the wheel selection
+        for pair in pairs:
+            i, j = items.index(pair[0]), items.index(pair[1])
+            fit.append((mi[i][j])*Disp[i][j])
+        
+        #Select a pair with a roulette wheel algorithm
         selected_index = roulette(fit)
-        p = permutations([pairs[selected_index][0], pairs[selected_index][1]], 2)
-        i += 1
-        if i>1000:
-            break
     
-    pair = [pairs[selected_index][0], pairs[selected_index][1]]
+        p = permutations([pairs[selected_index][0], pairs[selected_index][1]], 2)
+        
+        #If the intersection of assessment and p is not Null then change the selected pair
+        i = 0
+        while bool(set(assessments) & set(p)):
+            selected_index = roulette(fit)
+            p = permutations([pairs[selected_index][0], pairs[selected_index][1]], 2)
+            i += 1
+            if i>1000:
+                break
+        
+        pair = [pairs[selected_index][0], pairs[selected_index][1]]
     
     return pair
 
@@ -286,7 +305,7 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
         
     return assessments, assessments_time, error, window
 
-def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values = None, max_iteration = 30, max_accuracy = 0.9, assessment_method = None):
+def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values = None, max_iteration = 30, max_accuracy = 0.9, assessment_method = None, entropy = False):
     """
     Adaptive Comparative Judgment (ACJ) is an evaluation method based on the comparison of pairs of items. Rather than scoring each item on a fixed scale, evaluators directly compare two items at a time and judge which is better according to certain criteria.
 
@@ -310,7 +329,8 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values
         Accuracy of the model. The default is 0.9.
     assessment_method : fun
         The assessment method. If none, the assessment is automatically performed using the true value. The default is None.
-    
+    entropy : bool
+        The method use to select items. The default is False
     Raises
     ------
     Exception
@@ -383,7 +403,7 @@ def ACJ (min_item, max_item, items, nb_judge = 1, sensibility = [0], true_values
     while ((iteration<max_iteration) and (cond < max_accuracy)):
         
         #We select the best next pair
-        pair = ACJ_new_pair(items, max_item, assessments, estimated_values)
+        pair = ACJ_new_pair(items, max_item, assessments, estimated_values, entropy)
         
         #We add the new assessment
         ACJ_assessment = [make_ACJ_assessment(items, pair, id_judge, sensibility[id_judge], true_values, assessment_method, len(assessments)+1, window) for id_judge in range(nb_judge)]
