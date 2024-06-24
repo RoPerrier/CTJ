@@ -97,6 +97,11 @@ CTJ(worst_element, best_element, shade, assessment_method = ctj_assessment_metho
 
 ```
 
+You can also use a modified version of ACJ, using the same optimisation than CTJ :
+
+```py
+ACJ(worst_element, best_element, shade, assessment_method = acj_assessment_method, entropy = True)
+```
 * ### For testing purposes
 
 You have the real values and want to assess the value yourself. In this case, you need to specify which method to use. You can use the method provided in the package or use a method that you've coded yourself; also specify the real values in a list.
@@ -133,7 +138,7 @@ CTJ(worst_element, best_element, shade, true_values = real_values , assessment_m
 
 ```
 
-You can also use a modified version of ACJ, using theb same optimisation than CTJ :
+You can also use a modified version of ACJ, using the same optimisation than CTJ :
 
 ```py
 ACJ(worst_element, best_element, shade, true_values = real_values, assessment_method = acj_assessment_method, entropy = True)
@@ -153,6 +158,12 @@ ACJ(worst_element, best_element, shade, true_values = real_values)
 
 CTJ(worst_element, best_element, shade, true_values = real_values)
 
+```
+
+You can also use a modified version of ACJ, using the same optimisation than CTJ :
+
+```py
+ACJ(worst_element, best_element, shade, true_values = real_values, entropy = True)
 ```
 
 Furthermore, in this case, you could use the sensibility parameter to introduce some errors.
