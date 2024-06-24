@@ -133,6 +133,12 @@ CTJ(worst_element, best_element, shade, true_values = real_values , assessment_m
 
 ```
 
+You can also use a modified version of ACJ, using theb same optimisation than CTJ :
+
+```py
+ACJ(worst_element, best_element, shade, true_values = real_values, assessment_method = acj_assessment_method, entropy = True)
+```
+
 * ### For verifying purposes
 
 You have the real values and want to check the efficiencies of the algorithms.
@@ -244,6 +250,7 @@ Adaptive Comparative Judgment (`ACJ`) is an evaluation method based on the compa
 - `max_iteration` (*int, optional*) – Number of maximum iterations of the algorithm. The default is 30.
 - `max_accuracy` (*float, optional*) – Accuracy of the model. The default is 0.9.
 - `assessment_method` (*function, optional*) – The assessment method. If None, the assessment is automatically performed using the true value. The default is None.
+- `entropy` : (*bool, optional*) – The method use to select items. The default is False
 
 **Raises:**
 
