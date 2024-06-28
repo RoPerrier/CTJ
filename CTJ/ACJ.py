@@ -273,7 +273,7 @@ def ACJ_init (items, true_values, nb_judge, sensibility, assessment_method):
         
         window = WindowManager()
         
-        skip_tutorial = ready(window, info = "The ACJ assessment involves comparisons between two items.\n\nIn each iteration, you will be asked to click on the best item.\n\nTo access the tutorial, click on the 'Tutorial' button. The tutorial includes an evaluation of the algorithm. After completing the tutorial evaluation, the actual test will begin.\n\nBetween each evaluation, a button will appear.\n Ensure you are ready before clicking it, as a countdown will start once clicked.\n At the end of the countdown, you can evaluate the item, so make sure you are prepared.", status =  "Tuto") 
+        skip_tutorial = ready(window, info = "The ACJ assessment involves comparisons between two items.\n\nIn each iteration, you will be asked to click on the best item.\n\nTo access the tutorial, click on the 'Tutorial' button.\n The tutorial includes an evaluation of the algorithm.\n After completing the tutorial evaluation, the actual test will begin.\n\nBetween each evaluation, a button will appear.\n Ensure you are ready before clicking it, as a countdown will start once clicked.\n At the end of the countdown, you can evaluate the item, so make sure you are prepared.", status =  "Tuto") 
         ###TUTO on pourrait le passer avec un bouton,  reflechir a un break ou un goto
         
         if not skip_tutorial:
