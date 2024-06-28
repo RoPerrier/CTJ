@@ -429,7 +429,7 @@ def ctj_assessment_method(slider_range, trio, nb_assessment, window):
     window.create_window("CTJ")
 
     #create text block
-    l = tk.Label (padx=10, pady=10, text = "Please sort the item, the best to the worst, then choose the distance betwwen the middle one and the others : \n(To permuting two item, clic the first one then the second)")
+    l = tk.Label (padx=10, pady=10, text = "Please sort the items from best to worst, then choose the distance between the middle item and the others:\n(To swap two items, click the first one, then the second)")
     l.config(bg=window.bgcolor)
     l.pack ()
 

@@ -346,7 +346,7 @@ def CTJ_init (items, max_id, min_id, max_val, min_val, sensibility, true_values,
         
         window = WindowManager()
         
-        skip_tutorial = ready(window, info = "The CTJ assessment involves comparisons between three items.\n\n On each iteration, you will be asked to sort the item, the best (at the left) to the worst (at the right).\n Then you must use the slider bellow to indicate the distance betwwen the extremums items and the average one.\n To swap item, you must click on both of them.\n\n By clicking on the 'Tutorial' button, you can access the tutorial.\n The tutorial consists of an evaluation of the algorithm. After completing the tutorial evaluation, the actual test will begin.\n\n Between each evaluation, a button will appear.\n Ensure you are ready before clicking on it, as once clicked, a countdown will start. At the end of the countdown, you can evaluate the item, so make sure you are prepared.", status =  "Tuto") 
+        skip_tutorial = ready(window, info = "In each iteration, you will be asked to sort the items from best (on the left) to worst (on the right).\n Then, use the slider below to indicate the distance between the extreme items and the average one.\n To swap items, click on both of them.\n\nTo access the tutorial, click on the 'Tutorial' button.\n The tutorial includes an evaluation of the algorithm.\n After completing the tutorial evaluation, the actual test will begin.\n\nBetween each evaluation, a button will appear. Ensure you are ready before clicking it, as a countdown will start once clicked.\n At the end of the countdown, you can evaluate the items, so make sure you are prepared.", status =  "Tuto") 
         
         if not skip_tutorial:
             item_1 = rd.choice(items)

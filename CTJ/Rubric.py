@@ -151,7 +151,7 @@ def Rubric(min_item, max_item, items, sensibility = (0,0), true_values = None, a
         
         window = WindowManager()
         
-        skip_tutorial = ready(window, info="The Rubric assessment involves individually grading each item.\n\n On each iteration, you will be asked to enter the value of the item shown, in a box below.\n\n By clicking on the 'Tutorial' button, you can access the tutorial.\nThe tutorial consists of an evaluation of the algorithm. After completing the tutorial evaluation, the actual test will begin.\n\n Between each evaluation, a button will appear.\n Ensure you are ready before clicking on it, as once clicked, a countdown will start. At the end of the countdown, you can evaluate the item, so make sure you are prepared.", status="Tuto")
+        skip_tutorial = ready(window, info="The Rubric assessment involves individually grading each item.\n\nIn each iteration, you will be asked to enter the value of the item shown in the box below.\n\nTo access the tutorial, click on the 'Tutorial' button.\n The tutorial includes an evaluation of the algorithm.\n After completing the tutorial evaluation, the actual test will begin.\n\nBetween each evaluation, a button will appear.\n Ensure you are ready before clicking it, as a countdown will start once clicked.\n At the end of the countdown, you can evaluate the item, so make sure you are prepared.", status="Tuto")
     
         if not skip_tutorial:
             item = rd.choice(items)
