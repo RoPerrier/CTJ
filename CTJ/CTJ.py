@@ -69,7 +69,7 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
         
         #We let the judge make the assessment
         trio, dist = assessment_method(scale, trio, nb_assessment, window)
-        
+
         b = time.time()
         
         assessment_duration = b-a
@@ -445,7 +445,7 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
     estimated_values = np.linalg.lstsq(A,b,rcond=1e-17)[0]
     estimated_values = list(chain.from_iterable(estimated_values)) 
     estimated_values = Rescale(min_item[0], max_item[0], estimated_values)
-    
+
     #We add it to the list containing all the estimated values
     all_estimated_values.append(estimated_values)
         
@@ -478,19 +478,19 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
         #We calculate the new estimated values
         estimated_values = np.linalg.lstsq(A,b,rcond=1e-17)[0]
         estimated_values = list(chain.from_iterable(estimated_values)) 
-        
-        #We rescale them
         estimated_values = Rescale(min_item[0], max_item[0], estimated_values)
         
         all_estimated_values.append(estimated_values)
         
         #We calculate the new accuracy
         cond = accuracy(true_values, estimated_values, all_estimated_values)
-        
         iteration += 1
     
     if window is not None :
         window.root.destroy()
+    
+    #We rescale them
+    estimated_values = Rescale(min_item[0], max_item[0], estimated_values)
         
     print("===============================================================")
     print("| Result of CTJ algorithm")
