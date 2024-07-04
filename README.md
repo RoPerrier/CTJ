@@ -87,20 +87,24 @@ By using the incorporated function:
 
 ```py
 
-from CTJ import rubric_assessment_method, acj_assessment_method, ctj_assessment_method
+from CTJ import rubric_assessment_method_image, acj_assessment_method_image, ctj_assessment_method_image
 
-Rubric(worst_element, best_element, shade, assessment_method = rubric_assessment_method)
+#OR IF YOU USE PDF
 
-ACJ(worst_element, best_element, shade, assessment_method = acj_assessment_method, max_accuracy = 0.99)
+from CTJ import rubric_assessment_method_pdf, acj_assessment_method_pdf, ctj_assessment_method_pdf
 
-CTJ(worst_element, best_element, shade, assessment_method = ctj_assessment_method, max_accuracy = 0.99)
+Rubric(worst_element, best_element, shade, assessment_method = rubric_assessment_method_image)
+
+ACJ(worst_element, best_element, shade, assessment_method = acj_assessment_method_image, max_accuracy = 0.99)
+
+CTJ(worst_element, best_element, shade, assessment_method = ctj_assessment_method_image, max_accuracy = 0.99)
 
 ```
 
 You can also use a modified version of ACJ, using the same optimisation than CTJ :
 
 ```py
-ACJ(worst_element, best_element, shade, assessment_method = acj_assessment_method, entropy = True)
+ACJ(worst_element, best_element, shade, assessment_method = acj_assessment_method_image, entropy = True)
 ```
 * ### For testing purposes
 
@@ -126,22 +130,26 @@ By using the incorporated function:
 
 ```py
 
-from CTJ import rubric_assessment_method, acj_assessment_method, ctj_assessment_method
+from CTJ import rubric_assessment_method_image, acj_assessment_method_image, ctj_assessment_method_image
+
+#OR IF YOU USE PDF
+
+from CTJ import rubric_assessment_method_pdf, acj_assessment_method_pdf, ctj_assessment_method_pdf
 
 real_values = [160, 106, 209, 80, 135]
 
-Rubric(worst_element, best_element, shade, true_values = real_values, assessment_method = rubric_assessment_method)
+Rubric(worst_element, best_element, shade, true_values = real_values, assessment_method = rubric_assessment_method_image)
 
-ACJ(worst_element, best_element, shade, true_values = real_values, assessment_method = acj_assessment_method)
+ACJ(worst_element, best_element, shade, true_values = real_values, assessment_method = acj_assessment_method_image)
 
-CTJ(worst_element, best_element, shade, true_values = real_values , assessment_method = ctj_assessment_method)
+CTJ(worst_element, best_element, shade, true_values = real_values , assessment_method = ctj_assessment_method_image)
 
 ```
 
 You can also use a modified version of ACJ, using the same optimisation than CTJ :
 
 ```py
-ACJ(worst_element, best_element, shade, true_values = real_values, assessment_method = acj_assessment_method, entropy = True)
+ACJ(worst_element, best_element, shade, true_values = real_values, assessment_method = acj_assessment_method_image, entropy = True)
 ```
 
 * ### For verifying purposes
@@ -305,7 +313,7 @@ Comparative Triple judgement (`CTJ`) is an evaluation method based on the compar
 
 #### Rubric Assessment Method
 
-#### `CTJ.rubric_assessment_method(item, nb_assessment)`
+#### `CTJ.rubric_assessment_method_image(item, nb_assessment)`
 
 Generate a window to let the user make the `Rubric` assessment.
 
@@ -324,7 +332,7 @@ Generate a window to let the user make the `Rubric` assessment.
 
 #### ACJ Assessment Method
 
-#### `CTJ.acj_assessment_method(id_judge, pair, nb_assessment)`
+#### `CTJ.acj_assessment_method_image(id_judge, pair, nb_assessment)`
 
 Generate a window to let the user make the `ACJ` assessment.
 
@@ -344,7 +352,7 @@ Generate a window to let the user make the `ACJ` assessment.
 
 #### CTJ Assessment Method
 
-#### `CTJ.ctj_assessment_method(slider_range, trio, nb_assessment)`
+#### `CTJ.ctj_assessment_method_image(slider_range, trio, nb_assessment)`
 
 Generate a window to let the user make the `CTJ` assessment.
 
