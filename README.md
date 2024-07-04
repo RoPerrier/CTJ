@@ -315,15 +315,36 @@ Comparative Triple judgement (`CTJ`) is an evaluation method based on the compar
 
 #### `CTJ.rubric_assessment_method_image(item, nb_assessment)`
 
-Generate a window to let the user make the `Rubric` assessment.
+Generate a window to let the user make the `Rubric` assessment for image.
 
 **Parameters:**
 
 - `item` (*string*) – A string representing the item being assessed.
 - `nb_assessment` (*int*) – The number of assessments done.
+- `window` (*WindowManager*) – An object to manage human assessments.
 
-**Raises:**
+**Raises**
 
+- `Exception` –  No file in directory.
+- `Exception` – The assessment was not done.
+
+**Returns:**
+
+- `item_value` (*int*) – The estimated value made by the user for this item.
+
+#### `CTJ.rubric_assessment_method_pdf(item, nb_assessment)`
+
+Generate a window to let the user make the `Rubric` assessment for pdf.
+
+**Parameters:**
+
+- `item` (*string*) – A string representing the item being assessed.
+- `nb_assessment` (*int*) – The number of assessments done.
+- `window` (*WindowManager*) – An object to manage human assessments.
+
+**Raises**
+
+- `Exception` –  No file in directory.
 - `Exception` – The assessment was not done.
 
 **Returns:**
@@ -334,39 +355,86 @@ Generate a window to let the user make the `Rubric` assessment.
 
 #### `CTJ.acj_assessment_method_image(id_judge, pair, nb_assessment)`
 
-Generate a window to let the user make the `ACJ` assessment.
+Generate a window to let the user make the `ACJ` assessment for image.
 
 **Parameters:**
 
 - `id_judge` (*int*) – The id of the judge making the assessment.
 - `pair` (*list of string*) – A list of strings representing the pair of items being assessed.
 - `nb_assessment` (*int*) – The number of assessments done.
+- `window` (*WindowManager*) – An object to manage human assessments.
 
-**Raises:**
+**Raises**
 
+- `Exception` –  No file in directory.
 - `Exception` – The assessment was not done.
 
 **Returns:**
 
 - `sort` (*list of string*) – A list of string containing the assessment results in the format [Max, Min].
 
+#### `CTJ.acj_assessment_method_pdf(id_judge, pair, nb_assessment)`
+
+Generate a window to let the user make the `ACJ` assessment for image for pdf.
+
+**Parameters:**
+
+- `id_judge` (*int*) – The id of the judge making the assessment.
+- `pair` (*list of string*) – A list of strings representing the pair of items being assessed.
+- `nb_assessment` (*int*) – The number of assessments done.
+- `window` (*WindowManager*) – An object to manage human assessments.
+
+**Raises**
+
+- `Exception` –  No file in directory.
+- `Exception` – The assessment was not done.
+
+**Returns:**
+
+- `sort` (*list of string*) – A list of string containing the assessment results in the format [Max, Min].
+  
 #### CTJ Assessment Method
 
 #### `CTJ.ctj_assessment_method_image(slider_range, trio, nb_assessment)`
 
-Generate a window to let the user make the `CTJ` assessment.
+Generate a window to let the user make the `CTJ` assessment for image.
 
 **Parameters:**
 
 - `slider_range` (*int*) – The range of the slider.
 - `trio` (*list of string*) – A list of strings representing the trio of items being assessed.
 - `nb_assessment` (*int*) – The number of assessments done.
+- `window` (*WindowManager*) – An object to manage human assessments.
+
+**Raises**
+
+- `Exception` –  No file in directory.
+- `Exception` – The assessment was not done.
 
 **Returns:**
 
 - `tup` (*tuple*) – A tuple containing the assessment results ([Max, Average, Min], dist).
- 
 
+#### `CTJ.ctj_assessment_method_pdf(slider_range, trio, nb_assessment)`
+
+Generate a window to let the user make the `CTJ` assessment for pdf.
+
+**Parameters:**
+
+- `slider_range` (*int*) – The range of the slider.
+- `trio` (*list of string*) – A list of strings representing the trio of items being assessed.
+- `nb_assessment` (*int*) – The number of assessments done.
+- `window` (*WindowManager*) – An object to manage human assessments.
+
+**Raises**
+
+- `Exception` –  No file in directory.
+- `Exception` – The assessment was not done.
+
+**Returns:**
+
+- `tup` (*tuple*) – A tuple containing the assessment results ([Max, Average, Min], dist).
+- 
 ## License
 
 This project is licensed under the Apache 2.0 License. See the LICENSE and NOTICE.txt files for more details.
