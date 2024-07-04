@@ -179,7 +179,7 @@ Rubric(worst_element, best_element, shade, true_values = real_values, sensibilit
 
 The `ACJ`'s sensibility is a list of int.
 Each int corresponds to the sensibility of a judge, the first int corresponds to the sensibility of the first judge, and etc..
-The int represent the sensitivity threshold. If the margin between two items is equal to this value, there is a probability of 0.9 of inverting them. The probability is calculated with this sigmoid function:  $\frac{1}{1 + \exp\left(-\frac{\log\left(\frac{1}{9}\right)}{\text{sensibility}} \times x\right)}$ where x is the margin between two items. 
+The int represent the sensitivity threshold. If the margin between two items is equal to this value, there is a probability of 0.1 of inverting them. The probability is calculated with this sigmoid function:  $\frac{1}{1 + \exp\left(-\frac{\log\left(\frac{1}{9}\right)}{\text{sensibility}} \times x\right)}$ where x is the margin between two items. 
 
 ```py
 
@@ -188,7 +188,7 @@ ACJ(worst_element, best_element, shade, true_values = real_values, nb_judge = 2,
 ```
 
 The `CTJ`'s sensibility is a tuple containing three elements.
-The first value corresponds to the distance between the nearest item that the judge could misjudge with a propability of 0.9. We use also the sigmoid fonction to calculate the propability of inverting two element : $\frac{1}{1 + \exp\left(-\frac{\log\left(\frac{1}{9}\right)}{\text{sensibility[0]}} \times x\right)}$ where x is the absolute value of the gap betwween two items.. The second value is the mistake made on the scale, and the third value is the probability of making a scale error.
+The first value corresponds to the distance between the nearest item that the judge could misjudge with a propability of 0.1. We use also the sigmoid fonction to calculate the propability of inverting two element : $\frac{1}{1 + \exp\left(-\frac{\log\left(\frac{1}{9}\right)}{\text{sensibility[0]}} \times x\right)}$ where x is the absolute value of the gap betwween two items.. The second value is the mistake made on the scale, and the third value is the probability of making a scale error.
 
 ```py
 
