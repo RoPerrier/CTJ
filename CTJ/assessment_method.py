@@ -13,6 +13,7 @@ except ImportError:
 from PIL import Image, ImageTk
     
 import os
+import fitz
 
 ###############################         FUNCTIONS       ############################################
 
@@ -230,7 +231,7 @@ class AssessmentManager:
         self.testing = False
 
 
-def rubric_assessment_method(item, nb_assessment, window):
+def rubric_assessment_method_image(item, nb_assessment, window):
     """
     Generate a window to let the user make the Rubric assessment.
 
@@ -317,7 +318,7 @@ def rubric_assessment_method(item, nb_assessment, window):
     
     return item_value
 
-def acj_assessment_method(id_judge, pair, nb_assessment, window):
+def acj_assessment_method_image(id_judge, pair, nb_assessment, window):
     """
     Generate a window to let the user make the ACJ assessment.
 
@@ -396,7 +397,7 @@ def acj_assessment_method(id_judge, pair, nb_assessment, window):
     
     return sort
     
-def ctj_assessment_method(slider_range, trio, nb_assessment, window):
+def ctj_assessment_method_image(slider_range, trio, nb_assessment, window):
     """
     Generate a window to let the user make the CTJ assessment.
 
@@ -510,3 +511,368 @@ def resize_image(image_path, width, height):
     resized_image = ImageTk.PhotoImage(original_image)
     
     return resized_image
+
+
+###PDF
+
+
+class PDFViewer:
+    def __init__(self, root, file_name):
+        self.root = root
+        self.file_name = file_name
+        self.doc = fitz.open(file_name)
+        self.num_pages = len(self.doc)
+        self.current_page = 0
+        self.img_tk = None
+        self.image_refs = []
+
+    def create_viewer_window(self):
+        self.viewer_root = tk.Toplevel(self.root)
+        self.viewer_root.geometry('750x700')
+
+        # Add scroll bar
+        self.scrollbar = tk.Scrollbar(self.viewer_root)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        self.frame = tk.Frame(self.viewer_root)
+        self.frame.pack(padx=10, pady=10)
+        
+        # Add canvas
+        self.canvas = tk.Canvas(self.viewer_root, yscrollcommand=self.scrollbar.set)
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+
+        # Add buttons to navigate pages
+        self.prev_button = tk.Button(self.frame, text="Previous", command=self.prev_page)
+        self.next_button = tk.Button(self.frame, text="Next", command=self.next_page)
+        self.prev_button.pack(side=tk.TOP)
+        self.next_button.pack(side=tk.TOP)
+
+        # Bind resize event to update image size
+        self.viewer_root.bind("<Configure>", self.on_resize)
+
+        # Initial display of the first page
+        self.show_image()
+
+        # Configure the scroll bar
+        self.scrollbar.config(command=self.canvas.yview)
+
+        self.viewer_root.protocol("WM_DELETE_WINDOW", self.viewer_root.destroy)
+
+    def pdf_to_img(self, page_num, width):
+        page = self.doc.load_page(page_num)
+        zoom = width / page.rect.width
+        mat = fitz.Matrix(zoom, zoom)
+        pix = page.get_pixmap(matrix=mat)
+        return Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+
+    def show_image(self):
+        try:
+            width = self.canvas.winfo_width()
+            if width <= 1:  # Initial call before canvas is properly sized
+                self.viewer_root.after(100, self.show_image)
+                return
+            im = self.pdf_to_img(self.current_page, width)
+            self.img_tk = ImageTk.PhotoImage(im)
+            self.canvas.delete("all")  # Clear previous images
+            self.canvas.create_image(0, 0, anchor='nw', image=self.img_tk)
+            self.canvas.config(scrollregion=self.canvas.bbox("all"))
+
+            # Keep a reference to the image to avoid garbage collection
+            self.image_refs.append(self.img_tk)
+
+            # Update buttons visibility
+            self.prev_button.pack_forget()
+            self.next_button.pack_forget()
+            if self.current_page > 0:
+                self.prev_button.pack(side=tk.LEFT)
+            if self.current_page < self.num_pages - 1:
+                self.next_button.pack(side=tk.RIGHT)
+        except Exception as e:
+            print(e)
+
+    def next_page(self):
+        if self.current_page < self.num_pages - 1:
+            self.current_page += 1
+            self.show_image()
+
+    def prev_page(self):
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.show_image()
+
+    def on_resize(self, event):
+        self.show_image()
+
+    def display_first_page(self, width, height):
+        first_page_image = self.pdf_to_img(0, width)
+
+        first_page_image.thumbnail((width, height), Image.Resampling.LANCZOS)
+        
+        return ImageTk.PhotoImage(first_page_image)
+
+def rubric_assessment_method_pdf(item, nb_assessment, window):
+    rubric_assessment = AssessmentManager()
+        
+    item_value = None
+
+    window.create_window("Rubric")
+    
+    l = tk.Label(padx=10, pady=10, text="Please enter the value of this item:")
+    l.config(bg=window.bgcolor)
+    l.pack()
+
+    # Create PDFViewer instance without displaying it
+    pdf_viewer = PDFViewer(window.root, item + ".pdf")
+
+    # Convert the first page of the PDF to an image
+    if not os.path.exists(item + ".pdf"):
+        rubric_assessment.testing = False
+        window.root.destroy()
+        raise Exception(item + ".pdf not in directory.")
+    
+    first_page_image = pdf_viewer.display_first_page((window.root.winfo_screenwidth() * 0.9) // 3, window.root.winfo_screenheight() * 0.5)
+
+    label_frame = tk.Frame(window.root, bg=window.bgcolor)
+    label_frame.pack(padx=10, pady=10)
+    
+    label = tk.Label(label_frame, image=first_page_image, bg=window.bgcolor)
+    label.grid(row=0, column=0, padx=10, pady=10)
+    label.image = first_page_image  # Keep a reference to avoid garbage collection
+
+    def view():
+        pdf_viewer.create_viewer_window()
+
+    view_button = tk.Button(window.root, text="View", command=view)
+    view_button.pack(pady=10)
+    
+    entry_frame = tk.Frame(window.root, bg=window.bgcolor)
+    entry_frame.pack(padx=10, pady=10)
+    
+    vcmd = window.root.register(rubric_assessment.validate_entry)
+    entry = tk.Entry(entry_frame, validate="key", validatecommand=(vcmd, '%P'))
+    entry.pack(padx=10, pady=10)
+    
+    window.root.update_idletasks()  # For macOS
+    
+    close_button = tk.Button(window.root, text="Next", command=lambda: rubric_assessment.rubric_close(entry))
+    close_button.pack(pady=10)
+    
+    assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} judgement")
+    assessment_label.config(bg=window.bgcolor)
+    assessment_label.pack(side=tk.BOTTOM, pady=10)
+    
+    window.root.protocol("WM_DELETE_WINDOW", rubric_assessment.exit_program)
+    
+    while rubric_assessment.testing:
+        window.root.update()
+    for widget in window.root.winfo_children():
+        widget.destroy()
+    if rubric_assessment.bad_ending or rubric_assessment.dist == "":
+        window.root.destroy()
+        raise Exception("Assessment not done!")
+    
+    item_value = int(rubric_assessment.dist)
+    
+    return item_value
+
+
+def acj_assessment_method_pdf(id_judge, pair, nb_assessment, window):
+    """
+    Generate a window to let the user make the ACJ assessment.
+
+    Parameters
+    ----------
+    id_judge : int
+        The id of the judge making the assessment.
+    pair : list of string
+        A list of strings representing the pair of items being assessed.
+    nb_assessment : int
+        The number of assessments done.
+    window : WindowManager
+        an object to manage human assessments.
+
+    Raises
+    ------
+    Exception
+        No file in directory.
+    Exception
+        The assessment was not done.
+
+    Returns
+    -------
+    sort : list
+        A list of string containing the assessment results in the format [Max, Min].
+    """
+    
+    acj_assessment = AssessmentManager()
+
+    window.create_window("ACJ")
+        
+    # Create text block
+    l = tk.Label (padx=10, pady=10, text = "Judge " + str(id_judge+1) + "\nPlease select the best item :")
+    l.config(bg=window.bgcolor)
+    l.pack ()
+    
+    frame = tk.Frame(window.root, bg=window.bgcolor)
+    frame.pack(padx=10, pady=10)
+    
+    # Load images dynamically based on list elements
+    pdf = []
+    
+    for pdf_name in pair:
+        pdf_path = pdf_name + ".pdf"
+        
+        if not os.path.exists(pdf_path):
+            window.root.destroy()
+            acj_assessment.testing = False
+            raise Exception(pdf_path + " not in directory.")
+        
+        # Create PDFViewer instance without displaying it
+        pdf_viewer = PDFViewer(window.root, pdf_path)
+        pdf.append(pdf_viewer)
+    
+    first_page_image_1 = pdf[0].display_first_page((window.root.winfo_screenwidth() * 0.9) // 3, window.root.winfo_screenheight() * 0.5)
+    first_page_image_2 = pdf[1].display_first_page((window.root.winfo_screenwidth() * 0.9) // 3, window.root.winfo_screenheight() * 0.5)
+
+    def view(pdf_index):
+        pdf[pdf_index].create_viewer_window()
+    
+    label1 = tk.Label(frame, image=first_page_image_1, bg=window.bgcolor)
+    label1.grid(row=0, column=0, padx=10, pady=10)
+    label1.bind("<Button-1>", lambda event: acj_assessment.acj_close(pair[0], pair))
+    
+    view_button1 = tk.Button(frame, text="View", command=lambda: view(0))
+    view_button1.grid(row=1, column=0, pady=10)
+    
+    label2 = tk.Label(frame, image=first_page_image_2, bg=window.bgcolor)
+    label2.grid(row=0, column=1, padx=10, pady=10)
+    label2.bind("<Button-1>", lambda event: acj_assessment.acj_close(pair[1], pair))
+    
+    view_button2 = tk.Button(frame, text="View", command=lambda: view(1))
+    view_button2.grid(row=1, column=1, pady=10)
+    
+    assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} judgement")
+    assessment_label.config(bg=window.bgcolor)
+    assessment_label.pack(side=tk.BOTTOM, pady=10)
+
+    window.root.protocol("WM_DELETE_WINDOW", acj_assessment.exit_program)
+    
+    while acj_assessment.testing:
+        window.root.update()
+    for widget in window.root.winfo_children():
+        widget.destroy()
+    if acj_assessment.bad_ending:
+        window.root.destroy()
+        raise Exception("Assessment not done !")
+    
+    sort = acj_assessment.sort
+    
+    return sort
+    
+def ctj_assessment_method_pdf(slider_range, trio, nb_assessment, window):
+    """
+    Generate a window to let the user make the CTJ assessment.
+
+    Parameters
+    ----------
+    slider_range : int
+        The range of the slider.
+    trio : list of string
+        A list of strings representing the trio of items being assessed.
+    nb_assessment : int
+        The number of assessments done.
+    window : WindowManager
+        An object to manage human assessments.
+        
+    Raises
+    ------
+    Exception
+        No file in directory.
+    Exception
+        The assessment was not done.
+
+    Returns
+    -------
+    tup : tuple
+        A tuple containing the assessment results ([Max, Average, Min], dist). In the format ([int, int, int], int).
+    """
+    
+    ctj_assessment = AssessmentManager()
+    
+    window.create_window("CTJ")
+
+    # Create text block
+    l = tk.Label(padx=10, pady=10, text="Please sort the items from best to worst, then choose the distance between the middle one and the others:\n(To swap two items, click the first one and then the second)")
+    l.config(bg=window.bgcolor)
+    l.pack()
+
+    label_frame = tk.Frame(window.root, bg=window.bgcolor)
+    label_frame.pack(padx=10, pady=10)
+
+    for pdf_name in trio:
+        pdf_path = pdf_name + ".pdf"
+        
+        if not os.path.exists(pdf_path):
+            ctj_assessment.testing = False
+            window.root.destroy()
+            raise Exception(pdf_path + " not in directory.")
+            
+        pdf_viewer = PDFViewer(window.root, pdf_path)
+        
+        ctj_assessment.sort.append(pdf_viewer.display_first_page((window.root.winfo_screenwidth() * 0.9) // 3, window.root.winfo_screenheight() * 0.5))
+
+    ctj_assessment.sort_label = [tk.Label(label_frame, image=image) for image in ctj_assessment.sort]
+    
+    def view(pdf_path):
+        PDFViewer(window.root, pdf_path).create_viewer_window()
+        
+    def create_view_button(pdf_path, row, col):
+        button = tk.Button(label_frame, text="View PDF", command=lambda: view(pdf_path))
+        button.grid(row=row, column=col, padx=10, pady=5)
+        return button
+
+    ctj_assessment.view_buttons = []
+    
+    def update_display():
+        for i, label in enumerate(ctj_assessment.sort_label):
+            label.grid(row=0, column=i, padx=10, pady=10)
+            ctj_assessment.view_buttons[i].grid(row=1, column=i, padx=10, pady=5)
+            ctj_assessment.view_buttons[i].config(command=lambda path=trio[i] + ".pdf": view(path))
+    
+    for i, label in enumerate(ctj_assessment.sort_label):
+        label.grid(row=0, column=i, padx=10, pady=10)
+        label.bind("<Button-1>", lambda event, idx=i: ctj_assessment.swap_images(event, idx, trio))
+        button = create_view_button(trio[i] + ".pdf", 1, i)
+        ctj_assessment.view_buttons.append(button)
+
+    slider_frame = tk.Frame(window.root, bg=window.bgcolor)
+    slider_frame.pack(padx=10, pady=10)
+    
+    slider = tk.Scale(slider_frame, from_=0, to=slider_range, orient=tk.HORIZONTAL, length=400)
+    slider.grid(row=1, column=0, columnspan=len(trio), pady=10)
+    
+    window.root.update_idletasks() # For macOS
+
+    close_button = tk.Button(window.root, text="Next", command=lambda: ctj_assessment.ctj_close(trio, slider, slider_range))
+    close_button.pack(pady=10)
+    
+    assessment_label = tk.Label(window.root, text=f"You are making the {nb_assessment} judgment")
+    assessment_label.config(bg=window.bgcolor)
+    assessment_label.pack(side=tk.BOTTOM, pady=10)
+
+    window.root.protocol("WM_DELETE_WINDOW", ctj_assessment.exit_program)
+    
+    while ctj_assessment.testing:
+        window.root.update()
+        # Update display after each event loop to reflect swaps
+        update_display()
+        
+    for widget in window.root.winfo_children():
+        widget.destroy()
+    if ctj_assessment.bad_ending:
+        window.root.destroy()
+        raise Exception("Assessment not done!")
+    
+    tup = (ctj_assessment.sort, ctj_assessment.dist)
+    
+    return tup
