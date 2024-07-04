@@ -74,6 +74,17 @@ def make_CTJ_assessment (items, trio, sensibility, true_values, scale, assessmen
         
         assessment_duration = b-a
         
+        trio = sorted(trio, key=lambda x: true_values[items.index(x)], reverse = True)
+        dmin = true_values[items.index(trio[1])] - true_values[items.index(trio[0])]
+        dmax = true_values[items.index(trio[2])] - true_values[items.index(trio[0])]
+        
+        if dmax == 0:
+            true_dist = scale//2
+        else :
+            true_dist = round(scale*dmin/dmax)
+            
+        nb_scale_error=(np.abs(dist-true_dist))
+        
     elif true_values is not None :
         
         a = time.time()
@@ -491,6 +502,9 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
     
     #We rescale them
     estimated_values = Rescale(min_item[0], max_item[0], estimated_values)
+    
+    if assessment_method is not None :
+        error[1]=error[1]/len(assessment)
         
     print("===============================================================")
     print("| Result of CTJ algorithm")
@@ -503,6 +517,8 @@ def CTJ (min_item, max_item, items, sensibility = (0,0,0), true_values = None, m
     if sensibility != (0,0,0) :
         print("| Number of inversion : ", error[0])
         print("| Number of scale error : ", error[1])
+    if sensibility == (0,0,0):
+        print("| Your mean scale error : ", error[1])
     print("| Iteration : ", len(assessments))
     if assessment_method is not None :
         print("| Total duration : ", assessments_time)
