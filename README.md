@@ -29,13 +29,17 @@ This package therefore proposes an implementation of the `CTJ`, the `ACJ`, and t
 ## Installation 
 
 ```
-pip install CTJ
+python setup.py sdist bdist_wheel
+```
+
+```
+pip install ./dist/CTJ-1.1.6-py3-none-any.whl
 ```
 
 Or depending of your version of python :
 
 ```
-pip3 install CTJ
+pip3 install ./dist/CTJ-1.1.6-py3-none-any.whl
 ```
 
 Then you need to restart the Python kernel to finish the installation.

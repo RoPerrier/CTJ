@@ -1,0 +1,1 @@
+The Apache 2.0 License is not suitable for creating a commercial project. However, if you wish to continue developing this package, you can fork it and use the LICENSE file in this repository as a reference.
