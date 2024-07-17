@@ -28,6 +28,8 @@ This package therefore proposes an implementation of the `CTJ`, the `ACJ`, and t
 
 ## Installation 
 
+Pull or fork the repository, navigate to the root directory, and use the following commands:
+
 ```
 python setup.py sdist bdist_wheel
 ```
