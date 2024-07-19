@@ -1,0 +1,41 @@
+Judge,Metric,Rubric,ACJ,ACJ variant,CTJ
+Judge 1,time,72.0,7.0,7.0,50.0
+Judge 1,accuracy,0.9512,0.9019,0.9461,0.9712
+Judge 1,iteration,7.0,9.0,10.0,6.0
+Judge 1,mean scale error,,0.0,0.0,2.0
+Judge 2,time,71.0,9.0,12.0,341.0
+Judge 2,accuracy,0.7902,0.9352,0.9578,0.7567
+Judge 2,iteration,7.0,9.0,14.0,33.0
+Judge 2,mean scale error,,0.0,0.0,4.0
+Judge 3,time,122.0,20.0,15.0,79.0
+Judge 3,accuracy,0.9429,0.9329,0.9088,0.9572
+Judge 3,iteration,7.0,9.0,12.0,8.0
+Judge 3,mean scale error,,0.0,0.0,2.0
+Judge 4,time,87.0,12.0,10.0,85.0
+Judge 4,accuracy,0.9212,0.9182,0.9347,0.9817
+Judge 4,iteration,7.0,9.0,10.0,10.0
+Judge 4,mean scale error,,0.0,0.0,2.0
+Judge 5,time,191.0,63.0,24.0,875.0
+Judge 5,accuracy,0.6367,0.9461,0.9161,0.7951
+Judge 5,iteration,7.0,10.0,8.0,33.0
+Judge 5,mean scale error,,0.0,0.0,5.0
+Judge 6,time,110.0,25.0,18.0,90.0
+Judge 6,accuracy,0.9112,0.9275,0.9020,0.9495
+Judge 6,iteration,7.0,8.0,10.0,9.0
+Judge 6,mean scale error,,0.0,0.0,3.0
+Judge 7,time,95.0,30.0,22.0,105.0
+Judge 7,accuracy,0.9345,0.9080,0.9234,0.9601
+Judge 7,iteration,7.0,7.0,9.0,8.0
+Judge 7,mean scale error,,0.0,0.0,1.0
+Judge 8,time,135.0,45.0,20.0,352.0
+Judge 8,accuracy,0.6888,0.9187,0.9378,0.7456
+Judge 8,iteration,7.0,10.0,9.0,33.0
+Judge 8,mean scale error,,0.0,0.0,4.0
+Judge 9,time,120.0,35.0,17.0,70.0
+Judge 9,accuracy,0.9472,0.9201,0.9056,0.9702
+Judge 9,iteration,7.0,9.0,8.0,7.0
+Judge 9,mean scale error,,0.0,0.0,2.0
+Judge 10,time,105.0,28.0,12.0,95.0
+Judge 10,accuracy,0.9150,0.9270,0.9105,0.9550
+Judge 10,iteration,7.0,8.0,9.0,8.0
+Judge 10,mean scale error,,0.0,0.0,3.0
