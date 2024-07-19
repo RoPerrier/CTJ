@@ -18,7 +18,6 @@
         - [Rubric Assessment Method](#rubric-assessment-method)
         - [ACJ Assessment Method](#acj-assessment-method)
         - [CTJ Assessment Method](#ctj-assessment-method)
-- [License](#license)
 
 ## Description <a name="#description"></a>
 
@@ -440,9 +439,6 @@ Generate a window to let the user make the `CTJ` assessment for pdf.
 **Returns:**
 
 - `tup` (*tuple*) – A tuple containing the assessment results ([Max, Average, Min], dist).
-- 
-## License
-
-This project is licensed under the Apache 2.0 License. See the LICENSE and NOTICE.txt files for more details.
+  
 
 
