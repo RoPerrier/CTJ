@@ -1,5 +1,5 @@
 include README.md
-include NOTICE.txt
+include fix_import_error_tkinter.md
 graft License_idea
 graft Notebook
 graft Test
