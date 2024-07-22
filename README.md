@@ -147,11 +147,11 @@ This directory contains the main source code of the project:
 
 ### License_idea Directory
 
-This directory contains legal information and license files:
+This directory contains preliminary legal information. Please note that the project is not yet licensed, so it should not be used in any official capacity:
 
-- **LICENSE**: The project's license.
-- **NOTICE.txt**: Legal notice regarding the project.
-- **README.txt**: Additional information about the license and legal notices.
+- **LICENSE**: A draft of the project's potential license.
+- **NOTICE.txt**: Contains information about all third-party packages used in the project and the files in which they are utilized.
+- **README.txt**: Additional information.
 
 ### Notebook Directory
 
