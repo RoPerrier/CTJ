@@ -78,6 +78,7 @@ CTJ/
     |       |        ├── Analyse.py
     |       |        ├── README.txt
     |       |        ├── real_test.csv
+    |       |        ├── threshold.py
     |       |        └── time.png
     |       ├── Nb_errors/
     |       |        ├── 30.csv
@@ -171,6 +172,7 @@ This directory contains tests to validate the functionality of the project:
   - **Analyse.py**: Script for analyzing test results.
   - **README.txt**: Instructions for manual tests.
   - **real_test.csv**: Real data for tests.
+  - **threshold.py**: script to determine threshold of judges.
   - **time.png**: Execution time graph of the tests.
 
 - **Nb_errors/**: Tests related to the number of errors.
