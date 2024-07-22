@@ -3,6 +3,7 @@
 ## Table of contents
 - [Description](#description)
 - [Installation](#installation)
+- [Structure](#structure)
 - [Usage](#usage)
     - [For predictive purposes](#for-predictive-purposes)
     - [For testing purposes](#for-testing-purposes)
@@ -44,6 +45,160 @@ pip3 install ./dist/CTJ-1.1.6-py3-none-any.whl
 ```
 
 Then you need to restart the Python kernel to finish the installation.
+
+## Structure
+```
+CTJ/
+    ├── CTJ/
+    |       ├── __init__.py
+    |       ├── ACJ.py
+    |       ├── assessment_method.py
+    |       ├── CTJ.py
+    |       ├── Rubric.py
+    |       ├── selection.py
+    |       └── util.py
+    ├── License_idea/
+    |       ├── LICENSE
+    |       ├── NOTICE.txt
+    |       └── README.txt
+    ├── Notebook/
+    |       ├── ACJ-Tutorial.ipynb
+    |       ├── black.png
+    |       ├── CTJ-Tutorial.ipynb
+    |       ├── g1.png
+    |       ├── g2.png
+    |       ├── g3.png
+    |       ├── g4.png
+    |       ├── g5.png
+    |       ├── Rubric-Tutorial.ipynb
+    |       └── white.png
+    ├── Test/
+    |       ├── Manual_testing/
+    |       |        ├── Accuracy.png
+    |       |        ├── Analyse.py
+    |       |        ├── README.txt
+    |       |        ├── real_test.csv
+    |       |        └── time.png
+    |       ├── Nb_errors/
+    |       |        ├── 30.csv
+    |       |        ├── 30_accuracy.png
+    |       |        ├── 30_iteration.png
+    |       |        ├── 30_proba.png
+    |       |        ├── 60.csv
+    |       |        ├── 60_accuracy.png
+    |       |        ├── 60_iteration.png
+    |       |        ├── 60_proba.png
+    |       |        ├── 90.csv
+    |       |        ├── 90_accuracy.png
+    |       |        ├── 90_iteration.png
+    |       |        ├── 90_proba.png
+    |       |        ├── gather_data.py
+    |       |        ├── nb_errors_data.py
+    |       |        └── README.txt
+    |       ├── Scale_errors/
+    |       |        ├── error_scale.py
+    |       |        ├── error_scale_1.csv
+    |       |        ├── error_scale_2.csv
+    |       |        ├── error_scale_3.csv
+    |       |        ├── error_scale_4.csv
+    |       |        ├── eror_1.png
+    |       |        ├── eror_2.png
+    |       |        ├── eror_3.png
+    |       |        ├── eror_4.png
+    |       |        ├── gather_data.py
+    |       |        └── README.txt
+    |       └── Thresold/
+    |       |        ├── accuracy.png
+    |       |        ├── gather_data.py
+    |       |        ├── Iteration.png
+    |       |        ├── NB_of_errors.png
+    |       |        ├── README.txt
+    |       |        ├── thresold.csv
+    |       |        └── thresold.py
+    ├── fix_import_error_tkinter.md
+    ├── Manifest.in
+    ├── Readme.md
+    └── setup.py
+````
+
+The CTJ project is organized into several directories and files that serve specific purposes. Here is a detailed explanation of each part of the project's architecture:
+
+### Project Root
+
+At the root of the project, you will find the main configuration files and basic documentation:
+
+- **fix_import_error_tkinter.md**: Documentation to resolve Tkinter import errors.
+- **Manifest.in**: Indicates which files should be included in the package distribution.
+- **Readme.md**: General description of the project, installation, and usage instructions.
+- **setup.py**: Configuration script for installing the package.
+
+### CTJ Directory
+
+This directory contains the main source code of the project:
+
+- **CTJ/**
+  - **\_\_init\_\_.py**: Initializes the CTJ package.
+  - **ACJ.py**: Contains classes and functions related to Adaptive Comparative Judgement (ACJ).
+  - **assessment_method.py**: Implements various assessment methods.
+  - **CTJ.py**: Main file containing the core logic of the CTJ application.
+  - **Rubric.py**: Manages the creation and use of evaluation rubrics.
+  - **selection.py**: Algorithms and selection logic.
+  - **util.py**: Utility and helper functions.
+
+### License_idea Directory
+
+This directory contains legal information and license files:
+
+- **LICENSE**: The project's license.
+- **NOTICE.txt**: Legal notice regarding the project.
+- **README.txt**: Additional information about the license and legal notices.
+
+### Notebook Directory
+
+This directory contains Jupyter notebooks for tutorials and visual examples:
+
+- **ACJ-Tutorial.ipynb**: Tutorial on Adaptive Comparative Judgement.
+- **CTJ-Tutorial.ipynb**: General tutorial on using the CTJ project.
+- **Rubric-Tutorial.ipynb**: Tutorial on creating and using evaluation rubrics.
+- **black.png, white.png, g1.png, g2.png, g3.png, g4.png, g5.png**: Images used in the notebooks for illustrations and graphs.
+
+### Test Directory
+
+This directory contains tests to validate the functionality of the project:
+
+- **Manual_testing/**: Manual tests to verify accuracy and performance.
+  - **Accuracy.png**: Accuracy graph of the tests.
+  - **Analyse.py**: Script for analyzing test results.
+  - **README.txt**: Instructions for manual tests.
+  - **real_test.csv**: Real data for tests.
+  - **time.png**: Execution time graph of the tests.
+
+- **Nb_errors/**: Tests related to the number of errors.
+  - **30.csv, 60.csv, 90.csv**: Data for tests with different error levels.
+  - **30_accuracy.png, 60_accuracy.png, 90_accuracy.png**: Accuracy graphs for each error level.
+  - **30_iteration.png, 60_iteration.png, 90_iteration.png**: Iteration graphs for each error level.
+  - **30_proba.png, 60_proba.png, 90_proba.png**: Probability graphs for each error level.
+  - **gather_data.py**: Script for gathering test data.
+  - **nb_errors_data.py**: Main script for ploting result.
+  - **README.txt**: Instructions for tests related to the number of errors.
+
+- **Scale_errors/**: Tests related to error scaling.
+  - **error_scale.py**: Main script for ploting result.
+  - **error_scale_1.csv, error_scale_2.csv, error_scale_3.csv, error_scale_4.csv**: Data for each error scale.
+  - **eror_1.png, eror_2.png, eror_3.png, eror_4.png**: Error graphs for each error scale.
+  - **gather_data.py**: Script for gathering test data.
+  - **README.txt**: Instructions for tests related to error scaling.
+
+- **Thresold/**: Tests related to thresholds.
+  - **accuracy.png**: Accuracy graph based on thresholds.
+  - **gather_data.py**: Script for gathering test data.
+  - **Iteration.png**: Iteration graph based on thresholds.
+  - **NB_of_errors.png**: Number of errors graph based on thresholds.
+  - **README.txt**: Instructions for tests related to thresholds.
+  - **thresold.csv**: Threshold test data.
+  - **thresold.py**: Main script for testing thresholds.
+
+This structure organizes the source code, documentation, tests, and tutorials to facilitate the development, use, and maintenance of the CTJ project.
 
 ## Usage
 
