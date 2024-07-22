@@ -138,12 +138,12 @@ This directory contains the main source code of the project:
 
 - **CTJ/**
   - **\_\_init\_\_.py**: Initializes the CTJ package.
-  - **ACJ.py**: Contains classes and functions related to Adaptive Comparative Judgement (ACJ).
-  - **assessment_method.py**: Implements various assessment methods.
-  - **CTJ.py**: Main file containing the core logic of the CTJ application.
-  - **Rubric.py**: Manages the creation and use of evaluation rubrics.
-  - **selection.py**: Algorithms and selection logic.
-  - **util.py**: Utility and helper functions.
+  - **ACJ.py**: Contains functions related to Adaptive Comparative Judgement (ACJ).
+  - **assessment_method.py**: Implements visual assessment methods for each methods.
+  - **CTJ.py**: Contains functions related to Comparative Triple Judgement (CTJ).
+  - **Rubric.py**: Contains functions related to Rubric assessments.
+  - **selection.py**: Contains selection logic, based on information theory.
+  - **util.py**: Utility functions.
 
 ### License_idea Directory
 
