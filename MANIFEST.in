@@ -1,6 +1,6 @@
 include README.md
-include LICENSE
 include NOTICE.txt
+graft License_idea
 graft Notebook
 graft Test
 prune Notebook/.ipynb_checkpoints
