@@ -84,7 +84,7 @@ def determine_threshold():
         else:
             return
         
-        if selected_shade == max(label1_shade, label2_shade):
+        if selected_shade == max(label1_shade, label2_shade) and not stop:
             step = step // 2
             upper_bound = min(255, int(lower_bound + step))
         else:
@@ -92,11 +92,24 @@ def determine_threshold():
         
         # Check if the range is narrow enough
         if stop:
-            step = step * 2
+            step *= 2
             messagebox.showinfo("Ended", f"Threshold found : {lower_bound + step // 2}")
             root.quit()  # Properly quit the main loop and close the window
         else:
             update_image()
+    
+    def same_color():
+        nonlocal stop, step, lower_bound
+        step *=2
+        stop = True
+        messagebox.showinfo("Ended", f"Threshold found : {lower_bound + step // 2}")
+        root.quit()
+
+    #"Same color" button
+    button_frame = tk.Frame(frame, bg='#f5f5dc')
+    button_frame.pack(pady=10)
+    same_color_button = tk.Button(button_frame, text="Same color", command=same_color)
+    same_color_button.pack()
 
     label1.bind("<Button-1>", on_click)
     label2.bind("<Button-1>", on_click)
