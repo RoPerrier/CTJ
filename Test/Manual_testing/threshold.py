@@ -4,11 +4,18 @@ from PIL import Image, ImageTk
 import numpy as np
 import random
 
-def determine_threshold():
+def determine_threshold(nb_point):
     # Initial parameters
     lower_bound = 0
     upper_bound = 255
     step = 256
+    reduction_factor = 0.8  # Initial reduction factor
+    growth_factor = 1.2  # Initial growth factor for increasing step
+    step_values = []  # To store the step values during transitions
+    iteration = 0
+    phase = 0  # 0 for reduction phase, 1 for growth phase
+    factor_decay = 0.95  # Decay factor for reduction factor in reduction phase
+    growth_decay = 0.95  # Decay factor for growth factor in growth phase
 
     # Create the main window
     root = tk.Tk()
@@ -69,12 +76,12 @@ def determine_threshold():
             label1_shade, label2_shade = shade2, shade1
 
         # Update instructions
-        instruction.config(text="Choose the lightest shade\n")
+        instruction.config(text="Choose the lightest shade\n"
+                           f"Number of iterations : {iteration}")
 
-    stop = False
-    
     def on_click(event):
-        nonlocal label1_shade, label2_shade, lower_bound, upper_bound, step, stop
+        nonlocal label1_shade, label2_shade, lower_bound, upper_bound, step, reduction_factor, growth_factor, iteration, phase, factor_decay, growth_decay
+        
         clicked_label = event.widget
         
         if clicked_label == label1:
@@ -84,28 +91,76 @@ def determine_threshold():
         else:
             return
         
-        if selected_shade == max(label1_shade, label2_shade) and not stop:
-            step = step // 2
-            upper_bound = min(255, int(lower_bound + step))
-        else:
-            stop = True
-        
-        # Check if the range is narrow enough
-        if stop:
-            step *= 2
-            messagebox.showinfo("Ended", f"Threshold found : {lower_bound + step // 2}")
-            root.quit()  # Properly quit the main loop and close the window
-        else:
-            update_image()
-    
-    def same_color():
-        nonlocal stop, step, lower_bound
-        step *=2
-        stop = True
-        messagebox.showinfo("Ended", f"Threshold found : {lower_bound + step // 2}")
-        root.quit()
+        correct_selection = (selected_shade == max(label1_shade, label2_shade))
 
-    #"Same color" button
+        if phase == 0:  # Reduction phase
+            if correct_selection:
+                step = int(step * reduction_factor)
+                upper_bound = lower_bound + step
+                reduction_factor *= factor_decay  # Decay the reduction factor
+                update_image()
+            else:
+                # Transition to the growth phase
+                if len(step_values) < nb_point:
+                    step_values.append(step)
+                phase = 1
+                iteration += 1
+                # Prepare for the next phase
+                lower_bound = np.clip(lower_bound + step, 0, 255)
+                upper_bound = np.clip(upper_bound + step, 0, 255)
+                step = int(step * growth_factor)  # Increase step size
+                growth_factor *= growth_decay  # Decay the growth factor
+                update_image()
+        else:  # Growth phase
+            if correct_selection:
+                # Save the value of step and transition back to reduction phase
+                if len(step_values) < nb_point:
+                    step_values.append(step)
+                phase = 0
+                iteration += 1
+                # Prepare for the next phase
+                lower_bound = np.clip(lower_bound - step, 0, 255)
+                upper_bound = np.clip(upper_bound - step, 0, 255)
+                step = int(step / growth_factor)  # Decrease step size
+                reduction_factor *= factor_decay  # Decay the reduction factor
+                update_image()
+            else:
+                step = int(step // reduction_factor)
+                upper_bound = lower_bound + step
+                update_image()
+        if len(step_values) >= nb_point:
+            messagebox.showinfo("Ended", f"Threshold values: {step_values}")
+            root.quit()
+            
+    def same_color():
+        nonlocal lower_bound, upper_bound, step, iteration, phase, factor_decay, growth_decay, reduction_factor, growth_factor
+        
+        if phase == 0:  # Reduction phase
+            # Save step value and transition to the growth phase
+            if len(step_values) < nb_point:
+                step_values.append(step)
+            phase = 1
+            iteration += 1
+            # Prepare for the next phase
+            lower_bound = np.clip(lower_bound + step, 0, 255)
+            upper_bound = np.clip(upper_bound + step, 0, 255)
+            step = int(step * growth_factor)  # Increase step size
+            growth_factor *= growth_decay  # Decay the growth factor
+            update_image()
+        else:  # Growth phase
+            # Save step value and adjust upper_bound only
+            phase = 1
+            iteration += 1
+            # Only increase the upper bound
+            upper_bound = np.clip(upper_bound + step, 0, 255)
+            step = int(step / growth_factor)  # Decrease step size
+            reduction_factor *= factor_decay  # Decay the reduction factor
+            update_image()
+        if len(step_values) >= nb_point:
+            messagebox.showinfo("Ended", f"Threshold values: {step_values}")
+            root.quit()
+
+    # "Same color" button
     button_frame = tk.Frame(frame, bg='#f5f5dc')
     button_frame.pack(pady=10)
     same_color_button = tk.Button(button_frame, text="Same color", command=same_color)
@@ -121,11 +176,12 @@ def determine_threshold():
         # Run the GUI loop
         root.mainloop()
     except Exception as e:
-        print(f"An error has occurred : {e}")
+        print(f"An error has occurred: {e}")
     finally:
         # Ensure the window is closed properly
         root.destroy()
-        return lower_bound + step // 2
+        return step_values
 
 if __name__ == "__main__":
-    print(determine_threshold())
+    nb_point = 10  # Example number of iterations
+    print(determine_threshold(nb_point))
