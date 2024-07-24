@@ -172,7 +172,7 @@ This directory contains tests to validate the functionality of the project:
   - **Analyse.py**: Script for analyzing test results.
   - **README.txt**: Instructions for manual tests.
   - **real_test.csv**: Real data for tests.
-  - **threshold.py**: script to determine threshold of judges.
+  - **threshold.py**:This script determines the threshold value set by a judge. It returns a list of points, with each subsequent point representing a less significant step than the previous one.
   - **time.png**: Execution time graph of the tests.
 
 - **Nb_errors/**: Tests related to the number of errors.
