@@ -108,6 +108,9 @@ def determine_threshold(nb_point):
                 # Prepare for the next phase
                 lower_bound = np.clip(lower_bound + step, 0, 255)
                 upper_bound = np.clip(upper_bound + step, 0, 255)
+                if lower_bound == upper_bound :
+                    lower_bound = 0
+                    upper_bound = 255
                 step = int(step * growth_factor)  # Increase step size
                 growth_factor *= growth_decay  # Decay the growth factor
                 update_image()
@@ -121,6 +124,9 @@ def determine_threshold(nb_point):
                 # Prepare for the next phase
                 lower_bound = np.clip(lower_bound - step, 0, 255)
                 upper_bound = np.clip(upper_bound - step, 0, 255)
+                if lower_bound == upper_bound :
+                    lower_bound = 0
+                    upper_bound = 255
                 step = int(step / growth_factor)  # Decrease step size
                 reduction_factor *= factor_decay  # Decay the reduction factor
                 update_image()
@@ -144,6 +150,9 @@ def determine_threshold(nb_point):
             # Prepare for the next phase
             lower_bound = np.clip(lower_bound + step, 0, 255)
             upper_bound = np.clip(upper_bound + step, 0, 255)
+            if lower_bound == upper_bound :
+                lower_bound = 0
+                upper_bound = 255
             step = int(step * growth_factor)  # Increase step size
             growth_factor *= growth_decay  # Decay the growth factor
             update_image()
@@ -152,13 +161,16 @@ def determine_threshold(nb_point):
             phase = 1
             # Only increase the upper bound
             upper_bound = np.clip(upper_bound + step, 0, 255)
+            if lower_bound == upper_bound :
+                lower_bound = 0
+                upper_bound = 255
             step = int(step / growth_factor)  # Decrease step size
             reduction_factor *= factor_decay  # Decay the reduction factor
             update_image()
         if len(step_values) >= nb_point:
             messagebox.showinfo("Ended", f"Threshold values: {step_values}")
             root.quit()
-
+        
     # "Same color" button
     button_frame = tk.Frame(frame, bg='#f5f5dc')
     button_frame.pack(pady=10)
