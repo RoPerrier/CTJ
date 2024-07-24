@@ -150,7 +150,6 @@ def determine_threshold(nb_point):
         else:  # Growth phase
             # Save step value and adjust upper_bound only
             phase = 1
-            iteration += 1
             # Only increase the upper bound
             upper_bound = np.clip(upper_bound + step, 0, 255)
             step = int(step / growth_factor)  # Decrease step size
@@ -183,5 +182,5 @@ def determine_threshold(nb_point):
         return step_values
 
 if __name__ == "__main__":
-    nb_point = 10  # Example number of iterations
+    nb_point = 5  # Example number of iterations
     print(determine_threshold(nb_point))
