@@ -109,6 +109,9 @@ def determine_threshold(nb_point):
                 lower_bound = np.clip(lower_bound + step, 0, 255)
                 upper_bound = np.clip(upper_bound + step, 0, 255)
                 if lower_bound == upper_bound :
+                    phase = 0
+                    reduction_factor = 0.8
+                    growth_factor = 1.2
                     lower_bound = 0
                     upper_bound = 255
                 step = int(step * growth_factor)  # Increase step size
@@ -125,6 +128,9 @@ def determine_threshold(nb_point):
                 lower_bound = np.clip(lower_bound - step, 0, 255)
                 upper_bound = np.clip(upper_bound - step, 0, 255)
                 if lower_bound == upper_bound :
+                    phase = 0
+                    reduction_factor = 0.8
+                    growth_factor = 1.2
                     lower_bound = 0
                     upper_bound = 255
                 step = int(step / growth_factor)  # Decrease step size
@@ -151,6 +157,9 @@ def determine_threshold(nb_point):
             lower_bound = np.clip(lower_bound + step, 0, 255)
             upper_bound = np.clip(upper_bound + step, 0, 255)
             if lower_bound == upper_bound :
+                phase = 0
+                reduction_factor = 0.8
+                growth_factor = 1.2
                 lower_bound = 0
                 upper_bound = 255
             step = int(step * growth_factor)  # Increase step size
@@ -162,6 +171,9 @@ def determine_threshold(nb_point):
             # Only increase the upper bound
             upper_bound = np.clip(upper_bound + step, 0, 255)
             if lower_bound == upper_bound :
+                phase = 0
+                reduction_factor = 0.8
+                growth_factor = 1.2
                 lower_bound = 0
                 upper_bound = 255
             step = int(step / growth_factor)  # Decrease step size
