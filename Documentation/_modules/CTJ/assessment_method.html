@@ -1,0 +1,961 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CTJ.assessment_method &#8212; CTJ 1.1.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CTJ 1.1.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CTJ.assessment_method</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for CTJ.assessment_method</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Mon May 13 15:24:08 2024</span>
+
+<span class="sd">@author: Romain Perrier</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;tkinter is not installed, for more information refer to : https://github.com/RoPerrier/CTJ/blob/main/fix_import_error_tkinter.md&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageTk</span>
+    
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">fitz</span>
+
+<span class="c1">###############################         FUNCTIONS       ############################################</span>
+
+<div class="viewcode-block" id="AssessmentManager"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.AssessmentManager">[docs]</a><span class="k">class</span> <span class="nc">AssessmentManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class to manage various assessment-related operations such as sorting elements, </span>
+<span class="sd">    handling user inputs, and managing the state of the assessment process.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    _testing : bool</span>
+<span class="sd">        Indicates if the assessment is currently in testing mode. Default is True.</span>
+<span class="sd">    _bad_ending : bool</span>
+<span class="sd">        Indicates if the assessment ended in an error state. Default is False.</span>
+<span class="sd">    _sort : list</span>
+<span class="sd">        A list used for storing sorted elements.</span>
+<span class="sd">    _sort_label : list</span>
+<span class="sd">        A list of labels corresponding to the sorted elements.</span>
+<span class="sd">    _selected_index : int or None</span>
+<span class="sd">        The currently selected index in the sorting process. Default is None.</span>
+<span class="sd">    _dist : int</span>
+<span class="sd">        A distance metric used in the CTJ assessment process. Or the value entered by the user in Rubric assessment. Default is -1.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">    --------</span>
+<span class="sd">    testing() -&gt; bool:</span>
+<span class="sd">        Property to get the testing status.</span>
+<span class="sd">    testing(value: bool):</span>
+<span class="sd">        Property to set the testing status.</span>
+<span class="sd">    bad_ending() -&gt; bool:</span>
+<span class="sd">        Property to get the bad ending status.</span>
+<span class="sd">    bad_ending(value: bool):</span>
+<span class="sd">        Property to set the bad ending status.</span>
+<span class="sd">    sort() -&gt; list:</span>
+<span class="sd">        Property to get the sorted elements list.</span>
+<span class="sd">    sort(value: list):</span>
+<span class="sd">        Property to set the sorted elements list.</span>
+<span class="sd">    sort_label() -&gt; list:</span>
+<span class="sd">        Property to get the sorted labels list.</span>
+<span class="sd">    sort_label(value: list):</span>
+<span class="sd">        Property to set the sorted labels list.</span>
+<span class="sd">    selected_index() -&gt; int or None:</span>
+<span class="sd">        Property to get the selected index.</span>
+<span class="sd">    selected_index(value: int or None):</span>
+<span class="sd">        Property to set the selected index.</span>
+<span class="sd">    dist() -&gt; int:</span>
+<span class="sd">        Property to get the distance metric.</span>
+<span class="sd">    dist(value: int):</span>
+<span class="sd">        Property to set the distance metric.</span>
+<span class="sd">    exit_program():</span>
+<span class="sd">        Sets the testing status to False and bad ending status to True.</span>
+<span class="sd">    rubric_close(entry):</span>
+<span class="sd">        Sets the distance metric from the given entry and sets the testing status to False.</span>
+<span class="sd">    validate_entry(input: str) -&gt; bool:</span>
+<span class="sd">        Validates the user input, allowing only digits or an empty string.</span>
+<span class="sd">    acj_close(element, pair):</span>
+<span class="sd">        Sorts the pair of elements based on a condition and sets the testing status to False.</span>
+<span class="sd">    swap_images(event, index: int, trio: list):</span>
+<span class="sd">        Swaps images in the trio based on the selected index.</span>
+<span class="sd">    ctj_close(trio: list, slider, slider_range: int):</span>
+<span class="sd">        Configures the sorted elements and distance metric based on the trio and slider values, and sets the testing status to False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_testing</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bad_ending</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sort</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sort_label</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selected_index</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dist</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">testing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testing</span>
+    
+    <span class="nd">@testing</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">testing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_testing</span> <span class="o">=</span> <span class="n">value</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bad_ending</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bad_ending</span>
+    
+    <span class="nd">@bad_ending</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">bad_ending</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bad_ending</span> <span class="o">=</span> <span class="n">value</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort</span>
+
+    <span class="nd">@sort</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sort</span> <span class="o">=</span> <span class="n">value</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sort_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_label</span>
+
+    <span class="nd">@sort_label</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">sort_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sort_label</span> <span class="o">=</span> <span class="n">value</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">selected_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_index</span>
+
+    <span class="nd">@selected_index</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">selected_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_selected_index</span> <span class="o">=</span> <span class="n">value</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist</span>
+
+    <span class="nd">@dist</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dist</span> <span class="o">=</span> <span class="n">value</span>
+    
+<div class="viewcode-block" id="AssessmentManager.exit_program"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.AssessmentManager.exit_program">[docs]</a>    <span class="k">def</span> <span class="nf">exit_program</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the testing status to False and bad ending status to True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bad_ending</span> <span class="o">=</span> <span class="kc">True</span></div>
+        
+<div class="viewcode-block" id="AssessmentManager.rubric_close"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.AssessmentManager.rubric_close">[docs]</a>    <span class="k">def</span> <span class="nf">rubric_close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entry</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the distance metric from the given entry and sets the testing status to False.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        entry : Entry</span>
+<span class="sd">            The entry widget containing the distance metric.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span></div>
+        
+<div class="viewcode-block" id="AssessmentManager.validate_entry"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.AssessmentManager.validate_entry">[docs]</a>    <span class="k">def</span> <span class="nf">validate_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validates the user input, allowing only digits or an empty string.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        input : str</span>
+<span class="sd">            The user input to be validated.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if the input is valid, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">input</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">or</span> <span class="nb">input</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="AssessmentManager.acj_close"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.AssessmentManager.acj_close">[docs]</a>    <span class="k">def</span> <span class="nf">acj_close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">pair</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sorts the pair of elements based on a condition and sets the testing status to False.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        element : any</span>
+<span class="sd">            The element to be used as a key for sorting.</span>
+<span class="sd">        pair : list</span>
+<span class="sd">            The list of elements to be sorted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pair</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">!=</span> <span class="n">element</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span></div>
+        
+<div class="viewcode-block" id="AssessmentManager.swap_images"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.AssessmentManager.swap_images">[docs]</a>    <span class="k">def</span> <span class="nf">swap_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">trio</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Swaps images in the trio based on the selected index.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        event : Event</span>
+<span class="sd">            The event that triggered the swap.</span>
+<span class="sd">        index : int</span>
+<span class="sd">            The index of the image to be swapped.</span>
+<span class="sd">        trio : list</span>
+<span class="sd">            The list containing the images.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>  <span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_index</span><span class="p">]</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_index</span><span class="p">],</span>  <span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">trio</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">trio</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">trio</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_index</span><span class="p">],</span> <span class="n">trio</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">sort_label</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sort_label</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_index</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_index</span><span class="p">])</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_index</span> <span class="o">=</span> <span class="kc">None</span></div>
+    
+<div class="viewcode-block" id="AssessmentManager.ctj_close"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.AssessmentManager.ctj_close">[docs]</a>    <span class="k">def</span> <span class="nf">ctj_close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trio</span><span class="p">,</span> <span class="n">slider</span><span class="p">,</span> <span class="n">slider_range</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configures the sorted elements and distance metric based on the trio and slider values, and sets the testing status to False.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        trio : list</span>
+<span class="sd">            The list of elements to be sorted.</span>
+<span class="sd">        slider : Scale</span>
+<span class="sd">            The slider widget to get the distance metric.</span>
+<span class="sd">        slider_range : int</span>
+<span class="sd">            The range of the slider.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort</span> <span class="o">=</span> <span class="p">[</span><span class="n">trio</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trio</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="n">slider</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">&gt;=</span> <span class="n">slider_range</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="n">slider_range</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="mi">0</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span></div></div>
+
+
+<div class="viewcode-block" id="rubric_assessment_method_image"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.rubric_assessment_method_image">[docs]</a><span class="k">def</span> <span class="nf">rubric_assessment_method_image</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a window to let the user make the Rubric assessment.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item : string</span>
+<span class="sd">        A strings representing the item being assessed.</span>
+<span class="sd">    nb_assessment : int</span>
+<span class="sd">        The number of assessment done.</span>
+<span class="sd">    window : WindowManager</span>
+<span class="sd">        an object to manage human assessments.</span>
+<span class="sd">        </span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        No file in directory.</span>
+<span class="sd">    Exception</span>
+<span class="sd">        The assessment was not done.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    item_value : int</span>
+<span class="sd">        The estimated value made by the user for this item.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">rubric_assessment</span>  <span class="o">=</span> <span class="n">AssessmentManager</span><span class="p">()</span>
+        
+    <span class="n">item_value</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Check if root and window.bgcolor are already defined</span>
+    <span class="n">window</span><span class="o">.</span><span class="n">create_window</span><span class="p">(</span><span class="s2">&quot;Rubric&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Create text block</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span> <span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Please enter the value of this item :&quot;</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">pack</span> <span class="p">()</span>
+    
+    <span class="c1"># Load images dynamically based on list elements</span>
+    
+    <span class="n">image_path</span> <span class="o">=</span> <span class="n">item</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">image_path</span><span class="p">):</span>
+        <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">image_path</span> <span class="o">+</span> <span class="s2">&quot; not in directory.&quot;</span><span class="p">)</span>
+    
+    <span class="n">image</span> <span class="o">=</span> <span class="n">resize_image</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenwidth</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">)</span><span class="o">//</span><span class="mi">3</span><span class="p">,</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenheight</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+    
+    <span class="n">label_frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">label_frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">label_frame</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="n">image</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">label</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="c1"># Entry only for int</span>
+    <span class="n">entry_frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">entry_frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">vcmd</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">rubric_assessment</span><span class="o">.</span><span class="n">validate_entry</span><span class="p">)</span>
+    <span class="n">entry</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Entry</span><span class="p">(</span><span class="n">entry_frame</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="n">validatecommand</span><span class="o">=</span><span class="p">(</span><span class="n">vcmd</span><span class="p">,</span> <span class="s1">&#39;%P&#39;</span><span class="p">))</span>
+    <span class="n">entry</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update_idletasks</span><span class="p">()</span> <span class="c1">#For macOs</span>
+    
+    <span class="n">close_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Next&quot;</span><span class="p">,</span> <span class="n">command</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">rubric_close</span><span class="p">(</span><span class="n">entry</span><span class="p">))</span>
+    <span class="n">close_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">assessment_label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;You are making the </span><span class="si">{</span><span class="n">nb_assessment</span><span class="si">}</span><span class="s2"> judgement&quot;</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">BOTTOM</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">protocol</span><span class="p">(</span><span class="s2">&quot;WM_DELETE_WINDOW&quot;</span><span class="p">,</span> <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">exit_program</span><span class="p">)</span>
+    
+    <span class="k">while</span> <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">testing</span><span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_children</span><span class="p">():</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">bad_ending</span> <span class="ow">or</span> <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">dist</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Assessment not done !&quot;</span><span class="p">)</span>
+    
+    <span class="n">item_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rubric_assessment</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">item_value</span></div>
+
+<div class="viewcode-block" id="acj_assessment_method_image"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.acj_assessment_method_image">[docs]</a><span class="k">def</span> <span class="nf">acj_assessment_method_image</span><span class="p">(</span><span class="n">id_judge</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a window to let the user make the ACJ assessment.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    id_judge : int</span>
+<span class="sd">        The id of the judge making the assessment.</span>
+<span class="sd">    pair : list of string</span>
+<span class="sd">        A list of strings representing the pair of items being assessed.</span>
+<span class="sd">    nb_assessment : int</span>
+<span class="sd">        The number of assessments done.</span>
+<span class="sd">    window : WindowManager</span>
+<span class="sd">        an object to manage human assessments.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        No file in directory.</span>
+<span class="sd">    Exception</span>
+<span class="sd">        The assessment was not done.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sort : list</span>
+<span class="sd">        A list of string containing the assessment results in the format [Max, Min].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">acj_assessment</span> <span class="o">=</span> <span class="n">AssessmentManager</span><span class="p">()</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">create_window</span><span class="p">(</span><span class="s2">&quot;ACJ&quot;</span><span class="p">)</span>
+        
+    <span class="c1"># Create text block</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span> <span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Judge &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">id_judge</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Please select the best item :&quot;</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">pack</span> <span class="p">()</span>
+    
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="c1"># Load images dynamically based on list elements</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">image_name</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">:</span>
+        <span class="n">image_path</span> <span class="o">=</span> <span class="n">image_name</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">image_path</span><span class="p">):</span>
+            <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+            <span class="n">acj_assessment</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">image_path</span> <span class="o">+</span> <span class="s2">&quot; not in directory.&quot;</span><span class="p">)</span>
+    
+        <span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resize_image</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenwidth</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">)</span><span class="o">//</span><span class="mi">3</span><span class="p">,</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenheight</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">))</span>
+                      
+    <span class="n">label1</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">label1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">label1</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Button-1&gt;&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">acj_close</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pair</span><span class="p">))</span>
+    
+    <span class="n">label2</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="n">images</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">label2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">label2</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Button-1&gt;&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">acj_close</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pair</span><span class="p">))</span>
+    
+    <span class="n">assessment_label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;You are making the </span><span class="si">{</span><span class="n">nb_assessment</span><span class="si">}</span><span class="s2"> judgement&quot;</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">BOTTOM</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">protocol</span><span class="p">(</span><span class="s2">&quot;WM_DELETE_WINDOW&quot;</span><span class="p">,</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">exit_program</span><span class="p">)</span>
+    
+    <span class="k">while</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">testing</span><span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_children</span><span class="p">():</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">bad_ending</span><span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Assessment not done !&quot;</span><span class="p">)</span>
+    
+    <span class="n">sort</span> <span class="o">=</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">sort</span>
+    
+    <span class="k">return</span> <span class="n">sort</span></div>
+    
+<div class="viewcode-block" id="ctj_assessment_method_image"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.ctj_assessment_method_image">[docs]</a><span class="k">def</span> <span class="nf">ctj_assessment_method_image</span><span class="p">(</span><span class="n">slider_range</span><span class="p">,</span> <span class="n">trio</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a window to let the user make the CTJ assessment.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    slider_range : int</span>
+<span class="sd">        The range of the slider.</span>
+<span class="sd">    trio : list of string</span>
+<span class="sd">        A list of strings representing the trio of items being assessed.</span>
+<span class="sd">    nb_assessment : int</span>
+<span class="sd">        The number of assessment done.</span>
+<span class="sd">    window : WindowManager</span>
+<span class="sd">        an object to manage human assessments.</span>
+<span class="sd">        </span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        No file in directory.</span>
+<span class="sd">    Exception</span>
+<span class="sd">        The assessment was not done.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tup : tuple</span>
+<span class="sd">        A tuple containing the assessment results ([Max, Average, Min], dist).In the format ([int, int, int], int).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">ctj_assessment</span> <span class="o">=</span> <span class="n">AssessmentManager</span><span class="p">()</span>
+    
+    <span class="n">window</span><span class="o">.</span><span class="n">create_window</span><span class="p">(</span><span class="s2">&quot;CTJ&quot;</span><span class="p">)</span>
+
+    <span class="c1">#create text block</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span> <span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Please sort the items from best to worst, then choose the distance between the middle item and the others:</span><span class="se">\n</span><span class="s2">(To swap two items, click the first one, then the second)&quot;</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">pack</span> <span class="p">()</span>
+
+    <span class="n">label_frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">label_frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">image_name</span> <span class="ow">in</span> <span class="n">trio</span><span class="p">:</span>
+        <span class="n">image_path</span> <span class="o">=</span> <span class="n">image_name</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">image_path</span><span class="p">):</span>
+            <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">image_path</span> <span class="o">+</span> <span class="s2">&quot; not in directory.&quot;</span><span class="p">)</span>
+
+        <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resize_image</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenwidth</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">)</span><span class="o">//</span><span class="mi">3</span><span class="p">,</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenheight</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">))</span>
+    
+    <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">sort_label</span> <span class="o">=</span> <span class="p">[</span><span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">label_frame</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="n">image</span><span class="p">)</span> <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">sort</span><span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ctj_assessment</span><span class="o">.</span><span class="n">sort_label</span><span class="p">):</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Button-1&gt;&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">i</span><span class="p">:</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">swap_images</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">trio</span><span class="p">))</span>
+    
+    <span class="n">slider_frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">slider_frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">slider</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">slider_frame</span><span class="p">,</span> <span class="n">from_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="n">slider_range</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">HORIZONTAL</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+    <span class="n">slider</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">trio</span><span class="p">),</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update_idletasks</span><span class="p">()</span> <span class="c1">#For macOs</span>
+
+    <span class="n">close_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Next&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">ctj_close</span><span class="p">(</span><span class="n">trio</span><span class="p">,</span> <span class="n">slider</span><span class="p">,</span> <span class="n">slider_range</span><span class="p">))</span>
+    <span class="n">close_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">assessment_label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;You are making the </span><span class="si">{</span><span class="n">nb_assessment</span><span class="si">}</span><span class="s2"> judgement&quot;</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">BOTTOM</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">protocol</span><span class="p">(</span><span class="s2">&quot;WM_DELETE_WINDOW&quot;</span><span class="p">,</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">exit_program</span><span class="p">)</span>
+    
+    <span class="k">while</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">testing</span> <span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_children</span><span class="p">():</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">bad_ending</span> <span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Assessment not done !&quot;</span><span class="p">)</span>
+    
+    <span class="n">tup</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctj_assessment</span><span class="o">.</span><span class="n">sort</span><span class="p">,</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">tup</span></div>
+
+<div class="viewcode-block" id="resize_image"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.resize_image">[docs]</a><span class="k">def</span> <span class="nf">resize_image</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Resize an image while preserving its aspect ratio using Pillow.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image_path : string</span>
+<span class="sd">        Path to the image file.</span>
+<span class="sd">    width : int</span>
+<span class="sd">        The maximum width of images displayed.</span>
+<span class="sd">    width : int</span>
+<span class="sd">        The height width of images displayed.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    resized_image : tk.PhotoImage</span>
+<span class="sd">        Resized image as a Tkinter PhotoImage object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+        
+    <span class="n">original_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+    
+    <span class="c1"># Use the thumbnail method to resize the image in place</span>
+    <span class="n">original_image</span><span class="o">.</span><span class="n">thumbnail</span><span class="p">((</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="n">Image</span><span class="o">.</span><span class="n">Resampling</span><span class="o">.</span><span class="n">LANCZOS</span><span class="p">)</span>
+    
+    <span class="c1"># Convert the resized image to a Tkinter PhotoImage object</span>
+    <span class="n">resized_image</span> <span class="o">=</span> <span class="n">ImageTk</span><span class="o">.</span><span class="n">PhotoImage</span><span class="p">(</span><span class="n">original_image</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">resized_image</span></div>
+
+
+<span class="c1">###PDF</span>
+
+
+<div class="viewcode-block" id="PDFViewer"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.PDFViewer">[docs]</a><span class="k">class</span> <span class="nc">PDFViewer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="n">file_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doc</span> <span class="o">=</span> <span class="n">fitz</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_pages</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_page</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">img_tk</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_refs</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="PDFViewer.create_viewer_window"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.PDFViewer.create_viewer_window">[docs]</a>    <span class="k">def</span> <span class="nf">create_viewer_window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer_root</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Toplevel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer_root</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="s1">&#39;750x700&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Add scroll bar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollbar</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Scrollbar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewer_root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollbar</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">Y</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewer_root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        
+        <span class="c1"># Add canvas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Canvas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewer_root</span><span class="p">,</span> <span class="n">yscrollcommand</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollbar</span><span class="o">.</span><span class="n">set</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">LEFT</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">BOTH</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Add buttons to navigate pages</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prev_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Previous&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prev_page</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Next&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">next_page</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prev_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">TOP</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">TOP</span><span class="p">)</span>
+
+        <span class="c1"># Bind resize event to update image size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer_root</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Configure&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_resize</span><span class="p">)</span>
+
+        <span class="c1"># Initial display of the first page</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_image</span><span class="p">()</span>
+
+        <span class="c1"># Configure the scroll bar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scrollbar</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">yview</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer_root</span><span class="o">.</span><span class="n">protocol</span><span class="p">(</span><span class="s2">&quot;WM_DELETE_WINDOW&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer_root</span><span class="o">.</span><span class="n">destroy</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PDFViewer.pdf_to_img"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.PDFViewer.pdf_to_img">[docs]</a>    <span class="k">def</span> <span class="nf">pdf_to_img</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">page_num</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">load_page</span><span class="p">(</span><span class="n">page_num</span><span class="p">)</span>
+        <span class="n">zoom</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="n">page</span><span class="o">.</span><span class="n">rect</span><span class="o">.</span><span class="n">width</span>
+        <span class="n">mat</span> <span class="o">=</span> <span class="n">fitz</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">zoom</span><span class="p">,</span> <span class="n">zoom</span><span class="p">)</span>
+        <span class="n">pix</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">get_pixmap</span><span class="p">(</span><span class="n">matrix</span><span class="o">=</span><span class="n">mat</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Image</span><span class="o">.</span><span class="n">frombytes</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">pix</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">pix</span><span class="o">.</span><span class="n">height</span><span class="p">],</span> <span class="n">pix</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PDFViewer.show_image"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.PDFViewer.show_image">[docs]</a>    <span class="k">def</span> <span class="nf">show_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">winfo_width</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Initial call before canvas is properly sized</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">viewer_root</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_image</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdf_to_img</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_page</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">img_tk</span> <span class="o">=</span> <span class="n">ImageTk</span><span class="o">.</span><span class="n">PhotoImage</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>  <span class="c1"># Clear previous images</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">create_image</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s1">&#39;nw&#39;</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">img_tk</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">scrollregion</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">bbox</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">))</span>
+
+            <span class="c1"># Keep a reference to the image to avoid garbage collection</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">image_refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_tk</span><span class="p">)</span>
+
+            <span class="c1"># Update buttons visibility</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prev_button</span><span class="o">.</span><span class="n">pack_forget</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">next_button</span><span class="o">.</span><span class="n">pack_forget</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_page</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">prev_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">LEFT</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_page</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_pages</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">next_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PDFViewer.next_page"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.PDFViewer.next_page">[docs]</a>    <span class="k">def</span> <span class="nf">next_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_page</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_pages</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_page</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_image</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PDFViewer.prev_page"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.PDFViewer.prev_page">[docs]</a>    <span class="k">def</span> <span class="nf">prev_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_page</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_page</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_image</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PDFViewer.on_resize"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.PDFViewer.on_resize">[docs]</a>    <span class="k">def</span> <span class="nf">on_resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_image</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PDFViewer.display_first_page"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.PDFViewer.display_first_page">[docs]</a>    <span class="k">def</span> <span class="nf">display_first_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+        <span class="n">first_page_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdf_to_img</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+
+        <span class="n">first_page_image</span><span class="o">.</span><span class="n">thumbnail</span><span class="p">((</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="n">Image</span><span class="o">.</span><span class="n">Resampling</span><span class="o">.</span><span class="n">LANCZOS</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">ImageTk</span><span class="o">.</span><span class="n">PhotoImage</span><span class="p">(</span><span class="n">first_page_image</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="rubric_assessment_method_pdf"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.rubric_assessment_method_pdf">[docs]</a><span class="k">def</span> <span class="nf">rubric_assessment_method_pdf</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+    <span class="n">rubric_assessment</span> <span class="o">=</span> <span class="n">AssessmentManager</span><span class="p">()</span>
+        
+    <span class="n">item_value</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">create_window</span><span class="p">(</span><span class="s2">&quot;Rubric&quot;</span><span class="p">)</span>
+    
+    <span class="n">l</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Please enter the value of this item:&quot;</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+
+    <span class="c1"># Create PDFViewer instance without displaying it</span>
+    <span class="n">pdf_viewer</span> <span class="o">=</span> <span class="n">PDFViewer</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">item</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Convert the first page of the PDF to an image</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">):</span>
+        <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="s2">&quot;.pdf not in directory.&quot;</span><span class="p">)</span>
+    
+    <span class="n">first_page_image</span> <span class="o">=</span> <span class="n">pdf_viewer</span><span class="o">.</span><span class="n">display_first_page</span><span class="p">((</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenwidth</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span><span class="p">,</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenheight</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="n">label_frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">label_frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">label_frame</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="n">first_page_image</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">label</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">label</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">first_page_image</span>  <span class="c1"># Keep a reference to avoid garbage collection</span>
+
+    <span class="k">def</span> <span class="nf">view</span><span class="p">():</span>
+        <span class="n">pdf_viewer</span><span class="o">.</span><span class="n">create_viewer_window</span><span class="p">()</span>
+
+    <span class="n">view_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;View&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
+    <span class="n">view_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">entry_frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">entry_frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">vcmd</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">rubric_assessment</span><span class="o">.</span><span class="n">validate_entry</span><span class="p">)</span>
+    <span class="n">entry</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Entry</span><span class="p">(</span><span class="n">entry_frame</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="n">validatecommand</span><span class="o">=</span><span class="p">(</span><span class="n">vcmd</span><span class="p">,</span> <span class="s1">&#39;%P&#39;</span><span class="p">))</span>
+    <span class="n">entry</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update_idletasks</span><span class="p">()</span>  <span class="c1"># For macOS</span>
+    
+    <span class="n">close_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Next&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">rubric_close</span><span class="p">(</span><span class="n">entry</span><span class="p">))</span>
+    <span class="n">close_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">assessment_label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;You are making the </span><span class="si">{</span><span class="n">nb_assessment</span><span class="si">}</span><span class="s2"> judgement&quot;</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">BOTTOM</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">protocol</span><span class="p">(</span><span class="s2">&quot;WM_DELETE_WINDOW&quot;</span><span class="p">,</span> <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">exit_program</span><span class="p">)</span>
+    
+    <span class="k">while</span> <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">testing</span><span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_children</span><span class="p">():</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">bad_ending</span> <span class="ow">or</span> <span class="n">rubric_assessment</span><span class="o">.</span><span class="n">dist</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Assessment not done!&quot;</span><span class="p">)</span>
+    
+    <span class="n">item_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rubric_assessment</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">item_value</span></div>
+
+
+<div class="viewcode-block" id="acj_assessment_method_pdf"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.acj_assessment_method_pdf">[docs]</a><span class="k">def</span> <span class="nf">acj_assessment_method_pdf</span><span class="p">(</span><span class="n">id_judge</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a window to let the user make the ACJ assessment.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    id_judge : int</span>
+<span class="sd">        The id of the judge making the assessment.</span>
+<span class="sd">    pair : list of string</span>
+<span class="sd">        A list of strings representing the pair of items being assessed.</span>
+<span class="sd">    nb_assessment : int</span>
+<span class="sd">        The number of assessments done.</span>
+<span class="sd">    window : WindowManager</span>
+<span class="sd">        an object to manage human assessments.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        No file in directory.</span>
+<span class="sd">    Exception</span>
+<span class="sd">        The assessment was not done.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sort : list</span>
+<span class="sd">        A list of string containing the assessment results in the format [Max, Min].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">acj_assessment</span> <span class="o">=</span> <span class="n">AssessmentManager</span><span class="p">()</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">create_window</span><span class="p">(</span><span class="s2">&quot;ACJ&quot;</span><span class="p">)</span>
+        
+    <span class="c1"># Create text block</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span> <span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Judge &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">id_judge</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Please select the best item :&quot;</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">pack</span> <span class="p">()</span>
+    
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="c1"># Load images dynamically based on list elements</span>
+    <span class="n">pdf</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">pdf_name</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">:</span>
+        <span class="n">pdf_path</span> <span class="o">=</span> <span class="n">pdf_name</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">):</span>
+            <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+            <span class="n">acj_assessment</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">pdf_path</span> <span class="o">+</span> <span class="s2">&quot; not in directory.&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Create PDFViewer instance without displaying it</span>
+        <span class="n">pdf_viewer</span> <span class="o">=</span> <span class="n">PDFViewer</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">pdf_path</span><span class="p">)</span>
+        <span class="n">pdf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pdf_viewer</span><span class="p">)</span>
+    
+    <span class="n">first_page_image_1</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">display_first_page</span><span class="p">((</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenwidth</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span><span class="p">,</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenheight</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">first_page_image_2</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">display_first_page</span><span class="p">((</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenwidth</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span><span class="p">,</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenheight</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="n">pdf_index</span><span class="p">):</span>
+        <span class="n">pdf</span><span class="p">[</span><span class="n">pdf_index</span><span class="p">]</span><span class="o">.</span><span class="n">create_viewer_window</span><span class="p">()</span>
+    
+    <span class="n">label1</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="n">first_page_image_1</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">label1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">label1</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Button-1&gt;&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">acj_close</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pair</span><span class="p">))</span>
+    
+    <span class="n">view_button1</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;View&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">view</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">view_button1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">label2</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="n">first_page_image_2</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">label2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">label2</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Button-1&gt;&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">acj_close</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pair</span><span class="p">))</span>
+    
+    <span class="n">view_button2</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;View&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">view</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">view_button2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">assessment_label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;You are making the </span><span class="si">{</span><span class="n">nb_assessment</span><span class="si">}</span><span class="s2"> judgement&quot;</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">BOTTOM</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">protocol</span><span class="p">(</span><span class="s2">&quot;WM_DELETE_WINDOW&quot;</span><span class="p">,</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">exit_program</span><span class="p">)</span>
+    
+    <span class="k">while</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">testing</span><span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_children</span><span class="p">():</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">bad_ending</span><span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Assessment not done !&quot;</span><span class="p">)</span>
+    
+    <span class="n">sort</span> <span class="o">=</span> <span class="n">acj_assessment</span><span class="o">.</span><span class="n">sort</span>
+    
+    <span class="k">return</span> <span class="n">sort</span></div>
+    
+<div class="viewcode-block" id="ctj_assessment_method_pdf"><a class="viewcode-back" href="../../index.html#CTJ.assessment_method.ctj_assessment_method_pdf">[docs]</a><span class="k">def</span> <span class="nf">ctj_assessment_method_pdf</span><span class="p">(</span><span class="n">slider_range</span><span class="p">,</span> <span class="n">trio</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a window to let the user make the CTJ assessment.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    slider_range : int</span>
+<span class="sd">        The range of the slider.</span>
+<span class="sd">    trio : list of string</span>
+<span class="sd">        A list of strings representing the trio of items being assessed.</span>
+<span class="sd">    nb_assessment : int</span>
+<span class="sd">        The number of assessments done.</span>
+<span class="sd">    window : WindowManager</span>
+<span class="sd">        An object to manage human assessments.</span>
+<span class="sd">        </span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        No file in directory.</span>
+<span class="sd">    Exception</span>
+<span class="sd">        The assessment was not done.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tup : tuple</span>
+<span class="sd">        A tuple containing the assessment results ([Max, Average, Min], dist). In the format ([int, int, int], int).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">ctj_assessment</span> <span class="o">=</span> <span class="n">AssessmentManager</span><span class="p">()</span>
+    
+    <span class="n">window</span><span class="o">.</span><span class="n">create_window</span><span class="p">(</span><span class="s2">&quot;CTJ&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create text block</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Please sort the items from best to worst, then choose the distance between the middle one and the others:</span><span class="se">\n</span><span class="s2">(To swap two items, click the first one and then the second)&quot;</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+
+    <span class="n">label_frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">label_frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">pdf_name</span> <span class="ow">in</span> <span class="n">trio</span><span class="p">:</span>
+        <span class="n">pdf_path</span> <span class="o">=</span> <span class="n">pdf_name</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">):</span>
+            <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">pdf_path</span> <span class="o">+</span> <span class="s2">&quot; not in directory.&quot;</span><span class="p">)</span>
+            
+        <span class="n">pdf_viewer</span> <span class="o">=</span> <span class="n">PDFViewer</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">pdf_path</span><span class="p">)</span>
+        
+        <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pdf_viewer</span><span class="o">.</span><span class="n">display_first_page</span><span class="p">((</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenwidth</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span><span class="p">,</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_screenheight</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">))</span>
+
+    <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">sort_label</span> <span class="o">=</span> <span class="p">[</span><span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">label_frame</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="n">image</span><span class="p">)</span> <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">sort</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">):</span>
+        <span class="n">PDFViewer</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">pdf_path</span><span class="p">)</span><span class="o">.</span><span class="n">create_viewer_window</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">create_view_button</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
+        <span class="n">button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">label_frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;View PDF&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">view</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">))</span>
+        <span class="n">button</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">button</span>
+
+    <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">view_buttons</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">def</span> <span class="nf">update_display</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ctj_assessment</span><span class="o">.</span><span class="n">sort_label</span><span class="p">):</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">view_buttons</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">view_buttons</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">command</span><span class="o">=</span><span class="k">lambda</span> <span class="n">path</span><span class="o">=</span><span class="n">trio</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">:</span> <span class="n">view</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ctj_assessment</span><span class="o">.</span><span class="n">sort_label</span><span class="p">):</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Button-1&gt;&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">i</span><span class="p">:</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">swap_images</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">trio</span><span class="p">))</span>
+        <span class="n">button</span> <span class="o">=</span> <span class="n">create_view_button</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">view_buttons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
+
+    <span class="n">slider_frame</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">slider_frame</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">slider</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">slider_frame</span><span class="p">,</span> <span class="n">from_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="n">slider_range</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">HORIZONTAL</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+    <span class="n">slider</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">trio</span><span class="p">),</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update_idletasks</span><span class="p">()</span> <span class="c1"># For macOS</span>
+
+    <span class="n">close_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Next&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">ctj_close</span><span class="p">(</span><span class="n">trio</span><span class="p">,</span> <span class="n">slider</span><span class="p">,</span> <span class="n">slider_range</span><span class="p">))</span>
+    <span class="n">close_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">assessment_label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;You are making the </span><span class="si">{</span><span class="n">nb_assessment</span><span class="si">}</span><span class="s2"> judgment&quot;</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">assessment_label</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="n">tk</span><span class="o">.</span><span class="n">BOTTOM</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">protocol</span><span class="p">(</span><span class="s2">&quot;WM_DELETE_WINDOW&quot;</span><span class="p">,</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">exit_program</span><span class="p">)</span>
+    
+    <span class="k">while</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">testing</span><span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="c1"># Update display after each event loop to reflect swaps</span>
+        <span class="n">update_display</span><span class="p">()</span>
+        
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_children</span><span class="p">():</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">bad_ending</span><span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Assessment not done!&quot;</span><span class="p">)</span>
+    
+    <span class="n">tup</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctj_assessment</span><span class="o">.</span><span class="n">sort</span><span class="p">,</span> <span class="n">ctj_assessment</span><span class="o">.</span><span class="n">dist</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">tup</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CTJ 1.1.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CTJ.assessment_method</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, PERRIER Romain.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+    </div>
+  </body>
+</html>

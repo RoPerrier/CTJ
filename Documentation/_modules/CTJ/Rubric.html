@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CTJ.Rubric &#8212; CTJ 1.1.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CTJ 1.1.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CTJ.Rubric</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for CTJ.Rubric</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Fri May 17 14:45:35 2024</span>
+
+<span class="sd">@author: Romain Perrier</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">random</span> <span class="k">as</span> <span class="nn">rd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">SSR</span><span class="p">,</span> <span class="n">Rescale</span><span class="p">,</span> <span class="n">ready</span><span class="p">,</span> <span class="n">WindowManager</span>
+
+<span class="c1">###############################         FUNCTIONS       ############################################</span>
+
+<div class="viewcode-block" id="make_Rubric_assessment"><a class="viewcode-back" href="../../index.html#CTJ.Rubric.make_Rubric_assessment">[docs]</a><span class="k">def</span> <span class="nf">make_Rubric_assessment</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">,</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is used to do the assessment on an item and return the value of it</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    item :  string</span>
+<span class="sd">        A string representing the item being assessed.</span>
+<span class="sd">    sensibility :tuple</span>
+<span class="sd">         A tuple cointaining the marge of error, and the probability of making a mystake. In the format (int, double).</span>
+<span class="sd">    true_values : list of int</span>
+<span class="sd">        A list of int containing the true values corresponding to each item in the `items` list.</span>
+<span class="sd">    true_values : list of int</span>
+<span class="sd">        A list of int containing the estimated values corresponding to each item in the `items` list.    </span>
+<span class="sd">    assessment_method : fun</span>
+<span class="sd">        The assessment method. If none, the assessment is automatically performed using the true value.</span>
+<span class="sd">    nb_assessment: int</span>
+<span class="sd">        The number of assessment done.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        There are no true value nor assessment_method, both are None.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    estimated_values : list of int</span>
+<span class="sd">        The list containing the estimated values for all items.</span>
+<span class="sd">    assessment_duration : double</span>
+<span class="sd">        Duration of the assessment in second.</span>
+<span class="sd">    one_more_bias : int</span>
+<span class="sd">        One if the judgment is biaised else 0.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">one_more_bias</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">if</span> <span class="n">assessment_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        
+        <span class="n">ready</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="c1">#We let the judges make the assessment</span>
+        <span class="n">estimated_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span> <span class="o">=</span> <span class="n">assessment_method</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+        
+        <span class="n">b</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="n">assessment_duration</span> <span class="o">=</span> <span class="n">b</span><span class="o">-</span><span class="n">a</span>
+        
+    <span class="k">elif</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            
+        <span class="n">a</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="n">bias</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="k">if</span> <span class="n">rd</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">sensibility</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span>
+        
+            <span class="n">bias</span> <span class="o">=</span> <span class="n">sensibility</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">rd</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.5</span> <span class="p">:</span>
+                <span class="n">bias</span> <span class="o">=</span> <span class="n">bias</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+                
+            <span class="n">one_more_bias</span> <span class="o">=</span> <span class="mi">1</span>
+            
+        
+        <span class="n">estimated_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span>  <span class="o">=</span>  <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span> <span class="o">+</span> <span class="n">bias</span>
+        
+        <span class="n">b</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="n">assessment_duration</span> <span class="o">=</span> <span class="n">b</span><span class="o">-</span><span class="n">a</span>
+        
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;There are no true value nor assessment_method, both are None&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">estimated_values</span> <span class="p">,</span> <span class="n">assessment_duration</span><span class="p">,</span> <span class="n">one_more_bias</span></div>
+
+<div class="viewcode-block" id="Rubric"><a class="viewcode-back" href="../../index.html#CTJ.Rubric.Rubric">[docs]</a><span class="k">def</span> <span class="nf">Rubric</span><span class="p">(</span><span class="n">min_item</span><span class="p">,</span> <span class="n">max_item</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">sensibility</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">true_values</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">assessment_method</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rubric Judgment is an evaluation method based on the direct notation of an item. An item is shown and we must evaluate it and give a value to it.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    min_item : tuple</span>
+<span class="sd">        The min_item we wont to use. In the format (int, string).</span>
+<span class="sd">    max_item : tuple</span>
+<span class="sd">        The max_item we wont to use. In the format (int, string).</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    sensibility : tuple</span>
+<span class="sd">        A tuple cointaining the marge of error, and the probability of making a mystake. In the format (int, double). The default is (0,0).</span>
+<span class="sd">    true_values : list of int, optional</span>
+<span class="sd">        A list of int containing the true values corresponding to each item in the `items` list. The default is None.</span>
+<span class="sd">    assessment_method : fun</span>
+<span class="sd">        The assessment method. If none, the assessment is automatically performed using the true value. The default is None.    </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    estimated_values : list of int</span>
+<span class="sd">        A list of int containing the estimated values corresponding to each item in the `items` list.</span>
+<span class="sd">    int</span>
+<span class="sd">        Number of iteration.</span>
+<span class="sd">    cond : float</span>
+<span class="sd">        Accuracy of estimated value at the end of algorithm.</span>
+<span class="sd">    error : int</span>
+<span class="sd">        Number of error.</span>
+<span class="sd">    assessments_time : int</span>
+<span class="sd">        The duration of the assessments.</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1">#If min and max value are not in the items list we add them</span>
+    <span class="k">if</span> <span class="n">min_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">items</span> <span class="p">:</span>
+         <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+         <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+             <span class="n">true_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">items</span> <span class="p">:</span>
+         <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+         <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+             <span class="n">true_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+    <span class="n">items_copy</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:]</span>
+    
+    <span class="n">rd</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">items_copy</span><span class="p">)</span>
+    
+    <span class="n">assessments_time</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">error</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">window</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="n">assessment_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        
+        <span class="n">window</span> <span class="o">=</span> <span class="n">WindowManager</span><span class="p">()</span>
+        
+        <span class="n">skip_tutorial</span> <span class="o">=</span> <span class="n">ready</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="s2">&quot;The Rubric assessment involves individually grading each item.</span><span class="se">\n\n</span><span class="s2">In each iteration, you will be asked to enter the value of the item shown in the box below.</span><span class="se">\n\n</span><span class="s2">To access the tutorial, click on the &#39;Tutorial&#39; button.</span><span class="se">\n</span><span class="s2"> The tutorial includes an evaluation of the algorithm.</span><span class="se">\n</span><span class="s2"> After completing the tutorial evaluation, the actual test will begin.</span><span class="se">\n\n</span><span class="s2">Between each evaluation, a button will appear.</span><span class="se">\n</span><span class="s2"> Ensure you are ready before clicking it, as a countdown will start once clicked.</span><span class="se">\n</span><span class="s2"> At the end of the countdown, you can evaluate the item, so make sure you are prepared.&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;Tuto&quot;</span><span class="p">)</span>
+    
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_tutorial</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="n">assessment_method</span><span class="p">(</span><span class="n">item</span> <span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>    
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">items_copy</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">:</span>
+        
+        <span class="n">item</span> <span class="o">=</span> <span class="n">items_copy</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">estimated_values</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">one_more_bias</span> <span class="o">=</span> <span class="n">make_Rubric_assessment</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">,</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">items_copy</span><span class="p">),</span> <span class="n">window</span><span class="p">)</span>
+        <span class="n">assessments_time</span> <span class="o">+=</span> <span class="n">time</span>
+        <span class="n">error</span> <span class="o">+=</span> <span class="n">one_more_bias</span>
+    
+    <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">Rescale</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">estimated_values</span><span class="p">)</span>
+    
+    <span class="n">acc</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;===============================================================&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Result of Rubric algorithm&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Items : &quot;</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| True values : &quot;</span><span class="p">,</span> <span class="n">true_values</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Estimated values : &quot;</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="n">SSR</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Accuracy : &quot;</span><span class="p">,</span> <span class="n">acc</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sensibility</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Number of error : &quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Iteration : &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">assessment_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Total duration : &quot;</span><span class="p">,</span> <span class="n">assessments_time</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;===============================================================&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="n">acc</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">assessments_time</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CTJ 1.1.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CTJ.Rubric</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, PERRIER Romain.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+    </div>
+  </body>
+</html>

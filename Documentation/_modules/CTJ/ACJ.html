@@ -1,0 +1,532 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CTJ.ACJ &#8212; CTJ 1.1.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CTJ 1.1.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CTJ.ACJ</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for CTJ.ACJ</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Fri May 10 14:56:29 2024</span>
+
+<span class="sd">@author: Romain Perrier</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">random</span> <span class="k">as</span> <span class="nn">rd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">choix</span>
+
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span><span class="p">,</span> <span class="n">permutations</span>
+
+<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">Rescale</span><span class="p">,</span> <span class="n">SSR</span><span class="p">,</span> <span class="n">ready</span><span class="p">,</span> <span class="n">WindowManager</span>
+<span class="kn">from</span> <span class="nn">.selection</span> <span class="kn">import</span> <span class="n">MI</span><span class="p">,</span> <span class="n">roulette</span>
+
+<span class="c1">###############################         FUNCTIONS       ############################################</span>
+
+<div class="viewcode-block" id="make_ACJ_assessment"><a class="viewcode-back" href="../../index.html#CTJ.ACJ.make_ACJ_assessment">[docs]</a><span class="k">def</span> <span class="nf">make_ACJ_assessment</span> <span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">id_judge</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">,</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is used to do the assessment on a Pair and return the tuple (Max, Min). In the format (int, int)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    pair : list of string</span>
+<span class="sd">        A list of strings representing the pair of items being assessed.</span>
+<span class="sd">    id_judge : int</span>
+<span class="sd">        The id of the judge making the assesment.</span>
+<span class="sd">    sensibility: int</span>
+<span class="sd">        The sensitivity threshold. If the margin between two items is equal to this value, there is a 10% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.</span>
+<span class="sd">    true_values : list of int</span>
+<span class="sd">        A list of int containing the true values corresponding to each item in the `items` list.</span>
+<span class="sd">    assessment_method : fun</span>
+<span class="sd">        The assessment method. If none, the assessment is automatically performed using the true value.</span>
+<span class="sd">    nb_assessment : int</span>
+<span class="sd">        The number of assessment done.</span>
+<span class="sd">    window : WindowManager</span>
+<span class="sd">        an object to manage human assessments.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        There are no true value nor assessment_method, both are None.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        A tuple containing the assessment results in the format (int, int).</span>
+<span class="sd">    assessment_duration : double</span>
+<span class="sd">        Duration of the assessment in second.</span>
+<span class="sd">    one_more_bias : int</span>
+<span class="sd">        One if the judgment is biaised else 0.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">one_more_bias</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">if</span> <span class="n">assessment_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        
+        <span class="n">ready</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="c1">#We let the judges make the assessment</span>
+        <span class="n">pair</span> <span class="o">=</span> <span class="n">assessment_method</span><span class="p">(</span><span class="n">id_judge</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+        
+        <span class="n">b</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="n">assessment_duration</span> <span class="o">=</span> <span class="n">b</span><span class="o">-</span><span class="n">a</span>
+        
+    <span class="k">elif</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            
+        <span class="n">a</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="c1">#We sort the pair        </span>
+        <span class="n">Booleen</span> <span class="o">=</span> <span class="kc">True</span>
+        
+        <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span><span class="o">-</span><span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">9</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">sensibility</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rd</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="n">k</span> <span class="o">*</span> <span class="n">val</span><span class="p">))</span> <span class="p">:</span>
+        <span class="c1">#if (np.abs(true_values[items.index(pair[0])]-true_values[items.index(pair[1])]) &lt;= sensibility[0]) and (r &lt; sensibility[1]) :</span>
+            <span class="n">Booleen</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">one_more_bias</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">pair</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pair</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span> <span class="n">reverse</span> <span class="o">=</span> <span class="n">Booleen</span><span class="p">)</span>
+        
+        <span class="n">b</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="n">assessment_duration</span> <span class="o">=</span> <span class="n">b</span><span class="o">-</span><span class="n">a</span>
+        
+    <span class="k">else</span> <span class="p">:</span>
+        
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;There are no true value nor assessment_method, both are None&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">assessment_duration</span><span class="p">,</span> <span class="n">one_more_bias</span></div>
+
+<div class="viewcode-block" id="estimate_ACJ"><a class="viewcode-back" href="../../index.html#CTJ.ACJ.estimate_ACJ">[docs]</a><span class="k">def</span> <span class="nf">estimate_ACJ</span> <span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">true_values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The method to estimate the value of each ACJ iteration.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    assessments : list of tuple</span>
+<span class="sd">         A list containing all the assessments done in the format (int,int).</span>
+<span class="sd">    true_values : list of int</span>
+<span class="sd">        A list of int containing the true values corresponding to each item in the `items` list.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    estimated_values : list of int</span>
+<span class="sd">         A list of int containing the estimated values corresponding to each item in the `items` list.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">nb_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+    
+    <span class="n">estimated_values</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">true_values</span><span class="p">)</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">true_values</span><span class="p">)</span>
+    
+    <span class="n">assessments_ind</span> <span class="o">=</span> <span class="p">[(</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">assessments</span><span class="p">]</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">choix</span><span class="o">.</span><span class="n">ilsr_pairwise</span><span class="p">(</span><span class="n">nb_items</span><span class="p">,</span> <span class="n">assessments_ind</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    
+    <span class="n">Z_parameters</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">zscore</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Z_parameters</span><span class="p">:</span> 
+        <span class="n">val</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span> <span class="n">x</span> <span class="o">*</span> <span class="n">std</span> <span class="o">+</span> <span class="n">mean</span>  <span class="p">)</span>
+        <span class="n">estimated_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">estimated_values</span></div>
+
+<div class="viewcode-block" id="ACJ_new_pair"><a class="viewcode-back" href="../../index.html#CTJ.ACJ.ACJ_new_pair">[docs]</a><span class="k">def</span> <span class="nf">ACJ_new_pair</span> <span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">max_item</span><span class="p">,</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">entropy</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function select the best new pair to assess.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    assessments : list of tuple</span>
+<span class="sd">        A list containing all the assessments done in the format (int, int).</span>
+<span class="sd">    estimated_values : list of int</span>
+<span class="sd">        A list of int containing the estimated values corresponding to each item in the `items` list.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pair : list</span>
+<span class="sd">        A list representing the new pair to assess.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">nb_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">entropy</span> <span class="p">:</span>
+        <span class="n">info_of_quality_assessment</span> <span class="o">=</span> <span class="mi">10000</span>
+        
+        <span class="n">assessments_ind</span> <span class="o">=</span> <span class="p">[(</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">assessments</span><span class="p">]</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">choix</span><span class="o">.</span><span class="n">ilsr_pairwise</span><span class="p">(</span><span class="n">nb_items</span><span class="p">,</span> <span class="n">assessments_ind</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+        
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nb_items</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">k</span><span class="p">:</span>
+                    <span class="n">info</span> <span class="o">=</span> <span class="n">choix</span><span class="o">.</span><span class="n">probabilities</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">],</span><span class="n">parameters</span><span class="p">)</span>
+                    <span class="n">info</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="nb">round</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">2</span><span class="p">))</span>        
+                    <span class="k">if</span> <span class="n">info</span> <span class="o">&lt;</span> <span class="n">info_of_quality_assessment</span><span class="p">:</span>
+                        <span class="n">quality_assessment</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>  <span class="c1"># i &gt; k</span>
+                        <span class="n">info_of_quality_assessment</span> <span class="o">=</span> <span class="n">info</span>
+        
+        <span class="n">pair</span> <span class="o">=</span> <span class="p">[</span><span class="n">items</span><span class="p">[</span><span class="n">quality_assessment</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">items</span><span class="p">[</span><span class="n">quality_assessment</span><span class="p">[</span><span class="mi">1</span><span class="p">]]]</span>
+    
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="c1">#Initialize the proximity of items tuples (i,j) to 0</span>
+        <span class="n">Prox</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nb_items</span><span class="p">,</span><span class="n">nb_items</span><span class="p">))</span>
+        
+        <span class="c1">#Initialize the apparition probabilities</span>
+        <span class="n">JointProba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nb_items</span><span class="p">,</span><span class="n">nb_items</span><span class="p">))</span>
+        <span class="n">Proba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_items</span><span class="p">)</span>
+        
+        <span class="c1">#let&#39;s fill all the probabilities array</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item_1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+            <span class="n">nb</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">assessments</span> <span class="k">if</span> <span class="n">item_1</span> <span class="ow">in</span> <span class="n">tup</span><span class="p">)</span>
+            <span class="n">Proba</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">))</span>
+            
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">item_2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+                <span class="n">nb_joint</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">assessments</span> <span class="k">if</span> <span class="n">item_2</span> <span class="ow">in</span> <span class="n">tup</span> <span class="ow">and</span> <span class="n">item_1</span> <span class="ow">in</span> <span class="n">tup</span><span class="p">)</span>
+                <span class="n">JointProba</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span>  <span class="n">nb_joint</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">)</span>
+                
+                <span class="c1">#Let&#39;s calculate the proximity of the ith and jth items</span>
+                <span class="n">Prox</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">estimated_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">estimated_values</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    
+        <span class="c1">#Let&#39;s calculate the array of Mutual Interaction</span>
+        <span class="n">mi</span><span class="o">=</span><span class="n">MI</span><span class="p">(</span><span class="n">JointProba</span><span class="p">,</span><span class="n">Proba</span><span class="p">)</span>
+    
+        <span class="c1">#a high proximity must be more important in selection</span>
+        <span class="n">Disp</span> <span class="o">=</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">Prox</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+    
+        <span class="c1">#Let&#39;s create all pairs possible</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">fit</span><span class="o">=</span><span class="p">[]</span>
+        
+        <span class="c1">#For all pair estimate the fitness for the wheel selection</span>
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
+            <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">fit</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">mi</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span><span class="o">*</span><span class="n">Disp</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+        
+        <span class="c1">#Select a pair with a roulette wheel algorithm</span>
+        <span class="n">selected_index</span> <span class="o">=</span> <span class="n">roulette</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+    
+        <span class="n">p</span> <span class="o">=</span> <span class="n">permutations</span><span class="p">([</span><span class="n">pairs</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pairs</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span> <span class="mi">2</span><span class="p">)</span>
+        
+        <span class="c1">#If the intersection of assessment and p is not Null then change the selected pair</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">assessments</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">p</span><span class="p">)):</span>
+            <span class="n">selected_index</span> <span class="o">=</span> <span class="n">roulette</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">permutations</span><span class="p">([</span><span class="n">pairs</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pairs</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">&gt;</span><span class="mi">1000</span><span class="p">:</span>
+                <span class="k">break</span>
+        
+        <span class="n">pair</span> <span class="o">=</span> <span class="p">[</span><span class="n">pairs</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pairs</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+    
+    <span class="k">return</span> <span class="n">pair</span></div>
+
+<div class="viewcode-block" id="ACJ_init"><a class="viewcode-back" href="../../index.html#CTJ.ACJ.ACJ_init">[docs]</a><span class="k">def</span> <span class="nf">ACJ_init</span> <span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">nb_judge</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This fonction initialize the ACJ algorithm. Set up the assessments list.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    true_values : list of int</span>
+<span class="sd">        A list of int containing the true values corresponding to each item in the `items` list.</span>
+<span class="sd">    nb_judge : int, optional</span>
+<span class="sd">        The number of judge that make the evaluation.</span>
+<span class="sd">    sensibility: int</span>
+<span class="sd">        The sensitivity threshold. If the margin between two items is equal to this value, there is a 10% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.</span>
+<span class="sd">    assessment_method : fun</span>
+<span class="sd">        The assessment method. If none, the assessment is automatically performed using the true value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    assessments : list of tuple</span>
+<span class="sd">         A list containing all the assessments done in the format (int,int).</span>
+<span class="sd">    assessments_time : int</span>
+<span class="sd">        The duration of the assessments.</span>
+<span class="sd">    error : list of int</span>
+<span class="sd">        A list containing the number of error for each judges.</span>
+<span class="sd">    window : WindowManager</span>
+<span class="sd">        an object to manage human assessments.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">nb_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+    
+    <span class="n">not_compared</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:]</span>
+    
+    <span class="c1">#Shuffle items if the items are sort the judgment may be biaised</span>
+    <span class="n">rd</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">not_compared</span><span class="p">)</span>
+    
+    <span class="n">assessments</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">assessments_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_judge</span><span class="p">)</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_judge</span><span class="p">)</span>
+    
+    <span class="n">window</span>  <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="c1">#if assessment method not None then Show a tutorial</span>
+    <span class="k">if</span> <span class="n">assessment_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        
+        <span class="n">window</span> <span class="o">=</span> <span class="n">WindowManager</span><span class="p">()</span>
+        
+        <span class="n">skip_tutorial</span> <span class="o">=</span> <span class="n">ready</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="s2">&quot;The ACJ assessment involves comparisons between two items.</span><span class="se">\n\n</span><span class="s2">In each iteration, you will be asked to click on the best item.</span><span class="se">\n\n</span><span class="s2">To access the tutorial, click on the &#39;Tutorial&#39; button.</span><span class="se">\n</span><span class="s2"> The tutorial includes an evaluation of the algorithm.</span><span class="se">\n</span><span class="s2"> After completing the tutorial evaluation, the actual test will begin.</span><span class="se">\n\n</span><span class="s2">Between each evaluation, a button will appear.</span><span class="se">\n</span><span class="s2"> Ensure you are ready before clicking it, as a countdown will start once clicked.</span><span class="se">\n</span><span class="s2"> At the end of the countdown, you can evaluate the item, so make sure you are prepared.&quot;</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span>  <span class="s2">&quot;Tuto&quot;</span><span class="p">)</span> 
+        <span class="c1">###TUTO on pourrait le passer avec un bouton,  reflechir a un break ou un goto</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_tutorial</span><span class="p">:</span>
+            <span class="n">item_1</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+            <span class="n">items_copy</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:]</span>
+            <span class="n">items_copy</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item_1</span><span class="p">)</span>
+            <span class="n">item_2</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">items_copy</span><span class="p">)</span>
+    
+            <span class="n">_</span> <span class="o">=</span> <span class="n">assessment_method</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,[</span><span class="n">item_1</span><span class="p">,</span><span class="n">item_2</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+    
+    <span class="c1">#Assess all items one times</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nb_items</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">pair</span> <span class="o">=</span> <span class="p">[</span><span class="n">not_compared</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">not_compared</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">ACJ_assessment</span> <span class="o">=</span> <span class="p">[</span><span class="n">make_ACJ_assessment</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">id_judge</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">[</span><span class="n">id_judge</span><span class="p">],</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span> <span class="k">for</span> <span class="n">id_judge</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_judge</span><span class="p">)]</span>
+        <span class="n">assessments_done</span> <span class="o">=</span> <span class="p">[</span><span class="n">assessment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">ACJ_assessment</span><span class="p">]</span>
+        <span class="n">assessments_time</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">assessment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">ACJ_assessment</span><span class="p">])</span>
+        <span class="n">error</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">assessment</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">ACJ_assessment</span><span class="p">])</span>
+        
+        <span class="n">assessments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">assessments_done</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">assessments_done</span><span class="o">.</span><span class="n">count</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">nb_items</span><span class="o">%</span><span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">pair</span> <span class="o">=</span> <span class="p">[</span><span class="n">not_compared</span><span class="p">[</span><span class="n">nb_items</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">not_compared</span><span class="p">[</span><span class="n">nb_items</span><span class="o">-</span><span class="mi">2</span><span class="p">]]</span>
+        <span class="n">ACJ_assessment</span> <span class="o">=</span> <span class="p">[</span><span class="n">make_ACJ_assessment</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">id_judge</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">[</span><span class="n">id_judge</span><span class="p">],</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span> <span class="k">for</span> <span class="n">id_judge</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_judge</span><span class="p">)]</span>
+        <span class="n">assessments_done</span> <span class="o">=</span> <span class="p">[</span><span class="n">assessment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">ACJ_assessment</span><span class="p">]</span>
+        <span class="n">assessments_time</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">assessment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">ACJ_assessment</span><span class="p">])</span>
+        <span class="n">error</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">assessment</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">ACJ_assessment</span><span class="p">])</span>
+        
+        <span class="n">assessments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">assessments_done</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">assessments_done</span><span class="o">.</span><span class="n">count</span><span class="p">))</span>
+        
+    <span class="k">return</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">assessments_time</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">window</span></div>
+
+<div class="viewcode-block" id="ACJ"><a class="viewcode-back" href="../../index.html#CTJ.ACJ.ACJ">[docs]</a><span class="k">def</span> <span class="nf">ACJ</span> <span class="p">(</span><span class="n">min_item</span><span class="p">,</span> <span class="n">max_item</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">nb_judge</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sensibility</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">true_values</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">max_iteration</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">max_accuracy</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">assessment_method</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">entropy</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adaptive Comparative Judgment (ACJ) is an evaluation method based on the comparison of pairs of items. Rather than scoring each item on a fixed scale, evaluators directly compare two items at a time and judge which is better according to certain criteria.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    min_item : tuple</span>
+<span class="sd">        The min_item we wont to use. In the format (int, string).</span>
+<span class="sd">    max_item : tuple</span>
+<span class="sd">        The max_item we wont to use. In the format (int, string).</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    nb_judge : int, optional</span>
+<span class="sd">        The number of judge that make the evaluation. The default is 1.</span>
+<span class="sd">    sensibility : list of int    </span>
+<span class="sd">        The sensitivity threshold. If the margin between two items is equal to this value, there is a 10% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items. The default is [0]</span>
+<span class="sd">    true_values : list of int, optional</span>
+<span class="sd">        A list of int containing the true values corresponding to each item in the `items` list. The default is None.</span>
+<span class="sd">    max_iteration : int, optional</span>
+<span class="sd">        Number of maximum iteration of the algorithm. The default is 30.</span>
+<span class="sd">    max_accuracy : float, optional</span>
+<span class="sd">        Accuracy of the model. The default is 0.9.</span>
+<span class="sd">    assessment_method : fun</span>
+<span class="sd">        The assessment method. If none, the assessment is automatically performed using the true value. The default is None.</span>
+<span class="sd">    entropy : bool</span>
+<span class="sd">        The method use to select items. The default is False</span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        The len of sensitbility is not equal to the number of judge.</span>
+<span class="sd">    </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    estimated_values : list of int</span>
+<span class="sd">        A list of int containing the estimated values corresponding to each item in the `items` list.</span>
+<span class="sd">    int</span>
+<span class="sd">        Number of iteration.</span>
+<span class="sd">    cond : float</span>
+<span class="sd">        Accuracy of estimated value at the end of algorithm.</span>
+<span class="sd">    error : list of int</span>
+<span class="sd">        A list containing the number of error for each judges.</span>
+<span class="sd">    assessments_time : int</span>
+<span class="sd">        The duration of the assessments.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">nb_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+    
+    <span class="c1">#If min and max value are not in the items list we add them</span>
+    <span class="k">if</span> <span class="n">min_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">items</span> <span class="p">:</span>
+         <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+         <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+             <span class="n">true_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">items</span> <span class="p">:</span>
+         <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+         <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+             <span class="n">true_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+             
+    <span class="k">if</span> <span class="n">sensibility</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span>
+        <span class="n">sensibility</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_judge</span><span class="p">)]</span>
+        
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sensibility</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nb_judge</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;All the judge need a sensibility tuple ! The len of sensitbility is not equal to the number of judge.&quot;</span><span class="p">)</span>
+    
+    <span class="c1">#We initialize the assessments list</span>
+    <span class="n">assessments</span><span class="p">,</span> <span class="n">assessments_time</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">window</span> <span class="o">=</span> <span class="n">ACJ_init</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">nb_judge</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">)</span>
+    
+    <span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">all_estimated_values</span><span class="o">=</span><span class="p">[]</span>
+    
+    <span class="c1">#We calculate the estimated value after the initialisation</span>
+    <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span><span class="p">[</span> <span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">items</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">min_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span>
+               <span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">items</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">nb_items</span><span class="o">/</span><span class="mi">2</span> <span class="k">else</span>
+               <span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_items</span><span class="p">)]</span>
+        
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">true_values</span>
+        
+    <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">estimate_ACJ</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+    <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">Rescale</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">estimated_values</span><span class="p">)</span>
+    
+    <span class="c1">#We add it to the list containing all the estimated values</span>
+    <span class="n">all_estimated_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimated_values</span><span class="p">)</span>
+    
+    <span class="c1">#We select the accuracy method depending the existence of true_values list</span>
+    <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">all_estimated_values</span><span class="p">:</span> <span class="n">SSR</span><span class="p">(</span><span class="n">all_estimated_values</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">all_estimated_values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">all_estimated_values</span><span class="p">:</span> <span class="n">SSR</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">)</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="n">accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">all_estimated_values</span><span class="p">)</span>
+        
+    <span class="k">while</span> <span class="p">((</span><span class="n">iteration</span><span class="o">&lt;</span><span class="n">max_iteration</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">cond</span> <span class="o">&lt;</span> <span class="n">max_accuracy</span><span class="p">)):</span>
+        
+        <span class="c1">#We select the best next pair</span>
+        <span class="n">pair</span> <span class="o">=</span> <span class="n">ACJ_new_pair</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">max_item</span><span class="p">,</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">entropy</span><span class="p">)</span>
+        
+        <span class="c1">#We add the new assessment</span>
+        <span class="n">ACJ_assessment</span> <span class="o">=</span> <span class="p">[</span><span class="n">make_ACJ_assessment</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">id_judge</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">[</span><span class="n">id_judge</span><span class="p">],</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span> <span class="k">for</span> <span class="n">id_judge</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_judge</span><span class="p">)]</span>
+        <span class="n">assessments_done</span> <span class="o">=</span> <span class="p">[</span><span class="n">assessment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">ACJ_assessment</span><span class="p">]</span>
+        <span class="n">assessments_time</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">assessment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">ACJ_assessment</span><span class="p">])</span>
+        <span class="n">error</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">assessment</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">ACJ_assessment</span><span class="p">])</span>
+        
+        <span class="n">assessments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">assessments_done</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">assessments_done</span><span class="o">.</span><span class="n">count</span><span class="p">))</span>
+
+        <span class="c1">#We calculate the new estimated values</span>
+        <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">estimated_values</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">true_values</span>
+            
+        <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">estimate_ACJ</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        
+        <span class="n">all_estimated_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimated_values</span><span class="p">)</span>
+        
+        <span class="c1">#We calculate the new accuracy</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="n">accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">all_estimated_values</span><span class="p">)</span>
+        
+        <span class="n">iteration</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    
+    <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">Rescale</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">estimated_values</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;===============================================================&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Result of ACJ algorithm&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Items : &quot;</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| True values : &quot;</span><span class="p">,</span> <span class="n">true_values</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Estimated values : &quot;</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Accuracy : &quot;</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sensibility</span> <span class="o">!=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_judge</span><span class="p">)]</span> <span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Number of error : &quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Iteration : &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">assessment_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Total duration : &quot;</span><span class="p">,</span> <span class="n">assessments_time</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;===============================================================&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">),</span> <span class="n">cond</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">assessments_time</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CTJ 1.1.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CTJ.ACJ</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, PERRIER Romain.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+    </div>
+  </body>
+</html>

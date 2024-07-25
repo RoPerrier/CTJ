@@ -1,0 +1,346 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CTJ.util &#8212; CTJ 1.1.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CTJ 1.1.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CTJ.util</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for CTJ.util</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed May  1 15:56:51 2024</span>
+
+<span class="sd">@author: Romain Perrier</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;tkinter is not installed, for more information refer to : https://github.com/RoPerrier/CTJ/blob/main/fix_import_error_tkinter.md&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">colorchooser</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span>
+
+<span class="c1">###############################         FUNCTIONS       ############################################</span>
+
+<div class="viewcode-block" id="Rescale"><a class="viewcode-back" href="../../index.html#CTJ.util.Rescale">[docs]</a><span class="k">def</span> <span class="nf">Rescale</span> <span class="p">(</span><span class="n">Min</span><span class="p">,</span><span class="n">Max</span><span class="p">,</span><span class="n">estimated_values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rescaling the estimated_values between Min and Max.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Min : int</span>
+<span class="sd">        The minimum value of items.</span>
+<span class="sd">    Max : int</span>
+<span class="sd">        The maximum value of items.</span>
+<span class="sd">    estimated_values : list of int</span>
+<span class="sd">        A list of int containing the estimated values corresponding to each item in the `items` list.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    estimated_values : list of int</span>
+<span class="sd">        A list of int containing the estimated values corresponding to each item in the `items` list.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scaler</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="n">Min</span><span class="p">,</span> <span class="n">Max</span><span class="p">))</span>
+    <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">estimated_values</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">Min</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">estimated_values</span></div>
+
+<div class="viewcode-block" id="SSR"><a class="viewcode-back" href="../../index.html#CTJ.util.SSR">[docs]</a><span class="k">def</span> <span class="nf">SSR</span> <span class="p">(</span><span class="n">true_values</span><span class="p">,</span><span class="n">estimated_values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the sum of squared residuals, a mesure of similarity between true value and predicted value. Near 0 the value are not similar, Near 1 the values are similar</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    true_values : list of int</span>
+<span class="sd">        A list of int containing the true values corresponding to each item in the `items` list.</span>
+<span class="sd">    estimated_values : list of int</span>
+<span class="sd">        A list of int containing the estimated values corresponding to each item in the `items` list.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    SSR : float</span>
+<span class="sd">        The sum of squared residuals, a mesure of similarity between true value and predicted value. Near 0 the value are not similar, Near 1 the values are similar.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">estimated_STD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">estimated_values</span><span class="p">)</span>
+    <span class="n">MSE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">))</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">true_STD_squared</span> <span class="o">=</span> <span class="n">estimated_STD</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">MSE</span>
+    <span class="n">SSR</span> <span class="o">=</span> <span class="n">true_STD_squared</span> <span class="o">/</span> <span class="p">(</span><span class="n">estimated_STD</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">SSR</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">SSR</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="k">elif</span> <span class="n">SSR</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">SSR</span><span class="o">=</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">SSR</span></div>
+
+<div class="viewcode-block" id="ready"><a class="viewcode-back" href="../../index.html#CTJ.util.ready">[docs]</a><span class="k">def</span> <span class="nf">ready</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If the assessment is done by the user, create a window to check if the user is ready</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ------</span>
+<span class="sd">    window : windowManager</span>
+<span class="sd">        windowManager object</span>
+<span class="sd">    info : string</span>
+<span class="sd">        A string for display information.</span>
+<span class="sd">    status : string </span>
+<span class="sd">        Set if we are in a tutorial or not</span>
+<span class="sd">        </span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        The window was not destroy in the correct way.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    skip : bool</span>
+<span class="sd">        True if the user skip the tutorial.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">exit_program</span><span class="p">():</span>
+        <span class="k">nonlocal</span> <span class="n">testing</span>
+        <span class="k">nonlocal</span> <span class="n">BadEnding</span>
+        <span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">BadEnding</span> <span class="o">=</span> <span class="kc">True</span>
+            
+    <span class="k">def</span> <span class="nf">close</span><span class="p">():</span>
+        <span class="n">close_button</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="n">skip_button</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="n">countdown_label</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;The sample appear in 3 seconds...&quot;</span><span class="p">)</span>
+        <span class="n">countdown</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">countdown</span><span class="p">(</span><span class="n">seconds</span><span class="p">):</span>
+        <span class="k">nonlocal</span> <span class="n">testing</span>
+        <span class="k">if</span> <span class="n">seconds</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">countdown_label</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;The sample appear in </span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s2"> seconds...&quot;</span><span class="p">)</span>
+            <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">countdown</span><span class="p">,</span> <span class="n">seconds</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="k">def</span> <span class="nf">skip_tutorial</span><span class="p">():</span>
+        <span class="k">nonlocal</span> <span class="n">skip</span>
+        <span class="k">nonlocal</span> <span class="n">testing</span>
+        <span class="n">skip</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">testing</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">BadEnding</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="n">window</span><span class="o">.</span><span class="n">create_window</span><span class="p">(</span><span class="s2">&quot;Ready ?&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="s1">&#39;Next Sample&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="s1">&#39;Tutorial&#39;</span>
+        
+    <span class="n">l</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">info</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+
+    <span class="n">countdown_label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+    <span class="n">countdown_label</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="n">window</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+    <span class="n">countdown_label</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+
+    <span class="n">close_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="n">close</span><span class="p">)</span>
+    <span class="n">close_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+    
+        <span class="n">skip_button</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Skip Tutorial&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="n">skip_tutorial</span><span class="p">)</span>
+        <span class="n">skip_button</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">pady</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    
+    <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">protocol</span><span class="p">(</span><span class="s2">&quot;WM_DELETE_WINDOW&quot;</span><span class="p">,</span> <span class="n">exit_program</span><span class="p">)</span>
+    
+    <span class="k">while</span> <span class="n">testing</span> <span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_children</span><span class="p">():</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">BadEnding</span> <span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;You are not ready.. You must click on the &#39;Ready&#39; button.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">skip</span></div>
+
+<div class="viewcode-block" id="WindowManager"><a class="viewcode-back" href="../../index.html#CTJ.util.WindowManager">[docs]</a><span class="k">class</span> <span class="nc">WindowManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class to manage the creation and configuration of a Tkinter window with customizable properties.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    _root : tk.Tk or None</span>
+<span class="sd">        The root window of the Tkinter application. Initialized as None.</span>
+<span class="sd">    _bgcolor : str</span>
+<span class="sd">        The background color of the window, specified as a hexadecimal color code. Default is &#39;#f0f0f0&#39;.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">    --------</span>
+<span class="sd">    root() -&gt; tk.Tk or None:</span>
+<span class="sd">        Property to get the root window.</span>
+<span class="sd">    root(value: tk.Tk or None):</span>
+<span class="sd">        Property to set the root window.</span>
+<span class="sd">    bgcolor() -&gt; str:</span>
+<span class="sd">        Property to get the background color of the window.</span>
+<span class="sd">    bgcolor(value: str):</span>
+<span class="sd">        Property to set the background color of the window.</span>
+<span class="sd">    change_bg_color():</span>
+<span class="sd">        Opens a color chooser dialog to change the background color of the window and its child widgets.</span>
+<span class="sd">    destroy():</span>
+<span class="sd">        Destroys the root window if it exists.</span>
+<span class="sd">    create_window(title: str):</span>
+<span class="sd">        Creates and configures a new root window with the specified title, or reconfigures the existing root window.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgcolor</span> <span class="o">=</span> <span class="s1">&#39;#f0f0f0&#39;</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span>
+    
+    <span class="nd">@root</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">root</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">value</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bgcolor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bgcolor</span>
+    
+    <span class="nd">@bgcolor</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">bgcolor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bgcolor</span> <span class="o">=</span> <span class="n">value</span>
+    
+<div class="viewcode-block" id="WindowManager.change_bg_color"><a class="viewcode-back" href="../../index.html#CTJ.util.WindowManager.change_bg_color">[docs]</a>    <span class="k">def</span> <span class="nf">change_bg_color</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Opens a color chooser dialog to change the background color of the window and its child widgets.</span>
+<span class="sd">        Updates the background color of all frames, labels, and text widgets within the root window.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">colorchooser</span><span class="o">.</span><span class="n">askcolor</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">color</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bgcolor</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_children</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">tk</span><span class="o">.</span><span class="n">Frame</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">tk</span><span class="o">.</span><span class="n">Text</span><span class="p">):</span>
+                    <span class="n">widget</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="WindowManager.create_window"><a class="viewcode-back" href="../../index.html#CTJ.util.WindowManager.create_window">[docs]</a>    <span class="k">def</span> <span class="nf">create_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates and configures a new root window with the specified title.</span>
+<span class="sd">        If a root window already exists, it reconfigures the existing window with the new title.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        title : str</span>
+<span class="sd">            The title for the Tkinter window.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Tk</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">wm_attributes</span><span class="p">(</span><span class="s2">&quot;-zoomed&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">tk</span><span class="o">.</span><span class="n">TclError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="s1">&#39;zoomed&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">bg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bgcolor</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">option_add</span><span class="p">(</span><span class="s2">&quot;*Font&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;TkDefaultFont&quot;</span><span class="p">,</span> <span class="mi">14</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">resizable</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            
+            <span class="n">menu_bar</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Menu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">menu</span><span class="o">=</span><span class="n">menu_bar</span><span class="p">)</span>
+            <span class="n">parameters_menu</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Menu</span><span class="p">(</span><span class="n">menu_bar</span><span class="p">,</span> <span class="n">tearoff</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">menu_bar</span><span class="o">.</span><span class="n">add_cascade</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Parameters&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="o">=</span><span class="n">parameters_menu</span><span class="p">)</span>
+            <span class="n">parameters_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Change Background Color&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">change_bg_color</span><span class="p">)</span>
+        
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update_idletasks</span><span class="p">()</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">winfo_children</span><span class="p">():</span>
+                <span class="n">widget</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+            <span class="n">menu_bar</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Menu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">menu</span><span class="o">=</span><span class="n">menu_bar</span><span class="p">)</span>
+            <span class="n">parameters_menu</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Menu</span><span class="p">(</span><span class="n">menu_bar</span><span class="p">,</span> <span class="n">tearoff</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">menu_bar</span><span class="o">.</span><span class="n">add_cascade</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Parameters&quot;</span><span class="p">,</span> <span class="n">menu</span><span class="o">=</span><span class="n">parameters_menu</span><span class="p">)</span>
+            <span class="n">parameters_menu</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Change Background Color&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">change_bg_color</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update_idletasks</span><span class="p">()</span></div></div>
+            
+            
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CTJ 1.1.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CTJ.util</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, PERRIER Romain.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+    </div>
+  </body>
+</html>

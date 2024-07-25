@@ -1,0 +1,74 @@
+Welcome to CTJ's documentation!
+===============================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+The `CTJ` package implements the comparative triple judgement algorithm devised by Dr. Kevin Kelly. The aim of this algorithm is to improve the accuracy of `ACJ` (adaptive comparative judgement). Instead of comparing elements two by two, they are compared three by three, and a notion of distance between elements is added to the algorithm. `CTJ` was devised by Dr. Kevin Kelly.
+
+This package therefore proposes an implementation of the `CTJ`, the `ACJ`, and the `Rubric` judgment, to enable a more precise analysis of the `CTJ` and to compare its performance with other methods. To do this, pairs and trios are selected with similar methods using Shannon entropy.
+
+Modules
+=======
+
+CTJ Module
+----------
+The `CTJ` module implements the core functionality of the Comparative Triple Judgement algorithm. This includes the logic for comparing elements in sets of three and calculating distances between them to enhance judgment accuracy.
+
+.. automodule:: CTJ.CTJ
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ACJ Module
+----------
+The `ACJ` module provides an implementation of the Adaptive Comparative Judgement algorithm. This module is used for comparing pairs of elements.
+
+.. automodule:: CTJ.ACJ
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Rubric Module
+-------------
+The `Rubric` module includes functionality for rubric-based judgment. This allows for the assessment of elements based on predefined criteria.
+
+.. automodule:: CTJ.Rubric
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Assessment Method Module
+------------------------
+The `assessment_method` module encompasses various methods used for assessing and comparing elements visually. This includes judgement for image and pdf.
+
+.. automodule:: CTJ.assessment_method
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Selection Module
+----------------
+The `selection` module is responsible for the selection of pairs and trios of elements to be compared. It employs techniques based on information theory to ensure that the comparisons are as informative as possible.
+
+.. automodule:: CTJ.selection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Util Module
+-----------
+The `util` module provides utility functions used throughout the CTJ package.
+
+.. automodule:: CTJ.util
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

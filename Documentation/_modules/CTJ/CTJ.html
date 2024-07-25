@@ -1,0 +1,609 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CTJ.CTJ &#8212; CTJ 1.1.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CTJ 1.1.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CTJ.CTJ</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for CTJ.CTJ</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Mon Apr 29 15:35:28 2024</span>
+
+<span class="sd">@author: Romain Perrier</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">random</span> <span class="k">as</span> <span class="nn">rd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations</span><span class="p">,</span> <span class="n">permutations</span>
+
+<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">Rescale</span><span class="p">,</span> <span class="n">SSR</span><span class="p">,</span> <span class="n">ready</span><span class="p">,</span> <span class="n">WindowManager</span>
+<span class="kn">from</span> <span class="nn">.selection</span> <span class="kn">import</span> <span class="n">II</span><span class="p">,</span> <span class="n">roulette</span>
+
+
+<span class="c1">###############################         FUNCTIONS       ############################################</span>
+
+<div class="viewcode-block" id="make_CTJ_assessment"><a class="viewcode-back" href="../../index.html#CTJ.CTJ.make_CTJ_assessment">[docs]</a><span class="k">def</span> <span class="nf">make_CTJ_assessment</span> <span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">trio</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">,</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is used to do the assessment on a Trio and return the tuple (Max,(dist,Average),Min)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    trio : list of string</span>
+<span class="sd">        A list of strings representing the trio of items being assessed.</span>
+<span class="sd">    sensibility : tuple</span>
+<span class="sd">         A  tuple cointaining the sensibility treshold, the absolute value of the error on the scaler, and the probability of making a mystake. In the format (int, int, double).</span>
+<span class="sd">    true_values : list of int</span>
+<span class="sd">        A list of int containing the true values corresponding to each item in the `items` list.</span>
+<span class="sd">    scale : int</span>
+<span class="sd">        The value of the scale for the CTJ model. Default is 10.</span>
+<span class="sd">    assessment_method : fun</span>
+<span class="sd">        The assessment method. If none, the assessment is automatically performed using the true value.</span>
+<span class="sd">    nb_assessment : int</span>
+<span class="sd">        The number of assessment done.</span>
+<span class="sd">    window : WindowManager</span>
+<span class="sd">        an object to manage human assessments.</span>
+<span class="sd">        </span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        There are no true value nor assessment_method, both are None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        A tuple containing the assessment results (Max,(dist,Average),Min).In the format (int, (int, int), ini).</span>
+<span class="sd">    assessment_duration : double</span>
+<span class="sd">        Duration of the assessment in second.</span>
+<span class="sd">    assessments_time : int</span>
+<span class="sd">        The duration of the assessments.</span>
+<span class="sd">    error : list of int</span>
+<span class="sd">        The first element is the number of inversion done in automated assessment, the second is the number of scale error. Default is [0,0].</span>
+<span class="sd">        </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">nb_inversion</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nb_scale_error</span> <span class="o">=</span> <span class="mi">0</span>
+            
+    <span class="k">if</span> <span class="n">assessment_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        
+        <span class="n">ready</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="c1">#We let the judge make the assessment</span>
+        <span class="n">trio</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">assessment_method</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">trio</span><span class="p">,</span> <span class="n">nb_assessment</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+
+        <span class="n">b</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="n">assessment_duration</span> <span class="o">=</span> <span class="n">b</span><span class="o">-</span><span class="n">a</span>
+        
+        <span class="n">trio</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">trio</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span> <span class="n">reverse</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">dmin</span> <span class="o">=</span> <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span> <span class="o">-</span> <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+        <span class="n">dmax</span> <span class="o">=</span> <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span> <span class="o">-</span> <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+        
+        <span class="k">if</span> <span class="n">dmax</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">true_dist</span> <span class="o">=</span> <span class="n">scale</span><span class="o">//</span><span class="mi">2</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">true_dist</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">scale</span><span class="o">*</span><span class="n">dmin</span><span class="o">/</span><span class="n">dmax</span><span class="p">)</span>
+            
+        <span class="n">nb_scale_error</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dist</span><span class="o">-</span><span class="n">true_dist</span><span class="p">))</span>
+        
+    <span class="k">elif</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        
+        <span class="n">a</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="c1">#We sort the trio</span>
+        <span class="n">trio</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">trio</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)],</span> <span class="n">reverse</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        
+        <span class="n">b</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="c1">#We calculate the distance between the Average and the Max value</span>
+        <span class="n">dmin</span> <span class="o">=</span> <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span> <span class="o">-</span> <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+        
+        <span class="c1">#We calculate the distance between the Min and the Max value</span>
+        <span class="n">dmax</span> <span class="o">=</span> <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span> <span class="o">-</span> <span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+        
+        <span class="c1">###################</span>
+        
+        <span class="n">k</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">9</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">sensibility</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+        
+        <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span><span class="o">-</span><span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
+        
+        <span class="k">if</span> <span class="n">rd</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="n">k</span> <span class="o">*</span> <span class="n">val</span><span class="p">))</span> <span class="p">:</span>
+            
+            <span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            
+            <span class="n">nb_inversion</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span><span class="o">-</span><span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">2</span><span class="p">])])</span>
+            
+        <span class="k">if</span> <span class="n">rd</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="n">k</span> <span class="o">*</span> <span class="n">val</span><span class="p">))</span> <span class="p">:</span>
+                
+            <span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">trio</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">trio</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                
+            <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span><span class="o">-</span><span class="n">true_values</span><span class="p">[</span><span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
+            
+            <span class="n">nb_inversion</span> <span class="o">+=</span> <span class="mi">1</span>
+                    
+            <span class="k">if</span> <span class="n">rd</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="n">k</span> <span class="o">*</span> <span class="n">val</span><span class="p">))</span> <span class="p">:</span>
+                        
+                <span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                
+                <span class="n">nb_inversion</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="c1">###################</span>
+        
+        <span class="n">bias</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="k">if</span> <span class="n">rd</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">sensibility</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">:</span>
+            
+            <span class="n">bias</span> <span class="o">=</span> <span class="n">sensibility</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            
+            <span class="n">r</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="mf">0.5</span> <span class="p">:</span>
+                <span class="n">bias</span> <span class="o">=</span> <span class="n">bias</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+                
+            <span class="n">nb_scale_error</span> <span class="o">=</span> <span class="mi">1</span>
+        
+        <span class="k">if</span> <span class="n">dmax</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">scale</span><span class="o">//</span><span class="mi">2</span> <span class="o">+</span> <span class="n">bias</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">scale</span><span class="o">*</span><span class="n">dmin</span><span class="o">/</span><span class="n">dmax</span> <span class="o">+</span> <span class="n">bias</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">dist</span> <span class="o">&gt;=</span> <span class="n">scale</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">scale</span><span class="o">-</span><span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">dist</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="mi">0</span>  
+                
+        <span class="n">assessment_duration</span> <span class="o">=</span> <span class="n">b</span><span class="o">-</span><span class="n">a</span>
+                
+    <span class="k">else</span> <span class="p">:</span>
+        
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;There are no true value nor assessment_method, both are None&quot;</span><span class="p">)</span>
+    
+    <span class="n">error</span> <span class="o">=</span> <span class="p">[</span><span class="n">nb_inversion</span><span class="p">,</span> <span class="n">nb_scale_error</span><span class="p">]</span>
+        
+    <span class="k">return</span> <span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">trio</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">assessment_duration</span><span class="p">,</span> <span class="n">error</span></div>
+
+<div class="viewcode-block" id="CTJ_assessments"><a class="viewcode-back" href="../../index.html#CTJ.CTJ.CTJ_assessments">[docs]</a><span class="k">def</span> <span class="nf">CTJ_assessments</span> <span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">assessment</span><span class="p">,</span><span class="n">scale</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function calculates the new line to add in the A array for the CTJ model based on given assessments.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    A : array of double</span>
+<span class="sd">        An array used to calculate the estimated value.</span>
+<span class="sd">    b : array of double</span>
+<span class="sd">        Array of zeros execept for two value, the fixed point of the model.</span>
+<span class="sd">    assessment : tuple</span>
+<span class="sd">        A tuple containing the assessment results (Max,(dist,Average),Min).In the format (int, (int, int), int).</span>
+<span class="sd">    scale : int</span>
+<span class="sd">        The value of the scale for the CTJ model. Default is 10.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    line : list</span>
+<span class="sd">        A list representing the new line to add in the A array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">nb_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+    
+    <span class="n">d1</span> <span class="o">=</span> <span class="n">assessment</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">d2</span> <span class="o">=</span> <span class="n">scale</span> <span class="o">-</span> <span class="n">d1</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">d1</span><span class="o">/</span><span class="n">d2</span>
+    <span class="n">Max</span> <span class="o">=</span> <span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">assessment</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">Average</span> <span class="o">=</span> <span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">assessment</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Min</span> <span class="o">=</span> <span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">assessment</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="c1">#Create a new line for A array</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_items</span><span class="p">))</span>
+    <span class="n">line</span><span class="p">[</span><span class="n">Max</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">line</span><span class="p">[</span><span class="n">Average</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">line</span><span class="p">[</span><span class="n">Min</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span>
+    
+    <span class="k">return</span> <span class="n">line</span></div>
+
+<div class="viewcode-block" id="CTJ_new_trio"><a class="viewcode-back" href="../../index.html#CTJ.CTJ.CTJ_new_trio">[docs]</a><span class="k">def</span> <span class="nf">CTJ_new_trio</span> <span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function select the best new trio to assess.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    assessments : list of tuple</span>
+<span class="sd">        A list containing all the assessments done in the format (int,(int,int),int).</span>
+<span class="sd">    estimated_values : list of int</span>
+<span class="sd">        A list of int containing the estimated values corresponding to each item in the `items` list.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    trio : list</span>
+<span class="sd">        A list representing the new trio to assess.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">nb_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+    
+    <span class="c1">#Let&#39;s set the assessment from (Max, (dist, Average), Min) to (Max, Average, Min)</span>
+    <span class="n">assessment</span> <span class="o">=</span> <span class="p">[(</span><span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">tup</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">assessments</span><span class="p">]</span>
+    
+    <span class="c1">#Initialize the proximity of items tuples (i,j,k) to 0</span>
+    <span class="n">Prox</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nb_items</span><span class="p">,</span><span class="n">nb_items</span><span class="p">,</span><span class="n">nb_items</span><span class="p">))</span>
+    
+    <span class="c1">#Initialize the apparition probabilities</span>
+    <span class="n">TriProba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nb_items</span><span class="p">,</span><span class="n">nb_items</span><span class="p">,</span><span class="n">nb_items</span><span class="p">))</span>
+    <span class="n">JointProba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nb_items</span><span class="p">,</span><span class="n">nb_items</span><span class="p">))</span>
+    <span class="n">Proba</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_items</span><span class="p">)</span>
+    
+    <span class="c1">#let&#39;s fill all the probabilities array</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item_1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+        <span class="n">nb</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">assessment</span> <span class="k">if</span> <span class="n">item_1</span> <span class="ow">in</span> <span class="n">tup</span><span class="p">)</span>
+        <span class="n">Proba</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessment</span><span class="p">))</span>
+        
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">item_2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+            <span class="n">nb_joint</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">assessment</span> <span class="k">if</span> <span class="n">item_2</span> <span class="ow">in</span> <span class="n">tup</span> <span class="ow">and</span> <span class="n">item_1</span> <span class="ow">in</span> <span class="n">tup</span><span class="p">)</span>
+            <span class="n">JointProba</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">nb_joint</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessment</span><span class="p">))</span>
+    
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                <span class="n">JointProba</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">item_3</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+                 <span class="n">nb_tri</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">assessment</span> <span class="k">if</span> <span class="n">item_3</span> <span class="ow">in</span> <span class="n">tup</span> <span class="ow">and</span> <span class="n">item_2</span> <span class="ow">in</span> <span class="n">tup</span> <span class="ow">and</span> <span class="n">item_1</span> <span class="ow">in</span> <span class="n">tup</span><span class="p">)</span>
+                 <span class="n">TriProba</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">nb_tri</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessment</span><span class="p">)</span>
+                 
+                 <span class="c1">#Let&#39;s calculate the proximity of the ith, jth and kth items</span>
+                 <span class="n">Prox</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">estimated_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">estimated_values</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span>
+                                         <span class="p">(</span><span class="n">estimated_values</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">estimated_values</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span>
+                                         <span class="p">(</span><span class="n">estimated_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">estimated_values</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>        
+                 
+                 <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">==</span> <span class="n">k</span><span class="p">:</span>
+                     <span class="n">TriProba</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">#Let&#39;s calculate the array of Information Interaction</span>
+    <span class="n">ii</span><span class="o">=</span><span class="n">II</span><span class="p">(</span><span class="n">TriProba</span><span class="p">,</span><span class="n">JointProba</span><span class="p">,</span><span class="n">Proba</span><span class="p">)</span>
+
+    <span class="c1">#Let&#39;s create all trios possible</span>
+    <span class="n">trios</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">fit</span><span class="o">=</span><span class="p">[]</span>
+    
+    <span class="c1">#For all trio estimate the fitness for the wheel selection</span>
+    <span class="k">for</span> <span class="n">trio</span> <span class="ow">in</span> <span class="n">trios</span><span class="p">:</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">trio</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">fit</span><span class="o">.</span><span class="n">append</span><span class="p">(((</span><span class="n">ii</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">Prox</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">])</span>
+    
+    <span class="c1">#Select a trio with a roulette wheel algorithm</span>
+    <span class="n">selected_index</span> <span class="o">=</span> <span class="n">roulette</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+    
+    <span class="n">p</span> <span class="o">=</span> <span class="n">permutations</span><span class="p">([</span><span class="n">trios</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">trios</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">trios</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]],</span> <span class="mi">3</span><span class="p">)</span>
+    
+    <span class="c1">#If the intersection of assessment and p is not Null then change the selected trio</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">assessment</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">p</span><span class="p">)):</span>
+        <span class="n">selected_index</span> <span class="o">=</span> <span class="n">roulette</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">permutations</span><span class="p">([</span><span class="n">trios</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">trios</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">trios</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]],</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">i</span><span class="o">&gt;</span><span class="mi">1000</span><span class="p">:</span>
+            <span class="k">break</span>
+        
+    <span class="n">trio</span> <span class="o">=</span> <span class="p">[</span><span class="n">trios</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">trios</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">trios</span><span class="p">[</span><span class="n">selected_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]]</span>
+
+    <span class="k">return</span> <span class="n">trio</span></div>
+
+<div class="viewcode-block" id="CTJ_init"><a class="viewcode-back" href="../../index.html#CTJ.CTJ.CTJ_init">[docs]</a><span class="k">def</span> <span class="nf">CTJ_init</span> <span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">max_id</span><span class="p">,</span> <span class="n">min_id</span><span class="p">,</span> <span class="n">max_val</span><span class="p">,</span> <span class="n">min_val</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">,</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">assessment_method</span> <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This fonction initialize the CTJ algorithm. Set up the array of the model and the assessments list.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    max_id : int</span>
+<span class="sd">        The position of the max value in the items list.</span>
+<span class="sd">    min_id : int</span>
+<span class="sd">        The position of the min value in the items list.</span>
+<span class="sd">    max_val : int</span>
+<span class="sd">        The max value of items list.</span>
+<span class="sd">    min_val : int</span>
+<span class="sd">        The min value of items list.</span>
+<span class="sd">    sensibility : tuple</span>
+<span class="sd">        A  tuple cointaining the sensibility treshold, the absolute value of the error on the scaler, and the probability of making a mystake. In the format (int, int, double).</span>
+<span class="sd">    true_values : list of int</span>
+<span class="sd">        A list of int containing the true values corresponding to each item in the `items` list.</span>
+<span class="sd">    scale : int</span>
+<span class="sd">        The value of the scale for the CTJ model.</span>
+<span class="sd">    assessment_method : fun</span>
+<span class="sd">        The assessment method. If none, the assessment is automatically performed using the true value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    A : array of double</span>
+<span class="sd">        An array used to calculate the estimated value.</span>
+<span class="sd">    b : array of double</span>
+<span class="sd">        Array of zeros execept for two value, the fixed point of the model.</span>
+<span class="sd">    assessments : list of tuple</span>
+<span class="sd">         A list containing all the assessments done in the format (int,(int,int),int).</span>
+<span class="sd">    error : list of int</span>
+<span class="sd">        The first element is the number of inversion done in automated assessment, the second is the number of scale error. Default is [0,0].</span>
+<span class="sd">    window : WindowManager</span>
+<span class="sd">        an object to manage human assessments.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">nb_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+    
+    <span class="n">window</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="c1">#Create the matrices</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">nb_items</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">min_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_val</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">max_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_val</span>
+
+    <span class="n">not_compared</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:]</span>
+    
+    <span class="c1">#Shuffle items if the items are sort the judgment may be biaised</span>
+    <span class="n">rd</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">not_compared</span><span class="p">)</span>
+    
+    <span class="n">assessments</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="n">assessments_time</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">error</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="c1">#if assessment method not None then Show a tutorial</span>
+    <span class="k">if</span> <span class="n">assessment_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        
+        <span class="n">window</span> <span class="o">=</span> <span class="n">WindowManager</span><span class="p">()</span>
+        
+        <span class="n">skip_tutorial</span> <span class="o">=</span> <span class="n">ready</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="s2">&quot;In each iteration, you will be asked to sort the items from best (on the left) to worst (on the right).</span><span class="se">\n</span><span class="s2"> Then, use the slider below to indicate the distance between the extreme items and the average one.</span><span class="se">\n</span><span class="s2"> To swap items, click on both of them.</span><span class="se">\n\n</span><span class="s2">To access the tutorial, click on the &#39;Tutorial&#39; button.</span><span class="se">\n</span><span class="s2"> The tutorial includes an evaluation of the algorithm.</span><span class="se">\n</span><span class="s2"> After completing the tutorial evaluation, the actual test will begin.</span><span class="se">\n\n</span><span class="s2">Between each evaluation, a button will appear. Ensure you are ready before clicking it, as a countdown will start once clicked.</span><span class="se">\n</span><span class="s2"> At the end of the countdown, you can evaluate the items, so make sure you are prepared.&quot;</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span>  <span class="s2">&quot;Tuto&quot;</span><span class="p">)</span> 
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_tutorial</span><span class="p">:</span>
+            <span class="n">item_1</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+            <span class="n">items_copy</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:]</span>
+            <span class="n">items_copy</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item_1</span><span class="p">)</span>
+            <span class="n">item_2</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">items_copy</span><span class="p">)</span>
+            <span class="n">items_copy</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item_2</span><span class="p">)</span>
+            <span class="n">item_3</span> <span class="o">=</span> <span class="n">rd</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">items_copy</span><span class="p">)</span>
+    
+            <span class="n">_</span> <span class="o">=</span> <span class="n">assessment_method</span><span class="p">(</span><span class="n">scale</span><span class="p">,[</span><span class="n">item_1</span><span class="p">,</span> <span class="n">item_2</span><span class="p">,</span> <span class="n">item_3</span><span class="p">]</span> <span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span> 
+
+    <span class="c1">#Assess all items one times</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nb_items</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">trio</span> <span class="o">=</span> <span class="p">[</span><span class="n">not_compared</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">not_compared</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">not_compared</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]]</span>
+        <span class="n">assessment</span> <span class="o">=</span> <span class="n">make_CTJ_assessment</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">trio</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">,</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+        <span class="n">assessments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assessment</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">assessments_time</span> <span class="o">+=</span> <span class="n">assessment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">error</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">assessment</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">error</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">assessment</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">CTJ_assessments</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">assessments</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">scale</span><span class="p">)</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">line</span><span class="p">])</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="k">if</span> <span class="n">nb_items</span><span class="o">%</span><span class="mi">3</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">trio</span> <span class="o">=</span> <span class="p">[</span><span class="n">not_compared</span><span class="p">[</span><span class="n">nb_items</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">not_compared</span><span class="p">[</span><span class="n">nb_items</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">not_compared</span><span class="p">[</span><span class="n">nb_items</span><span class="o">-</span><span class="mi">3</span><span class="p">]]</span>
+        <span class="n">assessment</span> <span class="o">=</span> <span class="n">make_CTJ_assessment</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">trio</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">,</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+        <span class="n">assessments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assessment</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">assessments_time</span> <span class="o">+=</span> <span class="n">assessment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">error</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">assessment</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">error</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">assessment</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">line</span><span class="p">])</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        
+    <span class="k">return</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">assessments_time</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">window</span></div>
+
+<div class="viewcode-block" id="CTJ"><a class="viewcode-back" href="../../index.html#CTJ.CTJ.CTJ">[docs]</a><span class="k">def</span> <span class="nf">CTJ</span> <span class="p">(</span><span class="n">min_item</span><span class="p">,</span> <span class="n">max_item</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">sensibility</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">true_values</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">max_iteration</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">max_accuracy</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span> <span class="n">scale</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">assessment_method</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Comparative Triple judgement (CTJ) is an evaluation method based on the comparison of a trio of elements. Rather than scoring each item on a fixed scale, evaluators directly compare three items at once, ranking them from best to worst, and then position the central item on a scale by moving it closer to the end that best matches it.  CTJ was devised by Dr Kevin Kelly.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    min_item : tuple</span>
+<span class="sd">        The min_item we wont to use.  In the format (int, string).</span>
+<span class="sd">    max_item : tuple</span>
+<span class="sd">        The max_item we wont to use. In the format (int, string).</span>
+<span class="sd">    items : list of string</span>
+<span class="sd">        A list of strings representing the items to be assessed.</span>
+<span class="sd">    sensibility : tuple</span>
+<span class="sd">        A  tuple cointaining the sensibility treshold, the absolute value of the error on the scaler, and the probability of making a mystake. (int, int, double)</span>
+<span class="sd">    true_values : list of int, optional</span>
+<span class="sd">        A list of int containing the true values corresponding to each item in the `items` list. The default is None.</span>
+<span class="sd">    sensibility : tuple</span>
+<span class="sd">        A  tuple cointaining the sensibility treshold, the absolute value of the error on the scaler, and the probability of making a mystake. (int, int, double)</span>
+<span class="sd">    max_iteration : int, optional</span>
+<span class="sd">        Number of maximum iteration of the algorithm. The default is 30.</span>
+<span class="sd">    max_accuracy : float, optional</span>
+<span class="sd">        Accuracy of the model. The default is 0.9.</span>
+<span class="sd">    scale : int, optional</span>
+<span class="sd">        The value of the scale for the CTJ model. Default is 10.</span>
+<span class="sd">    assessment_method : fun</span>
+<span class="sd">        The assessment method. If none, the assessment is automatically performed using the true value. Default is None.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    estimated_values : list of int</span>
+<span class="sd">        A list of int containing the estimated values corresponding to each item in the `items` list.</span>
+<span class="sd">    int</span>
+<span class="sd">        Number of iteration.</span>
+<span class="sd">    cond : float</span>
+<span class="sd">        Accuracy of estimated value at the end of algorithm.</span>
+<span class="sd">    error : list of int</span>
+<span class="sd">        The first element is the number of inversion done in automated assessment, the second is the number of scale error. Default is [0,0].</span>
+<span class="sd">    assessments_time : int</span>
+<span class="sd">        The duration of the assessments.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1">#If min and max value are not in the items list we add them</span>
+    <span class="k">if</span> <span class="n">min_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">items</span> <span class="p">:</span>
+         <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+         <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+             <span class="n">true_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">items</span> <span class="p">:</span>
+         <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+         <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+             <span class="n">true_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+    <span class="c1">#We initialize the A array, b array and assessments list</span>
+    <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">assessments_time</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">window</span> <span class="o">=</span> <span class="n">CTJ_init</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">max_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">items</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sensibility</span><span class="p">,</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">assessment_method</span> <span class="p">)</span>
+    
+    <span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">all_estimated_values</span><span class="o">=</span><span class="p">[]</span>
+    
+    <span class="c1">#We calculate the estimated value after the initialisation</span>
+    <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">rcond</span><span class="o">=</span><span class="mf">1e-17</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">estimated_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">estimated_values</span><span class="p">))</span> 
+    <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">Rescale</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">estimated_values</span><span class="p">)</span>
+
+    <span class="c1">#We add it to the list containing all the estimated values</span>
+    <span class="n">all_estimated_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimated_values</span><span class="p">)</span>
+        
+    <span class="c1">#We select the accuracy method depending the existence of true_values list</span>
+    <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">all_estimated_values</span><span class="p">:</span> <span class="n">SSR</span><span class="p">(</span><span class="n">all_estimated_values</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">all_estimated_values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">all_estimated_values</span><span class="p">:</span> <span class="n">SSR</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">)</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="n">accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">all_estimated_values</span><span class="p">)</span>
+
+    
+    <span class="k">while</span> <span class="p">((</span><span class="n">iteration</span><span class="o">&lt;</span><span class="n">max_iteration</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">cond</span><span class="o">&lt;</span><span class="n">max_accuracy</span><span class="p">)):</span>
+        
+        <span class="c1">#We select the best next trio</span>
+        <span class="n">trio</span> <span class="o">=</span> <span class="n">CTJ_new_trio</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">)</span>
+        
+        <span class="c1">#We add the new assessment</span>
+        <span class="n">assessment</span> <span class="o">=</span> <span class="n">make_CTJ_assessment</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">trio</span><span class="p">,</span> <span class="n">sensibility</span><span class="p">,</span> <span class="n">true_values</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">assessment_method</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+        <span class="n">assessments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assessment</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">assessments_time</span> <span class="o">+=</span> <span class="n">assessment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">error</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">assessment</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">error</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">assessment</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="c1">#We upgrade the A and b array</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">CTJ_assessments</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">assessments</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">scale</span><span class="p">)</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">line</span><span class="p">])</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        
+        <span class="c1">#We calculate the new estimated values</span>
+        <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">rcond</span><span class="o">=</span><span class="mf">1e-17</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">estimated_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">estimated_values</span><span class="p">))</span> 
+        <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">Rescale</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">estimated_values</span><span class="p">)</span>
+        
+        <span class="n">all_estimated_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimated_values</span><span class="p">)</span>
+        
+        <span class="c1">#We calculate the new accuracy</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="n">accuracy</span><span class="p">(</span><span class="n">true_values</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="n">all_estimated_values</span><span class="p">)</span>
+        <span class="n">iteration</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+    
+    <span class="c1">#We rescale them</span>
+    <span class="n">estimated_values</span> <span class="o">=</span> <span class="n">Rescale</span><span class="p">(</span><span class="n">min_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">estimated_values</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">assessment_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="n">error</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">error</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">assessment</span><span class="p">)</span>
+        
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;===============================================================&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Result of CTJ algorithm&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Items : &quot;</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| True values : &quot;</span><span class="p">,</span> <span class="n">true_values</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Estimated values : &quot;</span><span class="p">,</span> <span class="n">estimated_values</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">true_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Accuracy : &quot;</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sensibility</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Number of inversion : &quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Number of scale error : &quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">sensibility</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Your mean scale error : &quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Iteration : &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">assessment_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;| Total duration : &quot;</span><span class="p">,</span> <span class="n">assessments_time</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;===============================================================&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">estimated_values</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">assessments</span><span class="p">),</span> <span class="n">cond</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">assessments_time</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CTJ 1.1.6 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">CTJ.CTJ</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, PERRIER Romain.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1053 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Welcome to CTJ’s documentation! &#8212; CTJ 1.1.6 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">CTJ 1.1.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Welcome to CTJ’s documentation!</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="welcome-to-ctj-s-documentation">
+<h1>Welcome to CTJ’s documentation!<a class="headerlink" href="#welcome-to-ctj-s-documentation" title="Permalink to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<p>The <cite>CTJ</cite> package implements the comparative triple judgement algorithm devised by Dr. Kevin Kelly. The aim of this algorithm is to improve the accuracy of <cite>ACJ</cite> (adaptive comparative judgement). Instead of comparing elements two by two, they are compared three by three, and a notion of distance between elements is added to the algorithm. <cite>CTJ</cite> was devised by Dr. Kevin Kelly.</p>
+<p>This package therefore proposes an implementation of the <cite>CTJ</cite>, the <cite>ACJ</cite>, and the <cite>Rubric</cite> judgment, to enable a more precise analysis of the <cite>CTJ</cite> and to compare its performance with other methods. To do this, pairs and trios are selected with similar methods using Shannon entropy.</p>
+</section>
+<section id="modules">
+<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this heading">¶</a></h1>
+<section id="ctj-module">
+<h2>CTJ Module<a class="headerlink" href="#ctj-module" title="Permalink to this heading">¶</a></h2>
+<p>The <cite>CTJ</cite> module implements the core functionality of the Comparative Triple Judgement algorithm. This includes the logic for comparing elements in sets of three and calculating distances between them to enhance judgment accuracy.</p>
+<span class="target" id="module-CTJ.CTJ"></span><p>Created on Mon Apr 29 15:35:28 2024</p>
+<p>&#64;author: Romain Perrier</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.CTJ.CTJ">
+<span class="sig-prename descclassname"><span class="pre">CTJ.CTJ.</span></span><span class="sig-name descname"><span class="pre">CTJ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensibility</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_accuracy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessment_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/CTJ.html#CTJ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.CTJ.CTJ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Comparative Triple judgement (CTJ) is an evaluation method based on the comparison of a trio of elements. Rather than scoring each item on a fixed scale, evaluators directly compare three items at once, ranking them from best to worst, and then position the central item on a scale by moving it closer to the end that best matches it.  CTJ was devised by Dr Kevin Kelly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_item</strong> (<em>tuple</em>) – The min_item we wont to use.  In the format (int, string).</p></li>
+<li><p><strong>max_item</strong> (<em>tuple</em>) – The max_item we wont to use. In the format (int, string).</p></li>
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>sensibility</strong> (<em>tuple</em>) – A  tuple cointaining the sensibility treshold, the absolute value of the error on the scaler, and the probability of making a mystake. (int, int, double)</p></li>
+<li><p><strong>true_values</strong> (<em>list of int</em><em>, </em><em>optional</em>) – A list of int containing the true values corresponding to each item in the <cite>items</cite> list. The default is None.</p></li>
+<li><p><strong>sensibility</strong> – A  tuple cointaining the sensibility treshold, the absolute value of the error on the scaler, and the probability of making a mystake. (int, int, double)</p></li>
+<li><p><strong>max_iteration</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of maximum iteration of the algorithm. The default is 30.</p></li>
+<li><p><strong>max_accuracy</strong> (<em>float</em><em>, </em><em>optional</em>) – Accuracy of the model. The default is 0.9.</p></li>
+<li><p><strong>scale</strong> (<em>int</em><em>, </em><em>optional</em>) – The value of the scale for the CTJ model. Default is 10.</p></li>
+<li><p><strong>assessment_method</strong> (<em>fun</em>) – The assessment method. If none, the assessment is automatically performed using the true value. Default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>estimated_values</strong> (<em>list of int</em>) – A list of int containing the estimated values corresponding to each item in the <cite>items</cite> list.</p></li>
+<li><p><em>int</em> – Number of iteration.</p></li>
+<li><p><strong>cond</strong> (<em>float</em>) – Accuracy of estimated value at the end of algorithm.</p></li>
+<li><p><strong>error</strong> (<em>list of int</em>) – The first element is the number of inversion done in automated assessment, the second is the number of scale error. Default is [0,0].</p></li>
+<li><p><strong>assessments_time</strong> (<em>int</em>) – The duration of the assessments.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.CTJ.CTJ_assessments">
+<span class="sig-prename descclassname"><span class="pre">CTJ.CTJ.</span></span><span class="sig-name descname"><span class="pre">CTJ_assessments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/CTJ.html#CTJ_assessments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.CTJ.CTJ_assessments" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function calculates the new line to add in the A array for the CTJ model based on given assessments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>A</strong> (<em>array of double</em>) – An array used to calculate the estimated value.</p></li>
+<li><p><strong>b</strong> (<em>array of double</em>) – Array of zeros execept for two value, the fixed point of the model.</p></li>
+<li><p><strong>assessment</strong> (<em>tuple</em>) – A tuple containing the assessment results (Max,(dist,Average),Min).In the format (int, (int, int), int).</p></li>
+<li><p><strong>scale</strong> (<em>int</em>) – The value of the scale for the CTJ model. Default is 10.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>line</strong> – A list representing the new line to add in the A array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.CTJ.CTJ_init">
+<span class="sig-prename descclassname"><span class="pre">CTJ.CTJ.</span></span><span class="sig-name descname"><span class="pre">CTJ_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensibility</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessment_method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/CTJ.html#CTJ_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.CTJ.CTJ_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>This fonction initialize the CTJ algorithm. Set up the array of the model and the assessments list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>max_id</strong> (<em>int</em>) – The position of the max value in the items list.</p></li>
+<li><p><strong>min_id</strong> (<em>int</em>) – The position of the min value in the items list.</p></li>
+<li><p><strong>max_val</strong> (<em>int</em>) – The max value of items list.</p></li>
+<li><p><strong>min_val</strong> (<em>int</em>) – The min value of items list.</p></li>
+<li><p><strong>sensibility</strong> (<em>tuple</em>) – A  tuple cointaining the sensibility treshold, the absolute value of the error on the scaler, and the probability of making a mystake. In the format (int, int, double).</p></li>
+<li><p><strong>true_values</strong> (<em>list of int</em>) – A list of int containing the true values corresponding to each item in the <cite>items</cite> list.</p></li>
+<li><p><strong>scale</strong> (<em>int</em>) – The value of the scale for the CTJ model.</p></li>
+<li><p><strong>assessment_method</strong> (<em>fun</em>) – The assessment method. If none, the assessment is automatically performed using the true value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>A</strong> (<em>array of double</em>) – An array used to calculate the estimated value.</p></li>
+<li><p><strong>b</strong> (<em>array of double</em>) – Array of zeros execept for two value, the fixed point of the model.</p></li>
+<li><p><strong>assessments</strong> (<em>list of tuple</em>) – A list containing all the assessments done in the format (int,(int,int),int).</p></li>
+<li><p><strong>error</strong> (<em>list of int</em>) – The first element is the number of inversion done in automated assessment, the second is the number of scale error. Default is [0,0].</p></li>
+<li><p><strong>window</strong> (<em>WindowManager</em>) – an object to manage human assessments.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.CTJ.CTJ_new_trio">
+<span class="sig-prename descclassname"><span class="pre">CTJ.CTJ.</span></span><span class="sig-name descname"><span class="pre">CTJ_new_trio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimated_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/CTJ.html#CTJ_new_trio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.CTJ.CTJ_new_trio" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function select the best new trio to assess.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>assessments</strong> (<em>list of tuple</em>) – A list containing all the assessments done in the format (int,(int,int),int).</p></li>
+<li><p><strong>estimated_values</strong> (<em>list of int</em>) – A list of int containing the estimated values corresponding to each item in the <cite>items</cite> list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>trio</strong> – A list representing the new trio to assess.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.CTJ.make_CTJ_assessment">
+<span class="sig-prename descclassname"><span class="pre">CTJ.CTJ.</span></span><span class="sig-name descname"><span class="pre">make_CTJ_assessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensibility</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessment_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_assessment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/CTJ.html#make_CTJ_assessment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.CTJ.make_CTJ_assessment" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to do the assessment on a Trio and return the tuple (Max,(dist,Average),Min)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>trio</strong> (<em>list of string</em>) – A list of strings representing the trio of items being assessed.</p></li>
+<li><p><strong>sensibility</strong> (<em>tuple</em>) – A  tuple cointaining the sensibility treshold, the absolute value of the error on the scaler, and the probability of making a mystake. In the format (int, int, double).</p></li>
+<li><p><strong>true_values</strong> (<em>list of int</em>) – A list of int containing the true values corresponding to each item in the <cite>items</cite> list.</p></li>
+<li><p><strong>scale</strong> (<em>int</em>) – The value of the scale for the CTJ model. Default is 10.</p></li>
+<li><p><strong>assessment_method</strong> (<em>fun</em>) – The assessment method. If none, the assessment is automatically performed using the true value.</p></li>
+<li><p><strong>nb_assessment</strong> (<em>int</em>) – The number of assessment done.</p></li>
+<li><p><strong>window</strong> (<a class="reference internal" href="#CTJ.util.WindowManager" title="CTJ.util.WindowManager"><em>WindowManager</em></a>) – an object to manage human assessments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – There are no true value nor assessment_method, both are None.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><em>tuple</em> – A tuple containing the assessment results (Max,(dist,Average),Min).In the format (int, (int, int), ini).</p></li>
+<li><p><strong>assessment_duration</strong> (<em>double</em>) – Duration of the assessment in second.</p></li>
+<li><p><strong>assessments_time</strong> (<em>int</em>) – The duration of the assessments.</p></li>
+<li><p><strong>error</strong> (<em>list of int</em>) – The first element is the number of inversion done in automated assessment, the second is the number of scale error. Default is [0,0].</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="acj-module">
+<h2>ACJ Module<a class="headerlink" href="#acj-module" title="Permalink to this heading">¶</a></h2>
+<p>The <cite>ACJ</cite> module provides an implementation of the Adaptive Comparative Judgement algorithm. This module is used for comparing pairs of elements.</p>
+<span class="target" id="module-CTJ.ACJ"></span><p>Created on Fri May 10 14:56:29 2024</p>
+<p>&#64;author: Romain Perrier</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.ACJ.ACJ">
+<span class="sig-prename descclassname"><span class="pre">CTJ.ACJ.</span></span><span class="sig-name descname"><span class="pre">ACJ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_judge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensibility</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_accuracy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessment_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entropy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/ACJ.html#ACJ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.ACJ.ACJ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adaptive Comparative Judgment (ACJ) is an evaluation method based on the comparison of pairs of items. Rather than scoring each item on a fixed scale, evaluators directly compare two items at a time and judge which is better according to certain criteria.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_item</strong> (<em>tuple</em>) – The min_item we wont to use. In the format (int, string).</p></li>
+<li><p><strong>max_item</strong> (<em>tuple</em>) – The max_item we wont to use. In the format (int, string).</p></li>
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>nb_judge</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of judge that make the evaluation. The default is 1.</p></li>
+<li><p><strong>sensibility</strong> (<em>list of int</em>) – The sensitivity threshold. If the margin between two items is equal to this value, there is a 10% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items. The default is [0]</p></li>
+<li><p><strong>true_values</strong> (<em>list of int</em><em>, </em><em>optional</em>) – A list of int containing the true values corresponding to each item in the <cite>items</cite> list. The default is None.</p></li>
+<li><p><strong>max_iteration</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of maximum iteration of the algorithm. The default is 30.</p></li>
+<li><p><strong>max_accuracy</strong> (<em>float</em><em>, </em><em>optional</em>) – Accuracy of the model. The default is 0.9.</p></li>
+<li><p><strong>assessment_method</strong> (<em>fun</em>) – The assessment method. If none, the assessment is automatically performed using the true value. The default is None.</p></li>
+<li><p><strong>entropy</strong> (<em>bool</em>) – The method use to select items. The default is False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – The len of sensitbility is not equal to the number of judge.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>estimated_values</strong> (<em>list of int</em>) – A list of int containing the estimated values corresponding to each item in the <cite>items</cite> list.</p></li>
+<li><p><em>int</em> – Number of iteration.</p></li>
+<li><p><strong>cond</strong> (<em>float</em>) – Accuracy of estimated value at the end of algorithm.</p></li>
+<li><p><strong>error</strong> (<em>list of int</em>) – A list containing the number of error for each judges.</p></li>
+<li><p><strong>assessments_time</strong> (<em>int</em>) – The duration of the assessments.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.ACJ.ACJ_init">
+<span class="sig-prename descclassname"><span class="pre">CTJ.ACJ.</span></span><span class="sig-name descname"><span class="pre">ACJ_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensibility</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessment_method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/ACJ.html#ACJ_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.ACJ.ACJ_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>This fonction initialize the ACJ algorithm. Set up the assessments list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>true_values</strong> (<em>list of int</em>) – A list of int containing the true values corresponding to each item in the <cite>items</cite> list.</p></li>
+<li><p><strong>nb_judge</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of judge that make the evaluation.</p></li>
+<li><p><strong>sensibility</strong> (<em>int</em>) – The sensitivity threshold. If the margin between two items is equal to this value, there is a 10% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.</p></li>
+<li><p><strong>assessment_method</strong> (<em>fun</em>) – The assessment method. If none, the assessment is automatically performed using the true value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>assessments</strong> (<em>list of tuple</em>) – A list containing all the assessments done in the format (int,int).</p></li>
+<li><p><strong>assessments_time</strong> (<em>int</em>) – The duration of the assessments.</p></li>
+<li><p><strong>error</strong> (<em>list of int</em>) – A list containing the number of error for each judges.</p></li>
+<li><p><strong>window</strong> (<em>WindowManager</em>) – an object to manage human assessments.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.ACJ.ACJ_new_pair">
+<span class="sig-prename descclassname"><span class="pre">CTJ.ACJ.</span></span><span class="sig-name descname"><span class="pre">ACJ_new_pair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimated_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entropy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/ACJ.html#ACJ_new_pair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.ACJ.ACJ_new_pair" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function select the best new pair to assess.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>assessments</strong> (<em>list of tuple</em>) – A list containing all the assessments done in the format (int, int).</p></li>
+<li><p><strong>estimated_values</strong> (<em>list of int</em>) – A list of int containing the estimated values corresponding to each item in the <cite>items</cite> list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>pair</strong> – A list representing the new pair to assess.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.ACJ.estimate_ACJ">
+<span class="sig-prename descclassname"><span class="pre">CTJ.ACJ.</span></span><span class="sig-name descname"><span class="pre">estimate_ACJ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/ACJ.html#estimate_ACJ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.ACJ.estimate_ACJ" title="Permalink to this definition">¶</a></dt>
+<dd><p>The method to estimate the value of each ACJ iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>assessments</strong> (<em>list of tuple</em>) – A list containing all the assessments done in the format (int,int).</p></li>
+<li><p><strong>true_values</strong> (<em>list of int</em>) – A list of int containing the true values corresponding to each item in the <cite>items</cite> list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>estimated_values</strong> – A list of int containing the estimated values corresponding to each item in the <cite>items</cite> list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.ACJ.make_ACJ_assessment">
+<span class="sig-prename descclassname"><span class="pre">CTJ.ACJ.</span></span><span class="sig-name descname"><span class="pre">make_ACJ_assessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensibility</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessment_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_assessment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/ACJ.html#make_ACJ_assessment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.ACJ.make_ACJ_assessment" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to do the assessment on a Pair and return the tuple (Max, Min). In the format (int, int)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>pair</strong> (<em>list of string</em>) – A list of strings representing the pair of items being assessed.</p></li>
+<li><p><strong>id_judge</strong> (<em>int</em>) – The id of the judge making the assesment.</p></li>
+<li><p><strong>sensibility</strong> (<em>int</em>) – The sensitivity threshold. If the margin between two items is equal to this value, there is a 10% probability of inverting them. The probability is calculated with this sigmoid function:  1 / (1 + np.exp(-np.log(1/9) / sensibility * x)) where x is the margin between two items.</p></li>
+<li><p><strong>true_values</strong> (<em>list of int</em>) – A list of int containing the true values corresponding to each item in the <cite>items</cite> list.</p></li>
+<li><p><strong>assessment_method</strong> (<em>fun</em>) – The assessment method. If none, the assessment is automatically performed using the true value.</p></li>
+<li><p><strong>nb_assessment</strong> (<em>int</em>) – The number of assessment done.</p></li>
+<li><p><strong>window</strong> (<a class="reference internal" href="#CTJ.util.WindowManager" title="CTJ.util.WindowManager"><em>WindowManager</em></a>) – an object to manage human assessments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – There are no true value nor assessment_method, both are None.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><em>tuple</em> – A tuple containing the assessment results in the format (int, int).</p></li>
+<li><p><strong>assessment_duration</strong> (<em>double</em>) – Duration of the assessment in second.</p></li>
+<li><p><strong>one_more_bias</strong> (<em>int</em>) – One if the judgment is biaised else 0.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="rubric-module">
+<h2>Rubric Module<a class="headerlink" href="#rubric-module" title="Permalink to this heading">¶</a></h2>
+<p>The <cite>Rubric</cite> module includes functionality for rubric-based judgment. This allows for the assessment of elements based on predefined criteria.</p>
+<span class="target" id="module-CTJ.Rubric"></span><p>Created on Fri May 17 14:45:35 2024</p>
+<p>&#64;author: Romain Perrier</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.Rubric.Rubric">
+<span class="sig-prename descclassname"><span class="pre">CTJ.Rubric.</span></span><span class="sig-name descname"><span class="pre">Rubric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensibility</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessment_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/Rubric.html#Rubric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.Rubric.Rubric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rubric Judgment is an evaluation method based on the direct notation of an item. An item is shown and we must evaluate it and give a value to it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_item</strong> (<em>tuple</em>) – The min_item we wont to use. In the format (int, string).</p></li>
+<li><p><strong>max_item</strong> (<em>tuple</em>) – The max_item we wont to use. In the format (int, string).</p></li>
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>sensibility</strong> (<em>tuple</em>) – A tuple cointaining the marge of error, and the probability of making a mystake. In the format (int, double). The default is (0,0).</p></li>
+<li><p><strong>true_values</strong> (<em>list of int</em><em>, </em><em>optional</em>) – A list of int containing the true values corresponding to each item in the <cite>items</cite> list. The default is None.</p></li>
+<li><p><strong>assessment_method</strong> (<em>fun</em>) – The assessment method. If none, the assessment is automatically performed using the true value. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>estimated_values</strong> (<em>list of int</em>) – A list of int containing the estimated values corresponding to each item in the <cite>items</cite> list.</p></li>
+<li><p><em>int</em> – Number of iteration.</p></li>
+<li><p><strong>cond</strong> (<em>float</em>) – Accuracy of estimated value at the end of algorithm.</p></li>
+<li><p><strong>error</strong> (<em>int</em>) – Number of error.</p></li>
+<li><p><strong>assessments_time</strong> (<em>int</em>) – The duration of the assessments.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.Rubric.make_Rubric_assessment">
+<span class="sig-prename descclassname"><span class="pre">CTJ.Rubric.</span></span><span class="sig-name descname"><span class="pre">make_Rubric_assessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensibility</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimated_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assessment_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_assessment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/Rubric.html#make_Rubric_assessment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.Rubric.make_Rubric_assessment" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to do the assessment on an item and return the value of it</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>list of string</em>) – A list of strings representing the items to be assessed.</p></li>
+<li><p><strong>item</strong> (<em>string</em>) – A string representing the item being assessed.</p></li>
+<li><p><strong>sensibility</strong> (<em>tuple</em>) – A tuple cointaining the marge of error, and the probability of making a mystake. In the format (int, double).</p></li>
+<li><p><strong>true_values</strong> (<em>list of int</em>) – A list of int containing the true values corresponding to each item in the <cite>items</cite> list.</p></li>
+<li><p><strong>true_values</strong> – A list of int containing the estimated values corresponding to each item in the <cite>items</cite> list.</p></li>
+<li><p><strong>assessment_method</strong> (<em>fun</em>) – The assessment method. If none, the assessment is automatically performed using the true value.</p></li>
+<li><p><strong>nb_assessment</strong> (<em>int</em>) – The number of assessment done.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – There are no true value nor assessment_method, both are None.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>estimated_values</strong> (<em>list of int</em>) – The list containing the estimated values for all items.</p></li>
+<li><p><strong>assessment_duration</strong> (<em>double</em>) – Duration of the assessment in second.</p></li>
+<li><p><strong>one_more_bias</strong> (<em>int</em>) – One if the judgment is biaised else 0.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="assessment-method-module">
+<h2>Assessment Method Module<a class="headerlink" href="#assessment-method-module" title="Permalink to this heading">¶</a></h2>
+<p>The <cite>assessment_method</cite> module encompasses various methods used for assessing and comparing elements visually. This includes judgement for image and pdf.</p>
+<span class="target" id="module-CTJ.assessment_method"></span><p>Created on Mon May 13 15:24:08 2024</p>
+<p>&#64;author: Romain Perrier</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">CTJ.assessment_method.</span></span><span class="sig-name descname"><span class="pre">AssessmentManager</span></span><a class="reference internal" href="_modules/CTJ/assessment_method.html#AssessmentManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to manage various assessment-related operations such as sorting elements,
+handling user inputs, and managing the state of the assessment process.</p>
+<dl class="simple">
+<dt>_testing<span class="classifier">bool</span></dt><dd><p>Indicates if the assessment is currently in testing mode. Default is True.</p>
+</dd>
+<dt>_bad_ending<span class="classifier">bool</span></dt><dd><p>Indicates if the assessment ended in an error state. Default is False.</p>
+</dd>
+<dt>_sort<span class="classifier">list</span></dt><dd><p>A list used for storing sorted elements.</p>
+</dd>
+<dt>_sort_label<span class="classifier">list</span></dt><dd><p>A list of labels corresponding to the sorted elements.</p>
+</dd>
+<dt>_selected_index<span class="classifier">int or None</span></dt><dd><p>The currently selected index in the sorting process. Default is None.</p>
+</dd>
+<dt>_dist<span class="classifier">int</span></dt><dd><p>A distance metric used in the CTJ assessment process. Or the value entered by the user in Rubric assessment. Default is -1.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>testing() -&gt; bool:</dt><dd><p>Property to get the testing status.</p>
+</dd>
+<dt>testing(value: bool):</dt><dd><p>Property to set the testing status.</p>
+</dd>
+<dt>bad_ending() -&gt; bool:</dt><dd><p>Property to get the bad ending status.</p>
+</dd>
+<dt>bad_ending(value: bool):</dt><dd><p>Property to set the bad ending status.</p>
+</dd>
+<dt>sort() -&gt; list:</dt><dd><p>Property to get the sorted elements list.</p>
+</dd>
+<dt>sort(value: list):</dt><dd><p>Property to set the sorted elements list.</p>
+</dd>
+<dt>sort_label() -&gt; list:</dt><dd><p>Property to get the sorted labels list.</p>
+</dd>
+<dt>sort_label(value: list):</dt><dd><p>Property to set the sorted labels list.</p>
+</dd>
+<dt>selected_index() -&gt; int or None:</dt><dd><p>Property to get the selected index.</p>
+</dd>
+<dt>selected_index(value: int or None):</dt><dd><p>Property to set the selected index.</p>
+</dd>
+<dt>dist() -&gt; int:</dt><dd><p>Property to get the distance metric.</p>
+</dd>
+<dt>dist(value: int):</dt><dd><p>Property to set the distance metric.</p>
+</dd>
+<dt>exit_program():</dt><dd><p>Sets the testing status to False and bad ending status to True.</p>
+</dd>
+<dt>rubric_close(entry):</dt><dd><p>Sets the distance metric from the given entry and sets the testing status to False.</p>
+</dd>
+<dt>validate_entry(input: str) -&gt; bool:</dt><dd><p>Validates the user input, allowing only digits or an empty string.</p>
+</dd>
+<dt>acj_close(element, pair):</dt><dd><p>Sorts the pair of elements based on a condition and sets the testing status to False.</p>
+</dd>
+<dt>swap_images(event, index: int, trio: list):</dt><dd><p>Swaps images in the trio based on the selected index.</p>
+</dd>
+<dt>ctj_close(trio: list, slider, slider_range: int):</dt><dd><p>Configures the sorted elements and distance metric based on the trio and slider values, and sets the testing status to False.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.acj_close">
+<span class="sig-name descname"><span class="pre">acj_close</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#AssessmentManager.acj_close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.acj_close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts the pair of elements based on a condition and sets the testing status to False.</p>
+<dl class="simple">
+<dt>element<span class="classifier">any</span></dt><dd><p>The element to be used as a key for sorting.</p>
+</dd>
+<dt>pair<span class="classifier">list</span></dt><dd><p>The list of elements to be sorted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.bad_ending">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bad_ending</span></span><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.bad_ending" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.ctj_close">
+<span class="sig-name descname"><span class="pre">ctj_close</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slider</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slider_range</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#AssessmentManager.ctj_close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.ctj_close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures the sorted elements and distance metric based on the trio and slider values, and sets the testing status to False.</p>
+<dl class="simple">
+<dt>trio<span class="classifier">list</span></dt><dd><p>The list of elements to be sorted.</p>
+</dd>
+<dt>slider<span class="classifier">Scale</span></dt><dd><p>The slider widget to get the distance metric.</p>
+</dd>
+<dt>slider_range<span class="classifier">int</span></dt><dd><p>The range of the slider.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.dist">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dist</span></span><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.dist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.exit_program">
+<span class="sig-name descname"><span class="pre">exit_program</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#AssessmentManager.exit_program"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.exit_program" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the testing status to False and bad ending status to True.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.rubric_close">
+<span class="sig-name descname"><span class="pre">rubric_close</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#AssessmentManager.rubric_close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.rubric_close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the distance metric from the given entry and sets the testing status to False.</p>
+<dl class="simple">
+<dt>entry<span class="classifier">Entry</span></dt><dd><p>The entry widget containing the distance metric.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.selected_index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selected_index</span></span><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.selected_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.sort">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sort</span></span><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.sort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.sort_label">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sort_label</span></span><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.sort_label" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.swap_images">
+<span class="sig-name descname"><span class="pre">swap_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#AssessmentManager.swap_images"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.swap_images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swaps images in the trio based on the selected index.</p>
+<dl class="simple">
+<dt>event<span class="classifier">Event</span></dt><dd><p>The event that triggered the swap.</p>
+</dd>
+<dt>index<span class="classifier">int</span></dt><dd><p>The index of the image to be swapped.</p>
+</dd>
+<dt>trio<span class="classifier">list</span></dt><dd><p>The list containing the images.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.testing">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">testing</span></span><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.testing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.AssessmentManager.validate_entry">
+<span class="sig-name descname"><span class="pre">validate_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#AssessmentManager.validate_entry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.AssessmentManager.validate_entry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates the user input, allowing only digits or an empty string.</p>
+<dl class="simple">
+<dt>input<span class="classifier">str</span></dt><dd><p>The user input to be validated.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>bool</dt><dd><p>True if the input is valid, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="CTJ.assessment_method.PDFViewer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">CTJ.assessment_method.</span></span><span class="sig-name descname"><span class="pre">PDFViewer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#PDFViewer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.PDFViewer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.PDFViewer.create_viewer_window">
+<span class="sig-name descname"><span class="pre">create_viewer_window</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#PDFViewer.create_viewer_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.PDFViewer.create_viewer_window" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.PDFViewer.display_first_page">
+<span class="sig-name descname"><span class="pre">display_first_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#PDFViewer.display_first_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.PDFViewer.display_first_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.PDFViewer.next_page">
+<span class="sig-name descname"><span class="pre">next_page</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#PDFViewer.next_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.PDFViewer.next_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.PDFViewer.on_resize">
+<span class="sig-name descname"><span class="pre">on_resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#PDFViewer.on_resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.PDFViewer.on_resize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.PDFViewer.pdf_to_img">
+<span class="sig-name descname"><span class="pre">pdf_to_img</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#PDFViewer.pdf_to_img"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.PDFViewer.pdf_to_img" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.PDFViewer.prev_page">
+<span class="sig-name descname"><span class="pre">prev_page</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#PDFViewer.prev_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.PDFViewer.prev_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.assessment_method.PDFViewer.show_image">
+<span class="sig-name descname"><span class="pre">show_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#PDFViewer.show_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.PDFViewer.show_image" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.assessment_method.acj_assessment_method_image">
+<span class="sig-prename descclassname"><span class="pre">CTJ.assessment_method.</span></span><span class="sig-name descname"><span class="pre">acj_assessment_method_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_assessment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#acj_assessment_method_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.acj_assessment_method_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a window to let the user make the ACJ assessment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id_judge</strong> (<em>int</em>) – The id of the judge making the assessment.</p></li>
+<li><p><strong>pair</strong> (<em>list of string</em>) – A list of strings representing the pair of items being assessed.</p></li>
+<li><p><strong>nb_assessment</strong> (<em>int</em>) – The number of assessments done.</p></li>
+<li><p><strong>window</strong> (<a class="reference internal" href="#CTJ.util.WindowManager" title="CTJ.util.WindowManager"><em>WindowManager</em></a>) – an object to manage human assessments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>Exception</strong> – No file in directory.</p></li>
+<li><p><strong>Exception</strong> – The assessment was not done.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sort</strong> – A list of string containing the assessment results in the format [Max, Min].</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.assessment_method.acj_assessment_method_pdf">
+<span class="sig-prename descclassname"><span class="pre">CTJ.assessment_method.</span></span><span class="sig-name descname"><span class="pre">acj_assessment_method_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_assessment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#acj_assessment_method_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.acj_assessment_method_pdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a window to let the user make the ACJ assessment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id_judge</strong> (<em>int</em>) – The id of the judge making the assessment.</p></li>
+<li><p><strong>pair</strong> (<em>list of string</em>) – A list of strings representing the pair of items being assessed.</p></li>
+<li><p><strong>nb_assessment</strong> (<em>int</em>) – The number of assessments done.</p></li>
+<li><p><strong>window</strong> (<a class="reference internal" href="#CTJ.util.WindowManager" title="CTJ.util.WindowManager"><em>WindowManager</em></a>) – an object to manage human assessments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>Exception</strong> – No file in directory.</p></li>
+<li><p><strong>Exception</strong> – The assessment was not done.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sort</strong> – A list of string containing the assessment results in the format [Max, Min].</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.assessment_method.ctj_assessment_method_image">
+<span class="sig-prename descclassname"><span class="pre">CTJ.assessment_method.</span></span><span class="sig-name descname"><span class="pre">ctj_assessment_method_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slider_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_assessment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#ctj_assessment_method_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.ctj_assessment_method_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a window to let the user make the CTJ assessment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>slider_range</strong> (<em>int</em>) – The range of the slider.</p></li>
+<li><p><strong>trio</strong> (<em>list of string</em>) – A list of strings representing the trio of items being assessed.</p></li>
+<li><p><strong>nb_assessment</strong> (<em>int</em>) – The number of assessment done.</p></li>
+<li><p><strong>window</strong> (<a class="reference internal" href="#CTJ.util.WindowManager" title="CTJ.util.WindowManager"><em>WindowManager</em></a>) – an object to manage human assessments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>Exception</strong> – No file in directory.</p></li>
+<li><p><strong>Exception</strong> – The assessment was not done.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tup</strong> – A tuple containing the assessment results ([Max, Average, Min], dist).In the format ([int, int, int], int).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.assessment_method.ctj_assessment_method_pdf">
+<span class="sig-prename descclassname"><span class="pre">CTJ.assessment_method.</span></span><span class="sig-name descname"><span class="pre">ctj_assessment_method_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slider_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_assessment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#ctj_assessment_method_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.ctj_assessment_method_pdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a window to let the user make the CTJ assessment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>slider_range</strong> (<em>int</em>) – The range of the slider.</p></li>
+<li><p><strong>trio</strong> (<em>list of string</em>) – A list of strings representing the trio of items being assessed.</p></li>
+<li><p><strong>nb_assessment</strong> (<em>int</em>) – The number of assessments done.</p></li>
+<li><p><strong>window</strong> (<a class="reference internal" href="#CTJ.util.WindowManager" title="CTJ.util.WindowManager"><em>WindowManager</em></a>) – An object to manage human assessments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>Exception</strong> – No file in directory.</p></li>
+<li><p><strong>Exception</strong> – The assessment was not done.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tup</strong> – A tuple containing the assessment results ([Max, Average, Min], dist). In the format ([int, int, int], int).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.assessment_method.resize_image">
+<span class="sig-prename descclassname"><span class="pre">CTJ.assessment_method.</span></span><span class="sig-name descname"><span class="pre">resize_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#resize_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.resize_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resize an image while preserving its aspect ratio using Pillow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_path</strong> (<em>string</em>) – Path to the image file.</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – The maximum width of images displayed.</p></li>
+<li><p><strong>width</strong> – The height width of images displayed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>resized_image</strong> – Resized image as a Tkinter PhotoImage object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tk.PhotoImage</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.assessment_method.rubric_assessment_method_image">
+<span class="sig-prename descclassname"><span class="pre">CTJ.assessment_method.</span></span><span class="sig-name descname"><span class="pre">rubric_assessment_method_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_assessment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#rubric_assessment_method_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.rubric_assessment_method_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a window to let the user make the Rubric assessment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>item</strong> (<em>string</em>) – A strings representing the item being assessed.</p></li>
+<li><p><strong>nb_assessment</strong> (<em>int</em>) – The number of assessment done.</p></li>
+<li><p><strong>window</strong> (<a class="reference internal" href="#CTJ.util.WindowManager" title="CTJ.util.WindowManager"><em>WindowManager</em></a>) – an object to manage human assessments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>Exception</strong> – No file in directory.</p></li>
+<li><p><strong>Exception</strong> – The assessment was not done.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>item_value</strong> – The estimated value made by the user for this item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.assessment_method.rubric_assessment_method_pdf">
+<span class="sig-prename descclassname"><span class="pre">CTJ.assessment_method.</span></span><span class="sig-name descname"><span class="pre">rubric_assessment_method_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_assessment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/assessment_method.html#rubric_assessment_method_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.assessment_method.rubric_assessment_method_pdf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="selection-module">
+<h2>Selection Module<a class="headerlink" href="#selection-module" title="Permalink to this heading">¶</a></h2>
+<p>The <cite>selection</cite> module is responsible for the selection of pairs and trios of elements to be compared. It employs techniques based on information theory to ensure that the comparisons are as informative as possible.</p>
+<span class="target" id="module-CTJ.selection"></span><p>Created on Wed May  1 15:56:30 2024</p>
+<p>&#64;author: Romain Perrier</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.selection.II">
+<span class="sig-prename descclassname"><span class="pre">CTJ.selection.</span></span><span class="sig-name descname"><span class="pre">II</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TriProba</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JointProba</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Proba</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/selection.html#II"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.selection.II" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the triple-wise interaction information between three random variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TriProba</strong> (<em>float array</em>) – Conditional probability distribution of three random variables.</p></li>
+<li><p><strong>JointProba</strong> (<em>float array</em>) – Joint probability distribution of the two random variables.</p></li>
+<li><p><strong>Proba</strong> (<em>float array</em>) – Marginal probability distribution of each random variable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ii</strong> – Triple-wise interaction information matrix representing the interaction information between each triple of random variables.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.selection.MI">
+<span class="sig-prename descclassname"><span class="pre">CTJ.selection.</span></span><span class="sig-name descname"><span class="pre">MI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">JointProba</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Proba</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/selection.html#MI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.selection.MI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Mutual information array representing the mutual information between each pair of random variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>JointProba</strong> (<em>float array</em>) – Joint probability distribution of the two random variables.</p></li>
+<li><p><strong>Proba</strong> (<em>float array</em>) – Marginal probability distribution of each random variable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>mi</strong> – Mutual information array representing the mutual information between each pair of random variables.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.selection.roulette">
+<span class="sig-prename descclassname"><span class="pre">CTJ.selection.</span></span><span class="sig-name descname"><span class="pre">roulette</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/selection.html#roulette"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.selection.roulette" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform roulette wheel selection to select an index from the population.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>population</strong> (<em>float array</em>) – List or array containing the fitness values of individuals in the population.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>selected_index</strong> – Index of the selected individual in the population.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.selection.shannon_entropy">
+<span class="sig-prename descclassname"><span class="pre">CTJ.selection.</span></span><span class="sig-name descname"><span class="pre">shannon_entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/selection.html#shannon_entropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.selection.shannon_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Shannon entropy for a given probability p.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>float</em>) – Probability of an event occurring, ranging from 0 to 1.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shannon entropy value for the given probability.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="util-module">
+<h2>Util Module<a class="headerlink" href="#util-module" title="Permalink to this heading">¶</a></h2>
+<p>The <cite>util</cite> module provides utility functions used throughout the CTJ package.</p>
+<span class="target" id="module-CTJ.util"></span><p>Created on Wed May  1 15:56:51 2024</p>
+<p>&#64;author: Romain Perrier</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.util.Rescale">
+<span class="sig-prename descclassname"><span class="pre">CTJ.util.</span></span><span class="sig-name descname"><span class="pre">Rescale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimated_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/util.html#Rescale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.util.Rescale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rescaling the estimated_values between Min and Max.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Min</strong> (<em>int</em>) – The minimum value of items.</p></li>
+<li><p><strong>Max</strong> (<em>int</em>) – The maximum value of items.</p></li>
+<li><p><strong>estimated_values</strong> (<em>list of int</em>) – A list of int containing the estimated values corresponding to each item in the <cite>items</cite> list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>estimated_values</strong> – A list of int containing the estimated values corresponding to each item in the <cite>items</cite> list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.util.SSR">
+<span class="sig-prename descclassname"><span class="pre">CTJ.util.</span></span><span class="sig-name descname"><span class="pre">SSR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimated_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/util.html#SSR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.util.SSR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the sum of squared residuals, a mesure of similarity between true value and predicted value. Near 0 the value are not similar, Near 1 the values are similar</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>true_values</strong> (<em>list of int</em>) – A list of int containing the true values corresponding to each item in the <cite>items</cite> list.</p></li>
+<li><p><strong>estimated_values</strong> (<em>list of int</em>) – A list of int containing the estimated values corresponding to each item in the <cite>items</cite> list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>SSR</strong> – The sum of squared residuals, a mesure of similarity between true value and predicted value. Near 0 the value are not similar, Near 1 the values are similar.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="CTJ.util.WindowManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">CTJ.util.</span></span><span class="sig-name descname"><span class="pre">WindowManager</span></span><a class="reference internal" href="_modules/CTJ/util.html#WindowManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.util.WindowManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to manage the creation and configuration of a Tkinter window with customizable properties.</p>
+<dl class="simple">
+<dt>_root<span class="classifier">tk.Tk or None</span></dt><dd><p>The root window of the Tkinter application. Initialized as None.</p>
+</dd>
+<dt>_bgcolor<span class="classifier">str</span></dt><dd><p>The background color of the window, specified as a hexadecimal color code. Default is ‘#f0f0f0’.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>root() -&gt; tk.Tk or None:</dt><dd><p>Property to get the root window.</p>
+</dd>
+<dt>root(value: tk.Tk or None):</dt><dd><p>Property to set the root window.</p>
+</dd>
+<dt>bgcolor() -&gt; str:</dt><dd><p>Property to get the background color of the window.</p>
+</dd>
+<dt>bgcolor(value: str):</dt><dd><p>Property to set the background color of the window.</p>
+</dd>
+<dt>change_bg_color():</dt><dd><p>Opens a color chooser dialog to change the background color of the window and its child widgets.</p>
+</dd>
+<dt>destroy():</dt><dd><p>Destroys the root window if it exists.</p>
+</dd>
+<dt>create_window(title: str):</dt><dd><p>Creates and configures a new root window with the specified title, or reconfigures the existing root window.</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="CTJ.util.WindowManager.bgcolor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bgcolor</span></span><a class="headerlink" href="#CTJ.util.WindowManager.bgcolor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.util.WindowManager.change_bg_color">
+<span class="sig-name descname"><span class="pre">change_bg_color</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/util.html#WindowManager.change_bg_color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.util.WindowManager.change_bg_color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens a color chooser dialog to change the background color of the window and its child widgets.
+Updates the background color of all frames, labels, and text widgets within the root window.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="CTJ.util.WindowManager.create_window">
+<span class="sig-name descname"><span class="pre">create_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/util.html#WindowManager.create_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.util.WindowManager.create_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates and configures a new root window with the specified title.
+If a root window already exists, it reconfigures the existing window with the new title.</p>
+<dl class="simple">
+<dt>title<span class="classifier">str</span></dt><dd><p>The title for the Tkinter window.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="CTJ.util.WindowManager.root">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">root</span></span><a class="headerlink" href="#CTJ.util.WindowManager.root" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="CTJ.util.ready">
+<span class="sig-prename descclassname"><span class="pre">CTJ.util.</span></span><span class="sig-name descname"><span class="pre">ready</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CTJ/util.html#ready"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#CTJ.util.ready" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the assessment is done by the user, create a window to check if the user is ready</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window</strong> (<em>windowManager</em>) – windowManager object</p></li>
+<li><p><strong>info</strong> (<em>string</em>) – A string for display information.</p></li>
+<li><p><strong>status</strong> (<em>string</em>) – Set if we are in a tutorial or not</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – The window was not destroy in the correct way.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skip</strong> – True if the user skip the tutorial.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="#">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Welcome to CTJ’s documentation!</a></li>
+<li><a class="reference internal" href="#modules">Modules</a><ul>
+<li><a class="reference internal" href="#ctj-module">CTJ Module</a></li>
+<li><a class="reference internal" href="#acj-module">ACJ Module</a></li>
+<li><a class="reference internal" href="#rubric-module">Rubric Module</a></li>
+<li><a class="reference internal" href="#assessment-method-module">Assessment Method Module</a></li>
+<li><a class="reference internal" href="#selection-module">Selection Module</a></li>
+<li><a class="reference internal" href="#util-module">Util Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">CTJ 1.1.6 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Welcome to CTJ’s documentation!</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, PERRIER Romain.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+    </div>
+  </body>
+</html>
