@@ -114,6 +114,7 @@ def determine_threshold(nb_point):
                     growth_factor = 1.2
                     lower_bound = 0
                     upper_bound = 255
+                    step = 80 
                 step = int(step * growth_factor)  # Increase step size
                 growth_factor *= growth_decay  # Decay the growth factor
                 update_image()
@@ -133,6 +134,7 @@ def determine_threshold(nb_point):
                     growth_factor = 1.2
                     lower_bound = 0
                     upper_bound = 255
+                    step = 10 
                 step = int(step / growth_factor)  # Decrease step size
                 reduction_factor *= factor_decay  # Decay the reduction factor
                 update_image()
@@ -162,6 +164,7 @@ def determine_threshold(nb_point):
                 growth_factor = 1.2
                 lower_bound = 0
                 upper_bound = 255
+                step = 80 
             step = int(step * growth_factor)  # Increase step size
             growth_factor *= growth_decay  # Decay the growth factor
             update_image()
@@ -176,6 +179,7 @@ def determine_threshold(nb_point):
                 growth_factor = 1.2
                 lower_bound = 0
                 upper_bound = 255
+                step = 10 
             step = int(step / growth_factor)  # Decrease step size
             reduction_factor *= factor_decay  # Decay the reduction factor
             update_image()
