@@ -57,10 +57,6 @@ CTJ/
     |       ├── Rubric.py
     |       ├── selection.py
     |       └── util.py
-    ├── License_idea/
-    |       ├── LICENSE
-    |       ├── NOTICE.txt
-    |       └── README.txt
     ├── Notebook/
     |       ├── ACJ-Tutorial.ipynb
     |       ├── black.png
@@ -145,14 +141,6 @@ This directory contains the main source code of the project:
   - **Rubric.py**: Contains functions related to Rubric assessments.
   - **selection.py**: Contains selection logic, based on information theory.
   - **util.py**: Utility functions.
-
-### License_idea Directory
-
-This directory contains preliminary legal information. Please note that the project is not yet licensed, so it should not be used in any official capacity:
-
-- **LICENSE**: A draft of the project's potential license.
-- **NOTICE.txt**: Contains information about all third-party packages used in the project and the files in which they are utilized.
-- **README.txt**: Additional information.
 
 ### Notebook Directory
 
