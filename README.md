@@ -105,13 +105,13 @@ CTJ/
     |       |        ├── gather_data.py
     |       |        └── README.txt
     |       └── Thresold/
-    |       |        ├── accuracy.png
-    |       |        ├── gather_data.py
-    |       |        ├── Iteration.png
-    |       |        ├── NB_of_errors.png
-    |       |        ├── README.txt
-    |       |        ├── thresold.csv
-    |       |        └── thresold.py
+    |                ├── accuracy.png
+    |                ├── gather_data.py
+    |                ├── Iteration.png
+    |                ├── NB_of_errors.png
+    |                ├── README.txt
+    |                ├── thresold.csv
+    |                └── thresold.py
     ├── fix_import_error_tkinter.md
     ├── Manifest.in
     ├── Readme.md
